@@ -1546,9 +1546,9 @@ async function useSkill(e,boss,D,ctx={}){
   if(s.k==='zen'){await say('おぴょの ぜんりょくダッシュ！！',{wait:false});S.shakeT=0.6;await sleep(300);await hitE(e,dmg(ATK(),e.def,2.8*am));return}
   if(s.k==='futari'){bgm(null);msgW.hidden=true;S.dark=0;S.battle.cutin={k:'combo',t0:tnow()};
     for(let i=0;i<10;i++){burst(40,100,8,['#bfe6ff','#ffffff'],80,-30);burst(136,100,8,['#ffd23f','#ffffff'],80,-30);await sleep(55)}
-    const Lc=SFX.combo?SFX.combo():0.7;S.flash=1.4;S.shakeT=1.6;await sleep(Lc*600);
+    const Lc=SFX.combo?SFX.combo():0.7;S.shakeT=1.2;await sleep(Math.max(Lc*600,700));
     await say('おぴょと おやぶんの\nがったいわざ「ふたりの ひかり」！！！',{wait:false});SFX.boom();await sleep(450);
-    S.battle.cutin=null;await hitE(e,dmg(ATK()+oyaDmg(),e.def,5),false,true);bgm('awaken');return'combo'}}
+    S.battle.cutin=null;S.flash=1.2;S.shakeT=1.4;await hitE(e,dmg(ATK()+oyaDmg(),e.def,5),false,true);bgm('awaken');return'combo'}}
 
 /* ================= ending ================= */
 function titleFor(){const[f,k,w]=P.cmd;const m=Math.max(f,k,w);if([f,k,w].filter(v=>v===m).length>1)return'きままな ぼうけんしゃ';return m===f?'なみうちぎわの ゆうしゃ':m===k?'はなの めいじん':'みまもりの たつじん'}
