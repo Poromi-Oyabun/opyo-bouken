@@ -1,0 +1,2865 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14202b">
+<title>ぬりぬり ワンだふる！</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">
+<style>html,body{margin:0;height:100%;background:#14202b;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+canvas{display:block;touch-action:none}</style></head><body><canvas id="cv"></canvas>
+<script>
+/* ===== art.js ===== */
+/* ============================================================
+ * art.js — ぬりぬり ワンだふる！ アート（担当A）
+ * すべてコード生成のドット絵（外部画像・フォントなし）。
+ * makeArt() → ART（中身はすべて HTMLCanvasElement）
+ * ============================================================ */
+function makeArt() {
+  'use strict';
+
+  // ------------------------------------------------------------
+  // ピクセルバッファ（値は 0=透明 / 1文字キー / 色文字列）
+  // ------------------------------------------------------------
+  function B(w, h) { return { w: w, h: h, d: new Array(w * h).fill(0) }; }
+  function gp(b, x, y) { return (x < 0 || y < 0 || x >= b.w || y >= b.h) ? 0 : b.d[y * b.w + x]; }
+  function sp(b, x, y, v) {
+    x = Math.floor(x); y = Math.floor(y);
+    if (x < 0 || y < 0 || x >= b.w || y >= b.h) return;
+    b.d[y * b.w + x] = v;
+  }
+  function stamp(b, rows, ox, oy) {
+    ox = ox || 0; oy = oy || 0;
+    for (let y = 0; y < rows.length; y++) {
+      const r = rows[y];
+      for (let x = 0; x < r.length; x++) {
+        const c = r[x];
+        if (c !== '.' && c !== ' ') sp(b, ox + x, oy + y, c);
+      }
+    }
+  }
+  // 左半分だけ書いて左右対称に
+  function sym(rows) { return rows.map(function (r) { return r + r.split('').reverse().join(''); }); }
+  // 外側1pxの輪郭（4近傍）
+  function outline(b, key) {
+    key = key || 'O';
+    const o = B(b.w, b.h); o.d = b.d.slice();
+    for (let y = 0; y < b.h; y++) for (let x = 0; x < b.w; x++) {
+      if (gp(b, x, y)) continue;
+      if (gp(b, x - 1, y) || gp(b, x + 1, y) || gp(b, x, y - 1) || gp(b, x, y + 1)) o.d[y * b.w + x] = key;
+    }
+    return o;
+  }
+  function over(dst, src, ox, oy) {
+    ox = ox || 0; oy = oy || 0;
+    for (let y = 0; y < src.h; y++) for (let x = 0; x < src.w; x++) {
+      const v = src.d[y * src.w + x];
+      if (v) sp(dst, x + ox, y + oy, v);
+    }
+  }
+  function flipB(b) {
+    const o = B(b.w, b.h);
+    for (let y = 0; y < b.h; y++) for (let x = 0; x < b.w; x++) o.d[y * b.w + (b.w - 1 - x)] = b.d[y * b.w + x];
+    return o;
+  }
+  function each(b, fn) {
+    for (let y = 0; y < b.h; y++) for (let x = 0; x < b.w; x++) {
+      const i = y * b.w + x;
+      const nv = fn(b.d[i], x, y);
+      if (nv !== undefined) b.d[i] = nv;
+    }
+  }
+  function ell(b, cx, cy, rx, ry, v) {
+    for (let y = Math.floor(cy - ry - 1); y <= Math.ceil(cy + ry + 1); y++)
+      for (let x = Math.floor(cx - rx - 1); x <= Math.ceil(cx + rx + 1); x++) {
+        const dx = (x + 0.5 - cx) / rx, dy = (y + 0.5 - cy) / ry;
+        if (dx * dx + dy * dy <= 1) sp(b, x, y, v);
+      }
+  }
+  function rect(b, x, y, w, h, v) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) sp(b, x + i, y + j, v); }
+  function line(b, x0, y0, x1, y1, v) {
+    x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
+    const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy;
+    for (;;) {
+      sp(b, x0, y0, v);
+      if (x0 === x1 && y0 === y1) break;
+      const e2 = 2 * err;
+      if (e2 >= dy) { err += dy; x0 += sx; }
+      if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+  }
+  function poly(b, pts, v) {
+    let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+    pts.forEach(function (p) { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); miny = Math.min(miny, p[1]); maxy = Math.max(maxy, p[1]); });
+    for (let y = Math.floor(miny); y <= Math.ceil(maxy); y++) for (let x = Math.floor(minx); x <= Math.ceil(maxx); x++) {
+      const px = x + 0.5, py = y + 0.5;
+      let inside = false;
+      for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+        const xi = pts[i][0], yi = pts[i][1], xj = pts[j][0], yj = pts[j][1];
+        if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) inside = !inside;
+      }
+      if (inside) sp(b, x, y, v);
+    }
+  }
+  // Catmull-Rom 曲線（n=単位長あたりのサンプル数）
+  function spline(pts, n) {
+    if (pts.length < 2) return pts.map(function (p) { return p.slice(); });
+    const out = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+      const seg = Math.max(2, Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) * n));
+      for (let k = 0; k < seg; k++) {
+        const t = k / seg, t2 = t * t, t3 = t2 * t;
+        const f = function (a0, a1, a2, a3) {
+          return 0.5 * (2 * a1 + (-a0 + a2) * t + (2 * a0 - 5 * a1 + 4 * a2 - a3) * t2 + (-a0 + 3 * a1 - 3 * a2 + a3) * t3);
+        };
+        out.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])]);
+      }
+    }
+    out.push(pts[pts.length - 1].slice());
+    return out;
+  }
+  function brush(b, pts, r0, r1, v, n) {
+    const P = spline(pts, n || 3);
+    for (let i = 0; i < P.length; i++) {
+      const t = P.length > 1 ? i / (P.length - 1) : 0;
+      const r = r0 + (r1 - r0) * t;
+      ell(b, P[i][0], P[i][1], r, r, v);
+    }
+  }
+  function rng(seed) {
+    let s = (seed >>> 0) || 1;
+    return function () { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+  }
+
+  // ------------------------------------------------------------
+  // 色とキャンバス化
+  // ------------------------------------------------------------
+  const CC = {};
+  function rgba(c) {
+    if (CC[c]) return CC[c];
+    let r = 0, g = 0, bl = 0, a = 255;
+    if (c[0] === '#') {
+      let h = c.slice(1);
+      if (h.length === 3) h = h.split('').map(function (z) { return z + z; }).join('');
+      r = parseInt(h.slice(0, 2), 16); g = parseInt(h.slice(2, 4), 16); bl = parseInt(h.slice(4, 6), 16);
+      if (h.length === 8) a = parseInt(h.slice(6, 8), 16);
+    } else {
+      const m = c.match(/[\d.]+/g);
+      r = +m[0]; g = +m[1]; bl = +m[2]; if (m[3] !== undefined) a = Math.round(+m[3] * 255);
+    }
+    return (CC[c] = [r, g, bl, a]);
+  }
+  function mk(w, h) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; return cv; }
+  function toCanvas(b, pal) {
+    const cv = mk(b.w, b.h), ctx = cv.getContext('2d');
+    const id = ctx.createImageData(b.w, b.h), D = id.data;
+    for (let i = 0; i < b.d.length; i++) {
+      let v = b.d[i];
+      if (!v) continue;
+      if (pal && Object.prototype.hasOwnProperty.call(pal, v)) v = pal[v];
+      if (!v || v.length < 4) continue;
+      const c = rgba(v);
+      D[i * 4] = c[0]; D[i * 4 + 1] = c[1]; D[i * 4 + 2] = c[2]; D[i * 4 + 3] = c[3];
+    }
+    ctx.putImageData(id, 0, 0);
+    return cv;
+  }
+
+  // ------------------------------------------------------------
+  // 共通パレット
+  // ------------------------------------------------------------
+  const SHADOW = 'rgba(90,58,24,0.30)';
+  const C0 = { e: '#1c1014', h: '#ffffff', n: '#1c1014', t: '#ff6b8a', q: '#ff8fa8', k: '#ffd23f', K: '#a87400', Z: SHADOW };
+  const TEAM = {
+    1: { c: '#ff8a1f', C: '#b84f00', L: '#ffc98a' },  // 柴犬チーム（オレンジ）
+    2: { c: '#2ad4b8', C: '#0b8a76', L: '#a6f5e8' }   // ネコ団（ミント）
+  };
+  const DOGK = {
+    poromi: { b: '#d46d27', s: '#a44f16', g: '#ad5a19', w: '#fff6e6', y: '#fbd29a', p: '#f79aa6', o: '#3a1a0a' },
+    shiro:  { b: '#f6ead2', s: '#d9c39a', g: '#d9c39a', w: '#ffffff', y: '#f6ead2', p: '#f7a6b2', o: '#4a3020' },
+    goma:   { b: '#c88b4e', s: '#8a5a32', g: '#3a2a20', w: '#fff1dc', y: '#f4d6a2', p: '#f29ea6', o: '#22140c' }
+  };
+  const CATK = {
+    tora: { b: '#b8bcc6', s: '#8d929e', g: '#555a66', G: '#555a66', w: '#f6f6f8', i: '#7fd640', p: '#ffa0b2', o: '#23262d', x: '#23262d' },
+    kuro: { b: '#353042', s: '#221e2c', g: '#353042', G: '#353042', w: '#4d475c', i: '#ffd83a', p: '#f08aa0', o: '#0d0a12', x: '#0d0a12' },
+    mike: { b: '#fffaf0', s: '#e0d4c2', g: '#f39a3c', G: '#383040', w: '#ffffff', i: '#f0b828', p: '#ffa0b2', o: '#3a2a20', x: '#3a2a20' }
+  };
+  function palOf(kindPal, team) {
+    const p = Object.assign({}, C0, kindPal, team === 1 ? { c: TEAM[1].c, C: TEAM[1].C } : { c: TEAM[2].c, C: TEAM[2].C });
+    p.O = p.o; p.m = p.o;
+    if (!p.x) p.x = p.o;
+    return p;
+  }
+
+  // ------------------------------------------------------------
+  // テンプレート（b=体 s=影 w=白(裏白) p=耳の内側 e=目 h=ハイライト n=鼻
+  //  t=舌 q=ネコ鼻 i=ネコの瞳 y=眉/明るい毛 c/C=チーム色 k/K=鈴 o=線）
+  // ------------------------------------------------------------
+  const DOG_HEAD = {
+    down: sym([
+      '............',
+      '............',
+      '....b.......',
+      '...bpb......',
+      '...bppb.....',
+      '...bpppb....',
+      '..bbpppbbbbb',
+      '..bbbbbbbbbb',
+      '..bbbbyybbbb',
+      '..bbbbhebbbb',
+      '..bbbbeebbww',
+      '..wwbbbbbwwn',
+      '..wwwwwwwwwo',
+      '...wwwwwwwot',
+      '....wwwwwwww'
+    ]),
+    up: sym([
+      '............',
+      '............',
+      '....b.......',
+      '...bbb......',
+      '...bbbb.....',
+      '...bbbbb....',
+      '..bbbbbbbbbb',
+      '..bbbbbbbbbb',
+      '..bbbbbbbbbb',
+      '..bbbbbbbbbb',
+      '..bbbbbbbbbb',
+      '..wbbbbbbbbb',
+      '..wwbbbbbbbb',
+      '...wwbbbbbbb',
+      '....ssssssss'
+    ]),
+    left: [
+      '........................',
+      '........................',
+      '........b...............',
+      '.......bpb..............',
+      '.......bppb.............',
+      '......bbppbb............',
+      '.....bbbbbbbb...........',
+      '....byybbbbbbb..........',
+      '...bbhebbbbbbbb.........',
+      '...bbeebbbbbbbb.........',
+      '.nbbbbbbbbbbbbb.........',
+      '.wwwwwbbbbbbbbb.........',
+      '..towwwbbbbbbb..........',
+      '...wwwwwwbbbb...........',
+      '.....wwwwww.............'
+    ]
+  };
+  const DOG_BODY = {
+    down: sym([
+      '....bbbbbbbb',
+      '....bbbbbbbb',
+      '....bccccccc',
+      '....bwCccccc',
+      '....bwwwCccc',
+      '....bbwwwwCC'
+    ]),  // y=14..19
+    up: sym([
+      '....bbbbbbbb',
+      '....oooooooo',
+      '....cccccccC',
+      '....oooooooC',
+      '....bbbbbbbb',
+      '....sbbbbbbb'
+    ]),  // y=14..19
+    left: [
+      '..........bbbbbbbbb.....',
+      '.........bbbbbbbbbbbb...',
+      '........bbbbbbbbbbbbb...',
+      '........bbbbbbbbbbbbb...',
+      '........bbbbbbbbbbbbb...',
+      '........bbboooobbbbbb...',
+      '........wbcccccbbbbbb...',
+      '........wwccccwwbbbbb...',
+      '.........wwCCwwwwwbb....',
+      '..........wwwwwwwbb.....'
+    ]    // y=9..18
+  };
+  const DOG_TAIL = {
+    down: ['.bb.', 'bwwb', 'bwbb', '.bb.'],
+    up: ['.bbbb.', 'bbwwbb', 'bw..wb', 'bw..wb', 'bbwwbb', '.bbbb.'],
+    left: ['..bbb.', '.bwwwb', 'bwbbbb', 'bwbsbb', '.bwwbb', '..bbbb']
+  };
+
+  const CAT_HEAD = {
+    down: sym([
+      '............',
+      '....b.......',
+      '....bb......',
+      '....bpb.....',
+      '....bppb....',
+      '...bbpppb...',
+      '...bbbbbbbbb',
+      '...bbbbbbbbb',
+      '...bbbbbbbbb',
+      '...bbbheibbb',
+      '...bbbieibww',
+      '...bbbbbwwwq',
+      '...bbbbbwowo',
+      '....bbbbwwow',
+      '.....bbbbbbb'
+    ]),
+    up: sym([
+      '............',
+      '....b.......',
+      '....bb......',
+      '....bbb.....',
+      '....bbbb....',
+      '...bbbbbb...',
+      '...bbbbbbbbb',
+      '...bbbbbbbbb',
+      '...bbbbbbbbb',
+      '...bbbbbbbbb',
+      '...bbbbbbbbb',
+      '...bbbbbbbbb',
+      '...bbbbbbbbb',
+      '....bbbbbbbb',
+      '.....sssssss'
+    ]),
+    left: [
+      '........................',
+      '.......b..s.............',
+      '......bb..ss............',
+      '......bpb.sss...........',
+      '.....bbppbbsss..........',
+      '....bbbbbbbbbbb.........',
+      '...bbbbbbbbbbbb.........',
+      '...bbehbbbbbbbbb........',
+      '..bbbeibbbbbbbbb........',
+      '..qwwbbbbbbbbbbb........',
+      '..wwwwbbbbbbbbbb........',
+      '...owwwbbbbbbbb.........',
+      '....wwwwbbbbbb..........',
+      '......bbbbbbb...........'
+    ]
+  };
+  const CAT_BODY = {
+    down: sym([
+      '.....bbbbbbb',
+      '.....bbbbbbb',
+      '.....ccccccc',
+      '.....bwwwwwk',
+      '.....bwwwwwK',
+      '.....bbwwwww'
+    ]),  // y=14..19
+    up: sym([
+      '.....bbbbbbb',
+      '.....ccccccc',
+      '.....bbbbbbb',
+      '.....bbbbbbb',
+      '.....bbbbbbb',
+      '.....sbbbbbb'
+    ]),
+    left: [
+      '...........bbbbbbbb.....',
+      '..........bbbbbbbbbb....',
+      '.........bbbbbbbbbbbb...',
+      '.........bbbbbbbbbbbb...',
+      '.........bbccbbbbbbbb...',
+      '.........wccbbbbbbbbb...',
+      '.........wccwwwbbbbbb...',
+      '..........kwwwwwwbbb....',
+      '...........wwwwwwbb.....'
+    ]    // y=10..18
+  };
+  // ネコのヒゲ（輪郭の後に重ねる）左側のみ。右は鏡像
+  const WHISK_D = [[0, 11], [1, 11], [2, 11], [2, 12], [1, 13], [0, 13]];
+  const WHISK_L = [[0, 10], [1, 10], [0, 12], [1, 12], [1, 11]];
+
+  // ------------------------------------------------------------
+  // 毛柄
+  // ------------------------------------------------------------
+  function topMap(b) {
+    const top = new Array(b.w).fill(99);
+    for (let x = 0; x < b.w; x++) for (let y = 0; y < b.h; y++) if (b.d[y * b.w + x]) { top[x] = y; break; }
+    return top;
+  }
+  function patDog(kind, part, dir, b) {
+    if (kind !== 'goma') return;
+    const top = topMap(b);
+    each(b, function (v, x, y) {
+      if (v !== 'b') return;
+      const d = y - top[x];
+      if (d <= 1) return ((x + y) & 1) ? 'g' : 's';
+      if (d === 2) return ((x + y) & 1) ? 's' : 'b';
+      if (d === 3 && ((x + y) % 4 === 0)) return 's';
+    });
+  }
+  function patCat(kind, part, dir, b) {
+    if (kind === 'tora') {
+      const top = topMap(b);
+      each(b, function (v, x, y) {
+        if (v !== 'b') return;
+        const d = y - top[x];
+        if (part === 'head') {
+          if (dir === 'left') { if (d >= 1 && d <= 2 && x % 2 === 1 && x >= 7) return 'g'; }
+          else {
+            if (y >= 6 && y <= 8 && (x === 9 || x === 11 || x === 12 || x === 14)) return 'g';
+            if ((y === 10 || y === 12) && (x <= 4 || x >= 19)) return 'g';
+          }
+        } else if (part === 'body') {
+          if (dir === 'left') { if (x % 3 === 0 && d <= 4) return 'g'; }
+          else if (dir === 'up') { if (y % 2 === 0 && y >= 16) return 'g'; }
+          else { if ((x <= 6 || x >= 17) && y % 2 === 1) return 'g'; }
+        } else if (part === 'tail') { if ((x + y) % 3 === 0) return 'g'; }
+      });
+    } else if (kind === 'mike') {
+      each(b, function (v, x, y) {
+        if (v !== 'b') return;
+        if (part === 'head') {
+          if (dir === 'down') { if (x <= 9 && y <= 8) return 'g'; if (x >= 15 && y <= 8) return 'G'; }
+          else if (dir === 'up') { if (x >= 14 && y <= 8) return 'g'; if (x <= 9 && y <= 8) return 'G'; }
+          else { if (y <= 6 && x >= 9) return 'G'; if (y <= 7 && x <= 8 && x >= 4) return 'g'; }
+        } else if (part === 'body') {
+          if (dir === 'down') { if (x >= 16 && y <= 17) return 'g'; if (x <= 6 && y >= 16) return 'G'; }
+          else if (dir === 'up') {
+            if ((x - 8) * (x - 8) + (y - 16) * (y - 16) <= 7) return 'G';
+            if ((x - 16) * (x - 16) + (y - 18) * (y - 18) <= 6) return 'g';
+          } else {
+            if ((x - 14) * (x - 14) + (y - 12) * (y - 12) <= 8) return 'G';
+            if ((x - 19) * (x - 19) + (y - 15) * (y - 15) <= 5) return 'g';
+          }
+        } else if (part === 'tail') { return (y % 3 === 0) ? 'G' : 'g'; }
+      });
+    }
+  }
+
+  // ------------------------------------------------------------
+  // 足・影
+  // ------------------------------------------------------------
+  function shadow(b, cx, cy, rx, ry) { ell(b, cx, cy, rx, ry, 'Z'); }
+  // 正面/背面の前足2本
+  function legsDU(b, xs, w, f, y0) {
+    const lift = [[0, 0], [1, 0], [0, 0], [0, 1]][f];
+    xs.forEach(function (x, i) {
+      const yb = 22 - lift[i];
+      for (let y = y0; y <= yb; y++) for (let k = 0; k < w; k++) sp(b, x + k, y, y === yb ? 'w' : 'b');
+    });
+  }
+  // 横向きの4本足  near: 手前（体レイヤー） far: 奥（影色）
+  function legsSide(near, far, f, y0, xs, w) {
+    // xs: [手前前足, 奥前足, 手前後足, 奥後足]
+    const A = { dx: [0, -1, 0, 1][f], lift: f === 1 ? 1 : 0 };   // 手前前足・奥後足
+    const Bp = { dx: [0, 1, 0, -1][f], lift: f === 3 ? 1 : 0 };  // 奥前足・手前後足
+    const defs = [[xs[0], A, near], [xs[1], Bp, far], [xs[2], Bp, near], [xs[3], A, far]];
+    defs.forEach(function (d) {
+      const x = d[0] + d[1].dx, yb = 22 - d[1].lift, isFar = d[2] === far;
+      for (let y = y0; y <= yb; y++) for (let k = 0; k < w; k++)
+        sp(d[2], x + k, y, y === yb ? 'w' : (isFar ? 's' : 'b'));
+    });
+  }
+
+  // ------------------------------------------------------------
+  // 柴犬
+  // ------------------------------------------------------------
+  function closeEyes(hb, x0, y0) {
+    each(hb, function (v) { if (v === 'e' || v === 'h' || v === 'i') return 'b'; });
+    const L = [[x0, y0], [x0 + 1, y0 + 1], [x0, y0 + 2]];
+    L.forEach(function (p) { sp(hb, p[0], p[1], 'o'); sp(hb, 23 - p[0], p[1], 'o'); });
+  }
+  function dogBuf(kind, dir, f, opt) {
+    opt = opt || {};
+    if (dir === 'right') return flipB(dogBuf(kind, 'left', f, opt));
+    const out = B(24, 24);
+    const bob = (f === 1 || f === 3) ? -1 : 0;
+    shadow(out, 12, 22.4, 8.5, 1.7);
+    if (dir === 'down' || dir === 'up') {
+      const bb = B(24, 24);
+      stamp(bb, DOG_BODY[dir], 0, 14 + bob);
+      legsDU(bb, [6, 15], 3, f, 20 + bob);
+      patDog(kind, 'body', dir, bb);
+      const hb = B(24, 24);
+      stamp(hb, DOG_HEAD[dir], 0, bob + (dir === 'up' ? -1 : 0));
+      patDog(kind, 'head', dir, hb);
+      if (opt.closed) closeEyes(hb, 6, 8 + bob);
+      const tb = B(24, 24);
+      if (dir === 'down') {
+        stamp(tb, DOG_TAIL.down, 19, 14 + bob + [0, -1, 0, 1][f]);
+        patDog(kind, 'tail', dir, tb);
+        over(out, outline(tb)); over(out, outline(bb)); over(out, outline(hb));
+      } else {
+        stamp(tb, DOG_TAIL.up, 9 + [0, 1, 0, -1][f], 16 + bob);
+        patDog(kind, 'tail', dir, tb);
+        over(out, outline(bb)); over(out, outline(hb)); over(out, outline(tb));
+      }
+    } else { // left
+      const fb = B(24, 24), bb = B(24, 24), hb = B(24, 24), tb = B(24, 24);
+      stamp(bb, DOG_BODY.left, 0, 9 + bob);
+      legsSide(bb, fb, f, 17 + bob, [9, 12, 16, 19], 2);
+      patDog(kind, 'body', dir, bb);
+      stamp(tb, DOG_TAIL.left, 15 + [0, 0, 1, 0][f], 3 + bob + [0, 1, 0, 0][f]);
+      patDog(kind, 'tail', dir, tb);
+      stamp(hb, DOG_HEAD.left, 0, bob);
+      patDog(kind, 'head', dir, hb);
+      over(out, outline(fb)); over(out, outline(tb)); over(out, outline(bb)); over(out, outline(hb));
+    }
+    return out;
+  }
+
+  // ------------------------------------------------------------
+  // ネコ
+  // ------------------------------------------------------------
+  function catTailPts(dir, f) {
+    const s = [0, 1, 0, -1][f];
+    if (dir === 'down') return [[19, 19], [20, 18], [21, 17], [21, 16], [21 + s, 15], [22 + s, 14], [22 + s, 13], [21 + s, 12]];
+    if (dir === 'up') return [[11, 21], [11, 20], [12, 19], [12, 18], [12 + s, 17], [13 + s, 16], [13 + s, 15], [12 + s, 14]];
+    return [[20, 11], [21, 10], [21, 9], [22 + s, 8], [22 + s, 7], [22 + s, 6], [21 + s, 5], [20 + s, 5]];
+  }
+  function catBuf(kind, dir, f, opt) {
+    opt = opt || {};
+    if (dir === 'right') return flipB(catBuf(kind, 'left', f, opt));
+    const out = B(24, 24);
+    const bob = (f === 1 || f === 3) ? -1 : 0;
+    shadow(out, 12, 22.4, 8, 1.6);
+    const tb = B(24, 24);
+    catTailPts(dir, f).forEach(function (p) { sp(tb, p[0], p[1] + bob, 'b'); });
+    patCat(kind, 'tail', dir, tb);
+    const bb = B(24, 24), hb = B(24, 24);
+    let whisk;
+    if (dir === 'down' || dir === 'up') {
+      stamp(bb, CAT_BODY[dir], 0, 14 + bob);
+      legsDU(bb, [7, 15], 2, f, 20 + bob);
+      patCat(kind, 'body', dir, bb);
+      stamp(hb, CAT_HEAD[dir], 0, bob + (dir === 'up' ? -1 : 0));
+      patCat(kind, 'head', dir, hb);
+      if (opt.closed) closeEyes(hb, 6, 8 + bob);
+      if (dir === 'down') { over(out, outline(tb)); over(out, outline(bb)); over(out, outline(hb)); }
+      else { over(out, outline(bb)); over(out, outline(hb)); over(out, outline(tb)); }
+      whisk = [];
+      WHISK_D.forEach(function (p) { whisk.push([p[0], p[1] + bob]); whisk.push([23 - p[0], p[1] + bob]); });
+    } else {
+      const fb = B(24, 24);
+      stamp(bb, CAT_BODY.left, 0, 10 + bob);
+      legsSide(bb, fb, f, 17 + bob, [10, 13, 16, 19], 2);
+      patCat(kind, 'body', dir, bb);
+      stamp(hb, CAT_HEAD.left, 0, bob);
+      patCat(kind, 'head', dir, hb);
+      over(out, outline(fb)); over(out, outline(bb)); over(out, outline(tb)); over(out, outline(hb));
+      whisk = WHISK_L.map(function (p) { return [p[0], p[1] + bob]; });
+    }
+    whisk.forEach(function (p) { sp(out, p[0], p[1], 'x'); });
+    return out;
+  }
+
+  // ------------------------------------------------------------
+  // びしょびしょ（ぶるぶる）
+  // ------------------------------------------------------------
+  function wetCanvas(species, kind) {
+    const pal = species === 'dog' ? palOf(DOGK[kind], 1) : palOf(CATK[kind], 2);
+    const enemy = species === 'dog' ? TEAM[2] : TEAM[1];
+    const base = toCanvas(species === 'dog' ? dogBuf(kind, 'down', 0, { closed: true }) : catBuf(kind, 'down', 0, { closed: true }), pal);
+    const cv = mk(24, 24), g = cv.getContext('2d');
+    g.globalAlpha = 0.35; g.drawImage(base, -1, 0); g.drawImage(base, 1, 0);
+    g.globalAlpha = 1; g.drawImage(base, 0, 0);
+    // かぶったぺんき
+    const gb = B(24, 24);
+    ell(gb, 12, 5.8, 5.2, 1.7, 'c');
+    rect(gb, 9, 6, 2, 2, 'c'); rect(gb, 14, 6, 1, 2, 'c'); sp(gb, 9, 8, 'c');
+    ell(gb, 15.5, 18.2, 1.6, 1.3, 'c'); sp(gb, 15, 19, 'c'); sp(gb, 15, 20, 'c');
+    ell(gb, 7.5, 16.5, 1.2, 1.1, 'c');
+    // 飛び散るしずく
+    [[2, 3], [21, 2], [1, 12], [22, 11], [5, 0], [18, 0]].forEach(function (p) { rect(gb, p[0], p[1], 1, 2, 'c'); });
+    const go = outline(gb, 'C');
+    each(go, function (v, x, y) { if (v === 'c' && gp(go, x, y - 1) === 'C' && ((x + y) % 3 !== 0)) return 'L'; });
+    // ぶるぶる線
+    [[0, 17], [0, 18], [1, 16], [1, 19], [23, 17], [23, 18], [22, 16], [22, 19]].forEach(function (p) { sp(go, p[0], p[1], 'o'); });
+    g.drawImage(toCanvas(go, { c: enemy.c, C: enemy.C, L: enemy.L, o: pal.o }), 0, 0);
+    return cv;
+  }
+
+  // ------------------------------------------------------------
+  // ほりほり中（耳だけ）16x8
+  // ------------------------------------------------------------
+  function diveCanvas(species) {
+    const team = species === 'dog' ? TEAM[1] : TEAM[2];
+    const kp = species === 'dog' ? DOGK.poromi : CATK.kuro;
+    const out = B(16, 8);
+    const pool = B(16, 8);
+    ell(pool, 8, 6.2, 7.8, 1.9, 'c');
+    each(pool, function (v, x, y) { if (v && !gp(pool, x, y + 1)) return 'C'; if (v && !gp(pool, x, y - 1) && x < 8) return 'L'; });
+    over(out, pool);
+    const ears = B(16, 8);
+    if (species === 'dog') {
+      poly(ears, [[2.5, 7], [4.5, 0.6], [8, 7]], 'b'); poly(ears, [[8, 7], [11.5, 0.6], [13.5, 7]], 'b');
+      poly(ears, [[4, 7], [4.8, 3], [6.6, 7]], 'p'); poly(ears, [[9.4, 7], [11.2, 3], [12, 7]], 'p');
+    } else {
+      poly(ears, [[3, 7], [3.6, -0.4], [7.6, 7]], 'b'); poly(ears, [[8.4, 7], [12.4, -0.4], [13, 7]], 'b');
+      poly(ears, [[4.2, 7], [4.4, 2.6], [6.4, 7]], 'p'); poly(ears, [[9.6, 7], [11.6, 2.6], [11.8, 7]], 'p');
+    }
+    over(out, outline(ears));
+    const mound = B(16, 8);
+    ell(mound, 8, 6.4, 6.4, 1.6, 'm');
+    each(mound, function (v, x, y) { if (v && !gp(mound, x, y - 1)) return 'M'; });
+    over(out, mound);
+    rect(out, 3, 5, 1, 1, 'M'); rect(out, 12, 5, 1, 1, 'M');
+    return toCanvas(out, { c: team.c, C: team.C, L: team.L, b: kp.b, p: kp.p, O: kp.o, m: '#efcf8c', M: '#fbe6b4' });
+  }
+
+  // ------------------------------------------------------------
+  // 審判おやぶん（黒柴）32x32
+  // ------------------------------------------------------------
+  const OYA_HEAD = sym([
+    '................',
+    '................',
+    '......b.........',
+    '.....bpb........',
+    '.....bppb.......',
+    '....bpppbb......',
+    '....bppppbbbbbbb',
+    '...bbbpppbbbbbbb',
+    '...bbbbbbbbbbbbb',
+    '..bbbbbbyybbbbbb',
+    '..bbbbbbyybbbbbb',
+    '..bbbbbbbbbbbbbb',
+    '..bbbbbbhebbbbbb',
+    '..bbbbbbeebbbbbb',
+    '..byybbbbbbbbwww',
+    '..bwwybbbbbwwwnn',
+    '...wwwbbbbwwwwwo',
+    '...wwwwbbwwwwwoo',
+    '....wwwwwwwwwwww',
+    '......wwwwwwwwww',
+    '........wwwwwwww'
+  ]);
+  const OYA_BODY = sym([
+    '.......bbbbbbbbb',
+    '......bbbbbbbbbb',
+    '.....bbbbbbwwwww',
+    '.....bbbbbwwwwww',
+    '....bbbbbbwwwwww',
+    '....bbbbbbbwwwww',
+    '...bbbbbbbbwwwww',
+    '...bbbbbbbbbbwww',
+    '...wwwbbbbbbbbbb'
+  ]); // y=22..30
+  const OYA_PAL = Object.assign({}, C0, {
+    b: '#302b3a', s: '#1a1720', W: '#eef3f8', V: '#8c96a6', w: '#fff6e8', y: '#e39a4c', p: '#e98d9c', o: '#0c0a10', O: '#0c0a10',
+    e: '#000000', h: '#ffffff', n: '#0c0a10', r: '#e8394a', k: '#ffd23f', K: '#8a6a10',
+    P: '#9a6a3a', Q: '#d9a56a', F: '#ffe25a', G: '#c9a020', A: '#6a4428'
+  });
+  function oyabunCanvas(flag) {
+    const dx = flag ? -3 : 0;
+    const out = B(32, 32);
+    shadow(out, 16 + dx, 30.6, 12, 1.6);
+    const tb = B(32, 32);
+    stamp(tb, ['.bbbb.', 'bbwwbb', 'bw..wb', 'bw..wb', 'bbwwbb', '.bbbb.'], 25 + dx, 21);
+    over(out, outline(tb));
+    const bb = B(32, 32);
+    stamp(bb, OYA_BODY, dx, 22);
+    over(out, outline(bb));
+    const lb = B(32, 32);
+    const legX = flag ? [10] : [10, 19];
+    legX.forEach(function (x) { rect(lb, x + dx, 25, 3, 4, 'b'); rect(lb, x + dx, 29, 3, 2, 'w'); });
+    over(out, outline(lb));
+    const hb = B(32, 32);
+    stamp(hb, OYA_HEAD, dx, 3);
+    over(out, outline(hb));
+    // 笛（くわえている）
+    stamp(out, ['.OOOOO.', 'OWWWWVO', 'OVVVVVO', '.OOOOO.'], 16 + dx, 19);
+    // ひも
+    const cord = spline([[10, 24], [13, 25.6], [16, 26.2], [19, 25.6], [21.5, 23.6], [21, 22.2]], 3);
+    cord.forEach(function (p) { sp(out, p[0] + dx, p[1], 'r'); });
+    if (flag) {
+      const ab = B(32, 32);
+      brush(ab, [[22, 26], [25.5, 21.5], [28, 17]], 1.6, 1.5, 'b', 3);
+      ell(ab, 28.4, 15.6, 2.2, 2.0, 'w');
+      // 旗ざお
+      const pb = B(32, 32);
+      rect(pb, 29, 1, 2, 23, 'P'); rect(pb, 29, 1, 1, 23, 'Q');
+      over(out, outline(pb));
+      over(out, outline(ab));
+      // 旗
+      const fb = B(32, 32);
+      poly(fb, [[29, 1], [18.5, 1.8], [20, 4.6], [18.5, 7.6], [29, 7.2]], 'F');
+      each(fb, function (v, x, y) { if (v && !gp(fb, x, y + 1)) return 'G'; });
+      // 肉球マーク
+      ell(fb, 24.6, 5.0, 1.6, 1.3, 'A');
+      [[22.6, 3.1], [24.0, 2.3], [25.6, 2.4], [26.8, 3.4]].forEach(function (p) { sp(fb, p[0], p[1], 'A'); });
+      over(out, outline(fb));
+    }
+    return toCanvas(out, OYA_PAL);
+  }
+
+  // ------------------------------------------------------------
+  // ステージ小物
+  // ------------------------------------------------------------
+  function rockCanvas() {
+    const out = B(16, 16);
+    ell(out, 8.6, 13.6, 7.4, 2.0, SHADOW);
+    const r = B(16, 16);
+    ell(r, 8, 8.6, 6.6, 5.2, '#9aa1ab'); ell(r, 4.6, 10.4, 3.9, 3.4, '#9aa1ab'); ell(r, 11.6, 10.6, 3.8, 3.2, '#9aa1ab');
+    each(r, function (v, x, y) {
+      if (!v) return;
+      if (y >= 11 || (y >= 10 && x >= 11)) return '#717784';
+      if ((x - 5.5) * (x - 5.5) + (y - 6) * (y - 6) * 1.8 < 5) return '#c7ccd4';
+    });
+    sp(r, 4, 5, '#eef0f4'); sp(r, 5, 5, '#eef0f4'); sp(r, 4, 6, '#eef0f4');
+    line(r, 10, 6, 11, 8, '#5d6370'); sp(r, 10, 9, '#5d6370');
+    sp(r, 7, 12, '#5d6370'); sp(r, 8, 12, '#5d6370');
+    // こけ
+    sp(r, 9, 4, '#79b85a'); sp(r, 10, 4, '#79b85a'); sp(r, 11, 5, '#5c9a44'); sp(r, 8, 4, '#5c9a44');
+    over(out, outline(r, '#2b2e38'));
+    return toCanvas(out);
+  }
+  function parasolCanvas() {
+    const out = B(24, 24);
+    ell(out, 14, 20.4, 9.6, 3.0, SHADOW);
+    const pole = B(24, 24);
+    rect(pole, 11, 12, 2, 10, '#f3efe8'); rect(pole, 12, 12, 1, 10, '#bdb6aa');
+    over(out, outline(pole, '#3a2a20'));
+    const cn = B(24, 24);
+    const cx = 12, cy = 9;
+    ell(cn, cx, cy, 11, 7.6, 'x');
+    each(cn, function (v, x, y) {
+      if (!v) return;
+      const a = Math.atan2((y + 0.5 - cy) * 1.45, x + 0.5 - cx);
+      const seg = Math.floor((a + Math.PI) / (Math.PI / 4) + 0.5) % 2;
+      const ddx = (x + 0.5 - cx) / 11, ddy = (y + 0.5 - (cy - 1.4)) / 7.6;
+      const rim = (ddx * ddx + ddy * ddy) > 1;
+      if (seg) return rim ? '#d94e8a' : '#ff74b0';
+      return rim ? '#e6d6c4' : '#fff8ee';
+    });
+    // ハイライト
+    [[6, 5], [7, 4], [8, 4], [5, 6]].forEach(function (p) { if (gp(cn, p[0], p[1])) sp(cn, p[0], p[1], '#ffffff'); });
+    rect(cn, 11, 7, 2, 2, '#ffd23f'); sp(cn, 11, 7, '#fff3a0');
+    over(out, outline(cn, '#3a2a20'));
+    return toCanvas(out);
+  }
+  function castleCanvas() {
+    const out = B(24, 24);
+    ell(out, 12.5, 21.6, 11, 2.3, SHADOW);
+    const c = B(24, 24);
+    const S = '#e2ad5e', SD = '#bf8a40', SL = '#f6d18c';
+    rect(c, 2, 15, 20, 7, S);         // 土台
+    rect(c, 2, 9, 6, 7, S); rect(c, 16, 9, 6, 7, S);   // 塔
+    rect(c, 8, 5, 8, 11, S);           // 中央
+    [2, 4, 6].forEach(function (x) { rect(c, x, 8, 1, 1, S); });
+    [16, 18, 20].forEach(function (x) { rect(c, x + 1, 8, 1, 1, S); });
+    [8, 10, 12, 14].forEach(function (x) { rect(c, x, 4, 1, 1, S); });
+    rect(c, 15, 4, 1, 1, S);
+    each(c, function (v, x, y) {
+      if (!v) return;
+      const right = !gp(c, x + 1, y) || (x === 7 && y >= 9) || (x === 21) || (x === 15 && y < 15);
+      if (right) return SD;
+      if (!gp(c, x, y - 1)) return SL;
+      if (y === 15 && (x < 8 || x > 15)) return SD;
+    });
+    // バケツの型あと
+    [4, 18].forEach(function (x) { rect(c, x, 11, 2, 3, SD); sp(c, x, 11, '#5a3418'); sp(c, x + 1, 11, '#5a3418'); });
+    rect(c, 11, 8, 2, 3, '#5a3418');          // 窓
+    rect(c, 10, 17, 4, 5, '#5a3418'); rect(c, 11, 16, 2, 1, '#5a3418'); // 門
+    // 砂つぶ
+    const R = rng(7);
+    for (let i = 0; i < 14; i++) { const x = 2 + Math.floor(R() * 20), y = 5 + Math.floor(R() * 16); if (gp(c, x, y) === S) sp(c, x, y, SD); }
+    // 旗
+    line(c, 12, 0, 12, 3, '#5a3418');
+    rect(c, 13, 0, 3, 2, '#ff74b0');
+    // 貝がら
+    rect(c, 4, 20, 2, 1, '#ffd0dc'); rect(c, 18, 19, 2, 2, '#ffffff'); sp(c, 18, 19, '#ffd0dc');
+    over(out, outline(c, '#5a3418'));
+    return toCanvas(out);
+  }
+  function palmCanvas() {
+    const out = B(24, 32);
+    ell(out, 12, 29.6, 8.5, 2.1, SHADOW);
+    ell(out, 4.5, 22, 3.5, 1.2, SHADOW);
+    const tr = B(24, 32);
+    const P = spline([[10.5, 30], [10.2, 24], [11.2, 18], [13, 12]], 3);
+    P.forEach(function (p, i) {
+      const w = 1.9 - i / P.length * 0.5;
+      ell(tr, p[0], p[1], w, 0.8, '#c48a4c');
+    });
+    each(tr, function (v, x, y) {
+      if (!v) return;
+      if (y % 3 === 0) return '#8a5a2e';
+      if (!gp(tr, x + 1, y)) return '#a06a38';
+      if (!gp(tr, x - 1, y)) return '#e0aa6a';
+    });
+    over(out, outline(tr, '#3a2414'));
+    const lv = B(24, 32);
+    const fronds = [
+      [[13, 10], [7, 6], [1.5, 9.5]],
+      [[13, 10], [8.5, 3.5], [4, 2]],
+      [[13, 10], [14, 3.5], [18.5, 1.5]],
+      [[13, 10], [19, 6], [23, 10]],
+      [[13, 10], [17, 11], [20.5, 16]],
+      [[13, 10], [9, 11], [5, 15.5]]
+    ];
+    fronds.forEach(function (fp) {
+      brush(lv, fp, 2.4, 0.7, '#3fa84a', 3);
+    });
+    fronds.forEach(function (fp) {
+      const Q = spline(fp, 3);
+      Q.forEach(function (p, i) { if (i > 2 && i < Q.length - 2) sp(lv, p[0], p[1], '#8bdc6a'); });
+    });
+    each(lv, function (v, x, y) { if (v === '#3fa84a' && !gp(lv, x, y + 1)) return '#277a34'; });
+    over(out, outline(lv, '#163e1c'));
+    const co = B(24, 32);
+    ell(co, 11.5, 11.6, 1.7, 1.7, '#7a4a24'); ell(co, 14.6, 11.8, 1.7, 1.7, '#7a4a24'); ell(co, 13, 13.4, 1.7, 1.7, '#6a3c1a');
+    sp(co, 11, 11, '#b07a48'); sp(co, 14, 11, '#b07a48'); sp(co, 12, 13, '#a06a3a');
+    over(out, outline(co, '#2a160a'));
+    return toCanvas(out);
+  }
+
+  // ------------------------------------------------------------
+  // 砂タイル 8x8
+  // ------------------------------------------------------------
+  function sandCanvas(i) {
+    const b = B(8, 8);
+    rect(b, 0, 0, 8, 8, '#f3dba0');
+    const R = rng(101 + i * 37);
+    const n = [3, 5, 2, 2][i];
+    for (let k = 0; k < n; k++) sp(b, Math.floor(R() * 8), Math.floor(R() * 8), '#e2c47f');
+    for (let k = 0; k < 2; k++) sp(b, Math.floor(R() * 8), Math.floor(R() * 8), '#fdedc6');
+    if (i === 2) { sp(b, 3, 3, '#ffc7d2'); sp(b, 4, 3, '#ffffff'); sp(b, 3, 4, '#f39fb2'); sp(b, 4, 4, '#ffc7d2'); }
+    if (i === 3) { sp(b, 1, 5, '#e6ca8a'); sp(b, 2, 4, '#e6ca8a'); sp(b, 3, 4, '#e6ca8a'); sp(b, 4, 5, '#e6ca8a'); sp(b, 5, 5, '#e6ca8a'); sp(b, 6, 4, '#e6ca8a'); }
+    return toCanvas(b);
+  }
+
+  // ------------------------------------------------------------
+  // ぺんき飛沫 12x12
+  // ------------------------------------------------------------
+  function splatCanvas(team, i) {
+    const T = TEAM[team];
+    const b = B(12, 12);
+    if (i === 0) {
+      ell(b, 6, 6, 3.7, 3.3, 'c');
+      [[6, 1.4, 1.1], [10.6, 4.4, 1.0], [9.8, 9.8, 1.3], [2.2, 9.4, 1.2], [1.6, 3.4, 0.9]].forEach(function (p) { ell(b, p[0], p[1], p[2], p[2], 'c'); });
+      line(b, 6, 6, 6, 2, 'c'); line(b, 6, 6, 10, 4, 'c'); line(b, 6, 6, 9, 9, 'c'); line(b, 6, 6, 2, 9, 'c'); line(b, 6, 6, 2, 3, 'c');
+    } else if (i === 1) {
+      ell(b, 6, 5.6, 4.6, 3.6, 'c');
+      rect(b, 3, 8, 2, 3, 'c'); rect(b, 7, 8, 2, 2, 'c'); ell(b, 4, 11, 1.1, 0.9, 'c');
+      sp(b, 11, 2, 'c'); sp(b, 0, 4, 'c'); sp(b, 10, 9, 'c'); sp(b, 10, 10, 'c');
+    } else { // 肉球
+      ell(b, 6, 8.2, 3.2, 2.6, 'c');
+      [[2.2, 4.6], [4.6, 2.6], [7.4, 2.6], [9.8, 4.6]].forEach(function (p) { ell(b, p[0], p[1], 1.4, 1.5, 'c'); });
+    }
+    each(b, function (v, x, y) {
+      if (!v) return;
+      if (!gp(b, x, y + 1) || !gp(b, x + 1, y)) return 'C';
+    });
+    each(b, function (v, x, y) { if (v === 'c' && !gp(b, x, y - 1) && !gp(b, x - 1, y)) return 'L'; });
+    if (i === 0) { sp(b, 5, 4, 'L'); }
+    if (i === 1) { sp(b, 4, 3, 'L'); sp(b, 5, 3, 'L'); }
+    if (i === 2) { sp(b, 5, 7, 'L'); }
+    return toCanvas(b, T);
+  }
+
+  // ------------------------------------------------------------
+  // アイコン 16x16
+  // ------------------------------------------------------------
+  const ICO_O = '#2a1a10';
+  const PO = TEAM[1].c, PD = TEAM[1].C, PL = TEAM[1].L;
+  function iconShower() {
+    const out = B(16, 16);
+    const hd = B(16, 16);
+    brush(hd, [[15, 0.5], [13, 2.5], [11.5, 4]], 1.1, 1.1, '#9aa8ba', 3);
+    over(out, outline(hd, ICO_O));
+    const h = B(16, 16);
+    ell(h, 7.5, 6.5, 5.4, 4.2, '#7f8ea2');          // ふち
+    ell(h, 7.5, 6.8, 4.2, 3.0, '#e4ebf3');          // 散水面
+    [[5, 5], [7, 5], [9, 5], [4, 7], [6, 7], [8, 7], [10, 7], [6, 9], [8, 9]].forEach(function (p) { sp(h, p[0] + 0.5, p[1], '#3e4a5c'); });
+    sp(h, 4, 4, '#ffffff'); sp(h, 5, 3, '#ffffff');
+    over(out, outline(h, ICO_O));
+    [[3, 11], [7, 12], [11, 11], [5, 14], [9, 14], [13, 14]].forEach(function (p) {
+      sp(out, p[0], p[1], PL); sp(out, p[0], p[1] + 1, PO);
+    });
+    return toCanvas(out);
+  }
+  function iconMop() {
+    const out = B(16, 16);
+    // ぬったあと
+    const pw = B(16, 16);
+    brush(pw, [[1, 14.2], [6, 13.6], [11, 14], [15, 13.4]], 1.2, 1.0, PO, 3);
+    each(pw, function (v, x, y) { if (v && !gp(pw, x, y - 1)) return PL; });
+    over(out, pw);
+    const st = B(16, 16);
+    line(st, 14, 0, 9, 6, '#c08a4a'); line(st, 15, 1, 10, 6, '#8a5a2a');
+    over(out, outline(st, ICO_O));
+    const m = B(16, 16);
+    [[[8, 8], [5.5, 11], [3, 14]], [[8.5, 8], [7, 11.5], [6.2, 14.6]], [[9, 8], [9.4, 11.5], [9.6, 14.6]], [[9.5, 8], [11.4, 11], [12.8, 13.8]]].forEach(function (pts) {
+      brush(m, pts, 0.85, 0.85, '#fff4e0', 4);
+    });
+    each(m, function (v, x, y) { if (v && y >= 11) return y >= 13 ? PO : PL; });
+    rect(m, 6, 6, 6, 3, '#8fa3b8'); rect(m, 6, 6, 6, 1, '#c8d6e4');
+    over(out, outline(m, ICO_O));
+    return toCanvas(out);
+  }
+  function iconBucket() {
+    const out = B(16, 16);
+    const hd = B(16, 16);
+    const arc = spline([[2.5, 7], [4, 2.5], [8, 1.2], [12, 2.5], [13.5, 7]], 3);
+    arc.forEach(function (p) { sp(hd, p[0], p[1], '#6a7686'); });
+    over(out, outline(hd, ICO_O));
+    const bk = B(16, 16);
+    poly(bk, [[2, 6], [14, 6], [12.5, 15], [3.5, 15]], '#9fb2c6');
+    each(bk, function (v, x, y) { if (!v) return; if (x >= 10) return '#7c8fa4'; if (x === 4 || x === 5) return '#d4e0ec'; });
+    ell(bk, 8, 6.6, 6, 1.6, PO);
+    rect(bk, 3, 7, 2, 4, PO); rect(bk, 9, 7, 1, 3, PO); ell(bk, 3.8, 11.2, 1.1, 1.1, PO);
+    sp(bk, 5, 6, PL); sp(bk, 6, 6, PL);
+    over(out, outline(bk, ICO_O));
+    return toCanvas(out);
+  }
+  function iconBomb() {
+    const out = B(16, 16);
+    const fz = B(16, 16);
+    brush(fz, [[11, 5], [12.4, 3], [13.6, 2.4]], 0.7, 0.7, '#8a5a2a', 3);
+    over(out, outline(fz, ICO_O));
+    const bl = B(16, 16);
+    ell(bl, 7.6, 9.4, 5.9, 5.6, PO);
+    each(bl, function (v, x, y) { if (v && (x - 7.6) * 0.7 + (y - 9.4) > 3.2) return PD; });
+    ell(bl, 7.6, 11, 2.0, 1.6, '#ffffff');
+    [[4.8, 8.4], [6.6, 6.8], [8.8, 6.8], [10.5, 8.6]].forEach(function (p) { ell(bl, p[0], p[1], 0.9, 1.0, '#ffffff'); });
+    sp(bl, 4, 6, PL); sp(bl, 5, 5, PL);
+    over(out, outline(bl, ICO_O));
+    // 火花
+    [[14, 1], [13, 0], [15, 2], [14, 3], [12, 1]].forEach(function (p, i) { sp(out, p[0], p[1], i === 0 ? '#ffffff' : '#ffd23f'); });
+    return toCanvas(out);
+  }
+
+  // ------------------------------------------------------------
+  // ポートレート 48x48
+  // ------------------------------------------------------------
+  function portraitPoromi() {
+    const K = DOGK.poromi;
+    const out = B(48, 48);
+    const bg = B(48, 48);
+    ell(bg, 24, 24, 23.5, 23.5, '#ffd9b0');
+    ell(bg, 24, 24, 21.5, 21.5, '#ffe9d0');
+    each(bg, function (v, x, y) { if (v === '#ffd9b0' && ((x + y) % 2 === 0)) return '#ffc58e'; });
+    over(out, outline(bg, TEAM[1].C));
+    // 体とバンダナ
+    const bd = B(48, 48);
+    ell(bd, 24, 49, 15, 10, K.b);
+    ell(bd, 24, 50, 8, 8, K.w);
+    poly(bd, [[9.5, 40], [38.5, 40], [24, 49]], TEAM[1].c);
+    each(bd, function (v, x, y) { if (v === TEAM[1].c && (y === 40 || y === 41)) return TEAM[1].C; });
+    [[16, 43], [24, 44], [31, 43], [20, 46], [28, 46]].forEach(function (p) { sp(bd, p[0], p[1], '#ffffff'); });
+    over(out, outline(bd, K.o));
+    // 耳
+    const er = B(48, 48);
+    poly(er, [[5, 24], [9.5, 3.5], [21, 13]], K.b); poly(er, [[43, 24], [38.5, 3.5], [27, 13]], K.b);
+    poly(er, [[9, 19], [10.6, 8], [17.5, 14]], K.p); poly(er, [[39, 19], [37.4, 8], [30.5, 14]], K.p);
+    over(out, outline(er, K.o));
+    // 顔
+    const hd = B(48, 48);
+    ell(hd, 24, 26.5, 18, 14, K.b);
+    ell(hd, 12, 33, 7, 5.6, K.w); ell(hd, 36, 33, 7, 5.6, K.w);
+    ell(hd, 24, 35, 9, 6.6, K.w);
+    each(hd, function (v, x, y) { if (v === K.b && y >= 38) return K.w; });
+    // 眉
+    ell(hd, 16.5, 20.5, 2.1, 1.3, K.y); ell(hd, 31.5, 20.5, 2.1, 1.3, K.y);
+    over(out, outline(hd, K.o));
+    // 目（にっこり大きめ）
+    [16, 32].forEach(function (cx) {
+      ell(out, cx, 27, 2.6, 3.2, '#1c1014');
+      sp(out, cx - 2, 25, '#ffffff'); sp(out, cx - 1, 25, '#ffffff'); sp(out, cx - 2, 26, '#ffffff'); sp(out, cx - 1, 26, '#ffffff');
+      sp(out, cx + 1, 28, '#ffffff');
+    });
+    // ほっぺ
+    ell(out, 10.5, 32.5, 2.6, 1.5, '#ff9fae'); ell(out, 37.5, 32.5, 2.6, 1.5, '#ff9fae');
+    // 鼻・口・舌
+    ell(out, 24, 31.4, 3.0, 2.0, '#1c1014'); sp(out, 23, 30, '#6a5560');
+    line(out, 24, 33, 24, 34, '#3a1a0a'); line(out, 23, 34, 23, 34, '#3a1a0a');
+    const tg = B(48, 48);
+    ell(tg, 24, 38.4, 3.0, 2.8, '#ff6b8a');
+    rect(tg, 21, 35, 6, 2, '#ff6b8a');
+    line(tg, 24, 37, 24, 39, '#e04a6a');
+    const tgo = outline(tg, '#3a1a0a');
+    over(out, tgo);
+    line(out, 19, 34, 21, 35, '#3a1a0a'); line(out, 29, 34, 27, 35, '#3a1a0a');
+    sp(out, 19, 33, '#3a1a0a'); sp(out, 29, 33, '#3a1a0a');
+    return toCanvas(out);
+  }
+  function portraitCat() {
+    const K = CATK.tora;
+    const out = B(48, 48);
+    const bg = B(48, 48);
+    ell(bg, 24, 24, 23.5, 23.5, '#bdf3e9');
+    ell(bg, 24, 24, 21.5, 21.5, '#dcfaf4');
+    each(bg, function (v, x, y) { if (v === '#bdf3e9' && ((x + y) % 2 === 0)) return '#9ce9db'; });
+    over(out, outline(bg, TEAM[2].C));
+    const bd = B(48, 48);
+    ell(bd, 24, 49, 14, 10, K.b);
+    ell(bd, 24, 50, 7, 8, K.w);
+    rect(bd, 10, 40, 28, 3, TEAM[2].c);
+    each(bd, function (v, x, y) { if (v === TEAM[2].c && y === 42) return TEAM[2].C; });
+    over(out, outline(bd, K.o));
+    const bell = B(48, 48);
+    ell(bell, 24, 44.5, 2.6, 2.6, '#ffd23f'); sp(bell, 23, 43, '#fff3a0'); rect(bell, 23, 45, 3, 1, '#a87400');
+    over(out, outline(bell, K.o));
+    const er = B(48, 48);
+    poly(er, [[4, 25], [7, 1.5], [20, 13]], K.b); poly(er, [[44, 25], [41, 1.5], [28, 13]], K.b);
+    poly(er, [[8, 19], [8.6, 7.5], [16, 14]], K.p); poly(er, [[40, 19], [39.4, 7.5], [32, 14]], K.p);
+    over(out, outline(er, K.o));
+    const hd = B(48, 48);
+    ell(hd, 24, 27.5, 19, 13.5, K.b);
+    ell(hd, 24, 35.2, 7.5, 5.2, K.w);
+    // しま
+    [[19, 15, 19], [24, 14, 19], [29, 15, 19]].forEach(function (s) { line(hd, s[0], s[1], s[0], s[2], K.g); line(hd, s[0] + (s[0] < 24 ? -1 : s[0] > 24 ? 1 : 0), s[1] + 1, s[0] + (s[0] < 24 ? -1 : s[0] > 24 ? 1 : 0), s[2] - 1, K.g); });
+    [[6, 27], [6, 31], [42, 27], [42, 31]].forEach(function (s) { line(hd, s[0] - (s[0] < 24 ? 0 : 3), s[1], s[0] + (s[0] < 24 ? 3 : 0), s[1], K.g); });
+    over(out, outline(hd, K.o));
+    // 目（大きなみどり目・たて長ひとみ）
+    [15.5, 32.5].forEach(function (cx) {
+      const eb = B(48, 48);
+      ell(eb, cx, 27, 3.8, 4.2, K.i);
+      each(eb, function (v, x, y) { if (v && y >= 28) return '#5ab42a'; });
+      rect(eb, Math.floor(cx), 24, 1, 7, '#1c1014');
+      sp(eb, Math.floor(cx) - 2, 24, '#ffffff'); sp(eb, Math.floor(cx) - 1, 24, '#ffffff'); sp(eb, Math.floor(cx) - 2, 25, '#ffffff');
+      over(out, outline(eb, '#1c1014'));
+    });
+    ell(out, 9.5, 33, 2.6, 1.5, '#ff9fae'); ell(out, 38.5, 33, 2.6, 1.5, '#ff9fae');
+    // 鼻（ピンクの三角）と ω口
+    poly(out, [[21.6, 31.4], [26.4, 31.4], [24, 34]], '#ff8fa8');
+    sp(out, 23, 31, '#ffc4d0');
+    line(out, 24, 34, 24, 35, '#3a1a0a');
+    line(out, 24, 35, 22, 37, '#3a1a0a'); line(out, 22, 37, 20, 36, '#3a1a0a');
+    line(out, 24, 35, 26, 37, '#3a1a0a'); line(out, 26, 37, 28, 36, '#3a1a0a');
+    // ヒゲ
+    line(out, 13, 34, 1, 32, '#3a1a0a'); line(out, 13, 36, 2, 37, '#3a1a0a');
+    line(out, 35, 34, 47, 32, '#3a1a0a'); line(out, 35, 36, 46, 37, '#3a1a0a');
+    return toCanvas(out);
+  }
+
+  // ------------------------------------------------------------
+  // タイトルロゴ 200x64（筆画データ → 丸ブラシで描く自作ドット文字）
+  // 座標は 0..10 の字面
+  // ------------------------------------------------------------
+  const GLYPH = {
+    'ぬ': { w: 10.4, s: [
+      [[2.0, 2.6], [2.9, 5.0], [4.0, 7.6]],
+      [[6.0, 1.2], [5.1, 4.2], [3.4, 7.4], [1.8, 9.0], [1.3, 7.6], [2.7, 5.2], [5.4, 3.6], [8.0, 4.2], [9.2, 6.4], [8.6, 8.8], [6.6, 9.6], [5.2, 8.9], [5.9, 7.7], [7.8, 8.0], [9.6, 9.7]]
+    ] },
+    'り': { w: 9.0, s: [
+      [[2.6, 1.6], [2.4, 4.6], [2.8, 6.8], [3.6, 7.0], [4.4, 5.6]],
+      [[6.4, 1.2], [7.2, 3.6], [7.2, 6.0], [6.2, 8.2], [4.2, 9.6]]
+    ] },
+    'ワ': { w: 9.8, s: [
+      [[2.2, 2.0], [2.2, 5.6]],
+      [[2.2, 2.0], [8.4, 2.0]],
+      [[8.4, 2.0], [8.0, 5.0], [6.6, 7.6], [3.8, 9.6]]
+    ] },
+    'ン': { w: 9.8, s: [
+      [[1.8, 2.4], [3.8, 3.8]],
+      [[2.0, 9.2], [5.2, 7.8], [7.4, 5.8], [8.8, 3.0]]
+    ] },
+    'だ': { w: 10.6, s: [
+      [[1.2, 3.4], [5.2, 2.8]],
+      [[3.6, 1.0], [3.0, 5.0], [1.6, 9.4]],
+      [[5.6, 5.4], [7.8, 5.0]],
+      [[5.4, 7.0], [5.8, 8.9], [8.6, 9.0]],
+      [[7.9, 0.4], [8.5, 2.0]],
+      [[9.5, 0.2], [10.1, 1.8]]
+    ] },
+    'ふ': { w: 10.4, s: [
+      [[4.2, 1.0], [5.9, 2.4]],
+      [[5.0, 3.8], [6.6, 5.4], [6.2, 7.6], [4.6, 8.8], [3.6, 8.2]],
+      [[2.6, 6.0], [1.0, 8.8]],
+      [[7.6, 6.0], [9.4, 8.8]]
+    ] },
+    'る': { w: 10.0, s: [
+      [[2.6, 1.6], [7.0, 1.4]],
+      [[7.0, 1.4], [2.0, 7.0]],
+      [[2.0, 7.0], [4.8, 5.0], [7.8, 5.2], [8.8, 7.4], [7.6, 9.3], [5.0, 9.5], [4.2, 8.1], [5.8, 7.4], [7.0, 8.6], [7.0, 9.8]]
+    ] },
+    '！': { w: 4.6, s: [
+      [[2.3, 1.0], [2.3, 6.2]]
+    ], dot: [2.3, 8.9] }
+  };
+  function logoCanvas() {
+    const W = 200, H = 64;
+    const fill = B(W, H);
+    function glyph(ch, ox, oy, sc, r, key) {
+      const G = GLYPH[ch];
+      G.s.forEach(function (st) {
+        const pts = st.map(function (p) { return [ox + p[0] * sc, oy + p[1] * sc]; });
+        brush(fill, pts, r, r, key, 1.5);
+      });
+      if (G.dot) ell(fill, ox + G.dot[0] * sc, oy + G.dot[1] * sc, r * 1.25, r * 1.25, key);
+      return G.w * sc;
+    }
+    function lineOf(str, keys, sc, r, y0, gap, bounce) {
+      let total = 0;
+      str.split('').forEach(function (ch) { total += GLYPH[ch].w * sc + gap; });
+      total -= gap;
+      let x = Math.round((W - total) / 2);
+      str.split('').forEach(function (ch, i) {
+        const w = glyph(ch, x, y0 + (bounce ? bounce[i % bounce.length] : 0), sc, r, keys[i % keys.length]);
+        x += w + gap;
+      });
+    }
+    lineOf('ぬりぬり', ['A', 'M', 'A', 'M'], 2.75, 2.25, 2, 3, [0, 1, -1, 1]);
+    lineOf('ワンだふる！', ['Y'], 2.3, 2.0, 35.5, 2, [0, 1, 0, 1, 0, 0]);
+    // 太らせ（輪郭）
+    function dil(src, r) {
+      const o = B(W, H);
+      const R = Math.ceil(r);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        if (!src.d[y * W + x]) continue;
+        for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) if (dx * dx + dy * dy <= r * r + 0.3) sp(o, x + dx, y + dy, 1);
+      }
+      return o;
+    }
+    const d2 = dil(fill, 2), d3 = dil(fill, 3);
+    const out = B(W, H);
+    // 影
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d3.d[y * W + x]) sp(out, x + 1, y + 2, 'rgba(70,35,10,0.45)');
+    for (let i = 0; i < W * H; i++) if (d3.d[i]) out.d[i] = '#ffffff';
+    for (let i = 0; i < W * H; i++) if (d2.d[i]) out.d[i] = '#3a1a0a';
+    const COL = {
+      A: ['#ffc06a', '#ff8a1f', '#d9620a'],
+      M: ['#8ff3e2', '#2ad4b8', '#119a85'],
+      Y: ['#fff2a6', '#ffd23f', '#e09a14']
+    };
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const k = fill.d[y * W + x];
+      if (!k) continue;
+      const c = COL[k];
+      const upEdge = !fill.d[(y - 1) * W + x] || !fill.d[(y - 2) * W + x];
+      const dnEdge = y + 1 >= H || !fill.d[(y + 1) * W + x] || !fill.d[(y + 2) * W + x];
+      let col = c[1];
+      if (dnEdge) col = c[2];
+      if (upEdge && !(!fill.d[(y - 1) * W + x] && dnEdge)) col = c[0];
+      out.d[y * W + x] = col;
+    }
+    // ぷっくりハイライト
+    for (let y = 1; y < H; y++) for (let x = 1; x < W; x++) {
+      const k = fill.d[y * W + x];
+      if (k && !fill.d[(y - 1) * W + x] && !fill.d[y * W + x - 1] && fill.d[(y + 2) * W + x]) out.d[y * W + x] = '#ffffff';
+    }
+    return toCanvas(out);
+  }
+
+  // ------------------------------------------------------------
+  // 組み立て
+  // ------------------------------------------------------------
+  const DIRS = ['down', 'up', 'left', 'right'];
+  const ART = {
+    dog: {}, cat: {},
+    dive: { dog: diveCanvas('dog'), cat: diveCanvas('cat') },
+    wet: { dog: {}, cat: {} },
+    oyabun: oyabunCanvas(false), oyabunFlag: oyabunCanvas(true),
+    props: { R: rockCanvas(), P: parasolCanvas(), C: castleCanvas(), T: palmCanvas() },
+    sand: [0, 1, 2, 3].map(sandCanvas),
+    splat: { 1: [0, 1, 2].map(function (i) { return splatCanvas(1, i); }), 2: [0, 1, 2].map(function (i) { return splatCanvas(2, i); }) },
+    icons: { shower: iconShower(), mop: iconMop(), bucket: iconBucket(), bomb: iconBomb() },
+    portrait: { poromi: portraitPoromi(), cat: portraitCat() },
+    logo: logoCanvas()
+  };
+  Object.keys(DOGK).forEach(function (kind) {
+    const pal = palOf(DOGK[kind], 1);
+    ART.dog[kind] = {};
+    DIRS.forEach(function (dir) { ART.dog[kind][dir] = [0, 1, 2, 3].map(function (f) { return toCanvas(dogBuf(kind, dir, f), pal); }); });
+    ART.wet.dog[kind] = wetCanvas('dog', kind);
+  });
+  Object.keys(CATK).forEach(function (kind) {
+    const pal = palOf(CATK[kind], 2);
+    ART.cat[kind] = {};
+    DIRS.forEach(function (dir) { ART.cat[kind][dir] = [0, 1, 2, 3].map(function (f) { return toCanvas(catBuf(kind, dir, f), pal); }); });
+    ART.wet.cat[kind] = wetCanvas('cat', kind);
+  });
+  return ART;
+}
+
+/* ===== sound.js ===== */
+/* =====================================================================
+   sound.js — ぬりぬり ワンだふる！ サウンド（担当B）
+   ・WebAudio の合成のみ（音源ファイル・外部URLなし）
+   ・BGM はすべてこのファイルのために書いたオリジナルの旋律
+   API:
+     const SND = makeSound();      // 引数に AudioContext / OfflineAudioContext を渡してもよい（テスト用）
+     SND.init();                    // 最初のタップで呼ぶ（AudioContext を作成・resume）
+     SND.bgm('title'|'battle'|'lastspurt'|'result'|null);
+     SND.sfx('shoot'|'mop'|'bucket'|'splat'|'hit'|'wet'|'respawn'|'dive'|'undive'|
+             'bombReady'|'bomb'|'countdown'|'go'|'whistle'|'win'|'lose'|'tap'|'paint');
+     SND.setMute(true|false);
+   ===================================================================== */
+function makeSound(ctxOpt) {
+  'use strict';
+
+  var ctx = null, master = null, comp = null, musicBus = null, sfxBus = null, noiseBuf = null;
+  var ready = false, muted = false, offline = false;
+  var pendingBgm;                    // init 前に bgm() が呼ばれたときの予約
+  var MASTER_VOL = 0.62;             // 控えめ
+  var MUSIC_VOL = 0.35, SFX_VOL = 1.0;
+  var LOOKAHEAD = 0.25, TICK_MS = 25;
+
+  /* ---------------- 共通ヘルパ ---------------- */
+  function mtof(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  function G(v) { var g = ctx.createGain(); g.gain.value = (v === undefined ? 1 : v); return g; }
+  function O(type, f, t) {
+    var o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); return o;
+  }
+  function F(type, f, q) {
+    var b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f;
+    if (q !== undefined) b.Q.value = q; return b;
+  }
+  // 打楽器型エンベロープ（a で立ち上がり、tau で指数減衰）。戻り値＝実質の終了時刻
+  function perc(g, t, peak, a, tau) {
+    g.gain.value = 0;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(peak, t + a);
+    g.gain.setTargetAtTime(0, t + a, tau);
+    return t + a + tau * 7;
+  }
+  // 持続音型（ADSR）。戻り値＝終了時刻
+  function adsr(g, t, peak, a, d, s, dur, rel) {
+    var te = t + Math.max(dur, a + 0.01);
+    g.gain.value = 0;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(peak, t + a);
+    g.gain.setTargetAtTime(peak * s, t + a, d / 3);
+    g.gain.setTargetAtTime(0, te, rel / 3);
+    return te + rel * 2.5;
+  }
+  function noise(t, dur) {
+    var s = ctx.createBufferSource(); s.buffer = noiseBuf;
+    var len = noiseBuf.duration;
+    if (dur > len - 0.05) { s.loop = true; s.start(t); }
+    else s.start(t, Math.random() * (len - dur - 0.02));
+    s.stop(t + dur);
+    return s;
+  }
+  function play(src, t, end) { src.start(t); src.stop(end); }
+  function glide(param, t, f0, f1, dt) {
+    param.setValueAtTime(f0, t);
+    param.exponentialRampToValueAtTime(Math.max(1, f1), t + dt);
+  }
+
+  /* ---------------- 楽器（BGM） ---------------- */
+  // 引数: t, midi(または和音の配列), dur(秒), vel(0..1), bus(=曲のバス)
+  var INST = {
+    // ビーチファンクのリード：矩形波＋ノコギリ波を少しデチューン、遅れてビブラート
+    lead: function (t, m, dur, v, bus) {
+      var f = mtof(m), o1 = O('square', f, t), o2 = O('sawtooth', f, t);
+      o2.detune.value = 7;
+      var lp = F('lowpass', 2300, 0.7);
+      lp.frequency.setValueAtTime(3400, t); lp.frequency.setTargetAtTime(1900, t, 0.09);
+      var g = G(0), end = adsr(g, t, 0.31 * v, 0.006, 0.12, 0.6, dur * 0.92, 0.07);
+      var m1 = G(0.55), m2 = G(0.45);
+      o1.connect(m1); o2.connect(m2); m1.connect(lp); m2.connect(lp); lp.connect(g);
+      g.connect(bus.dry); g.connect(bus.send);
+      if (dur > 0.22) {
+        var l = O('sine', 5.6, t), lg = G(0);
+        lg.gain.setValueAtTime(0, t + 0.12); lg.gain.linearRampToValueAtTime(14, t + dur);
+        l.connect(lg); lg.connect(o1.detune); lg.connect(o2.detune); play(l, t, end);
+      }
+      play(o1, t, end); play(o2, t, end);
+    },
+    // ハモり（やわらかい三角波＋矩形）
+    lead2: function (t, m, dur, v, bus) {
+      var f = mtof(m), o1 = O('triangle', f, t), o2 = O('square', f, t);
+      var lp = F('lowpass', 1700, 0.5), g = G(0), mx = G(0.25);
+      var end = adsr(g, t, 0.2 * v, 0.01, 0.15, 0.55, dur * 0.9, 0.08);
+      o1.connect(lp); o2.connect(mx); mx.connect(lp); lp.connect(g); g.connect(bus.dry); g.connect(bus.send);
+      play(o1, t, end); play(o2, t, end);
+    },
+    // ファンキーなシンセベース（フィルタの開閉で「ブゥン」）
+    bass: function (t, m, dur, v, bus) {
+      var f = mtof(m), o1 = O('sawtooth', f, t), o2 = O('sine', f, t);
+      var lp = F('lowpass', 300, 6);
+      lp.frequency.setValueAtTime(260 + 1500 * v, t); lp.frequency.setTargetAtTime(320, t + 0.005, 0.05);
+      var g = G(0), end = adsr(g, t, 0.16 * v, 0.004, 0.1, 0.7, dur * 0.9, 0.04);
+      var s = G(0.6);
+      o1.connect(lp); lp.connect(g); o2.connect(s); s.connect(g); g.connect(bus.dry);
+      play(o1, t, end); play(o2, t, end);
+    },
+    // コードのカッティング（短いスタブ）
+    stab: function (t, notes, dur, v, bus) {
+      var lp = F('lowpass', 1800, 1.2), g = G(0);
+      lp.frequency.setValueAtTime(2600, t); lp.frequency.setTargetAtTime(900, t, 0.04);
+      var end = adsr(g, t, 0.125 * v, 0.003, 0.05, 0.5, dur, 0.04);
+      lp.connect(g); g.connect(bus.dry); g.connect(bus.send);
+      for (var i = 0; i < notes.length; i++) {
+        var o = O('sawtooth', mtof(notes[i]), t); o.detune.value = rnd(-6, 6);
+        o.connect(lp); play(o, t, end);
+      }
+    },
+    // ウクレレ風のストローク（タイトル）
+    pluck: function (t, notes, dur, v, bus) {
+      for (var i = 0; i < notes.length; i++) {
+        var tt = t + i * 0.013, o = O('sawtooth', mtof(notes[i]), tt);
+        var lp = F('lowpass', 2400, 0.8), g = G(0);
+        lp.frequency.setValueAtTime(2800, tt); lp.frequency.setTargetAtTime(650, tt, 0.07);
+        var end = perc(g, tt, 0.1 * v, 0.003, Math.min(0.22, dur * 0.5));
+        o.connect(lp); lp.connect(g); g.connect(bus.dry); play(o, tt, end);
+      }
+    },
+    // マリンバ風（タイトルのメロディ）
+    marimba: function (t, m, dur, v, bus) {
+      var f = mtof(m), o1 = O('sine', f, t), o2 = O('sine', f * 4, t), o3 = O('triangle', f, t);
+      var g1 = G(0), g2 = G(0), g3 = G(0);
+      var e1 = perc(g1, t, 0.29 * v, 0.003, 0.16);
+      perc(g2, t, 0.06 * v, 0.001, 0.018);
+      perc(g3, t, 0.085 * v, 0.002, 0.05);
+      o1.connect(g1); o2.connect(g2); o3.connect(g3);
+      g1.connect(bus.dry); g2.connect(bus.dry); g3.connect(bus.dry); g1.connect(bus.send);
+      play(o1, t, e1); play(o2, t, t + 0.2); play(o3, t, t + 0.4);
+    },
+    // ピチカート風ベース（タイトル・リザルト）
+    pizz: function (t, m, dur, v, bus) {
+      var f = mtof(m), o1 = O('triangle', f, t), o2 = O('square', f, t);
+      var lp = F('lowpass', 700, 1), g = G(0), mx = G(0.25);
+      var end = perc(g, t, 0.24 * v, 0.004, Math.min(0.14, dur * 0.45));
+      o1.connect(g); o2.connect(mx); mx.connect(lp); lp.connect(g); g.connect(bus.dry);
+      play(o1, t, end); play(o2, t, end);
+    },
+    // ベル（リザルト）
+    bell: function (t, m, dur, v, bus) {
+      var f = mtof(m), parts = [[1, 0.195, 0.38], [2, 0.058, 0.18], [3.01, 0.023, 0.09]];
+      for (var i = 0; i < parts.length; i++) {
+        var o = O('sine', f * parts[i][0], t), g = G(0);
+        var e = perc(g, t, parts[i][1] * v, 0.002, parts[i][2]);
+        o.connect(g); g.connect(bus.dry); if (i === 0) g.connect(bus.send); play(o, t, e);
+      }
+    },
+    // やわらかいパッド（リザルト）
+    pad: function (t, notes, dur, v, bus) {
+      var lp = F('lowpass', 1400, 0.4), g = G(0);
+      var end = adsr(g, t, 0.04 * v, 0.12, 0.3, 0.8, dur * 0.95, 0.25);
+      lp.connect(g); g.connect(bus.dry);
+      for (var i = 0; i < notes.length; i++) {
+        var o = O('triangle', mtof(notes[i]), t); o.detune.value = rnd(-5, 5);
+        o.connect(lp); play(o, t, end);
+      }
+    },
+    // 焦りのアルペジオ（ラストスパート）
+    arp: function (t, m, dur, v, bus) {
+      var o = O('square', mtof(m), t), lp = F('lowpass', 2600, 0.5), g = G(0);
+      var end = perc(g, t, 0.09 * v, 0.002, 0.045);
+      o.connect(lp); lp.connect(g); g.connect(bus.dry); g.connect(bus.send); play(o, t, end);
+    }
+  };
+
+  /* ---------------- ドラム ---------------- */
+  var DRUM = {
+    k: function (t, v, bus) {          // キック
+      var o = O('sine', 150, t), g = G(0); glide(o.frequency, t, 150, 48, 0.12);
+      var e = perc(g, t, 0.55 * v, 0.002, 0.07);
+      var c = O('triangle', 900, t), cg = G(0); glide(c.frequency, t, 900, 180, 0.025);
+      perc(cg, t, 0.08 * v, 0.001, 0.008);
+      o.connect(g); c.connect(cg); g.connect(bus.dry); cg.connect(bus.dry);
+      play(o, t, e); play(c, t, t + 0.08);
+    },
+    s: function (t, v, bus) {          // スネア
+      var n = noise(t, 0.3), hp = F('highpass', 1100, 0.7), lp = F('lowpass', 7000, 0.5), g = G(0);
+      perc(g, t, 0.2 * v, 0.001, 0.045);
+      n.connect(hp); hp.connect(lp); lp.connect(g); g.connect(bus.dry);
+      var o = O('triangle', 210, t), og = G(0); glide(o.frequency, t, 210, 165, 0.05);
+      var e = perc(og, t, 0.18 * v, 0.001, 0.03);
+      o.connect(og); og.connect(bus.dry); play(o, t, e);
+    },
+    c: function (t, v, bus) {          // クラップ
+      var n = noise(t, 0.3), bp = F('bandpass', 1500, 0.9), g = G(0);
+      g.gain.value = 0;
+      var pk = 0.22 * v;
+      g.gain.setValueAtTime(0, t);
+      for (var i = 0; i < 3; i++) {
+        g.gain.linearRampToValueAtTime(pk, t + i * 0.011 + 0.001);
+        g.gain.linearRampToValueAtTime(pk * 0.25, t + i * 0.011 + 0.009);
+      }
+      g.gain.linearRampToValueAtTime(pk, t + 0.034);
+      g.gain.setTargetAtTime(0, t + 0.035, 0.04);
+      n.connect(bp); bp.connect(g); g.connect(bus.dry); g.connect(bus.send);
+    },
+    h: function (t, v, bus) {          // クローズド・ハット
+      var n = noise(t, 0.08), hp = F('highpass', 7200, 0.6), lp = F('lowpass', 12000, 0.5), g = G(0);
+      perc(g, t, 0.06 * v, 0.001, 0.011);
+      n.connect(hp); hp.connect(lp); lp.connect(g); g.connect(bus.dry);
+    },
+    o: function (t, v, bus) {          // オープン・ハット
+      var n = noise(t, 0.4), hp = F('highpass', 6500, 0.6), lp = F('lowpass', 11000, 0.5), g = G(0);
+      perc(g, t, 0.045 * v, 0.002, 0.055);
+      n.connect(hp); hp.connect(lp); lp.connect(g); g.connect(bus.dry);
+    },
+    m: function (t, v, bus) {          // シェイカー（砂の音）
+      var n = noise(t, 0.1), bp = F('bandpass', 5200, 0.9), g = G(0);
+      perc(g, t, 0.07 * v, 0.008, 0.02);
+      n.connect(bp); bp.connect(g); g.connect(bus.dry);
+    },
+    p: function (t, v, bus) { conga(t, v, bus, 370); },   // コンガ高
+    q: function (t, v, bus) { conga(t, v, bus, 255); },   // コンガ低
+    x: function (t, v, bus) {          // クラッシュ（やさしめ）
+      var n = noise(t, 1.4), hp = F('highpass', 4200, 0.5), lp = F('lowpass', 10000, 0.5), g = G(0);
+      perc(g, t, 0.05 * v, 0.003, 0.32);
+      n.connect(hp); hp.connect(lp); lp.connect(g); g.connect(bus.dry); g.connect(bus.send);
+    },
+    w: function (t, v, bus) {          // ウッドブロック（チクタク）
+      var o = O('sine', 1180, t), o2 = O('sine', 2360 * 1.01, t), g = G(0), g2 = G(0);
+      var e = perc(g, t, 0.06 * v, 0.001, 0.016); perc(g2, t, 0.015 * v, 0.001, 0.008);
+      o.connect(g); o2.connect(g2); g.connect(bus.dry); g2.connect(bus.dry);
+      play(o, t, e); play(o2, t, e);
+    }
+  };
+  function conga(t, v, bus, f) {
+    var o = O('sine', f, t), o2 = O('triangle', f * 1.5, t), g = G(0), g2 = G(0);
+    glide(o.frequency, t, f * 1.12, f, 0.03);
+    var e = perc(g, t, 0.16 * v, 0.002, 0.055); perc(g2, t, 0.03 * v, 0.001, 0.02);
+    o.connect(g); o2.connect(g2); g.connect(bus.dry); g2.connect(bus.dry);
+    play(o, t, e); play(o2, t, e);
+  }
+
+  /* ---------------- 楽譜の記法 ----------------
+     メロディ: "D5/2 G5/2 r/2 ..."  音名/長さ(16分音符の数)。r=休符。
+     コード:   1小節に1つ、または "Am7 D7" で半小節ずつ。
+     ドラム:   16文字/小節。'.'=なし 'x'=普通 'X'=強 'g'=弱
+     ベース:   [[ステップ, 根音からの半音, 長さ], ...]                          */
+  var PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  function noteNum(s) {
+    var r = /^([A-G])([#b]?)(-?\d)$/.exec(s);
+    if (!r) throw new Error('bad note ' + s);
+    return 12 * (+r[3] + 1) + PC[r[1]] + (r[2] === '#' ? 1 : r[2] === 'b' ? -1 : 0);
+  }
+  function parseMel(str) {
+    var out = [], pos = 0, tok = str.trim().split(/\s+/);
+    for (var i = 0; i < tok.length; i++) {
+      var p = tok[i].split('/'), len = +p[1];
+      if (p[0] !== 'r') out.push({ s: pos, m: noteNum(p[0]), d: len });
+      pos += len;
+    }
+    out.total = pos;
+    return out;
+  }
+  var QUAL = { '': [0, 4, 7], m: [0, 3, 7], '7': [0, 4, 7, 10], maj7: [0, 4, 7, 11], m7: [0, 3, 7, 10], sus4: [0, 5, 7] };
+  function chordInfo(name) {
+    var r = /^([A-G][#b]?)(.*)$/.exec(name);
+    var root = (noteNum(r[1] + '4')) % 12;
+    return { root: root, iv: QUAL[r[2]] };
+  }
+  function voicing(ch, lo) {         // [lo, lo+12) に収める密集配置
+    var out = [];
+    for (var i = 0; i < ch.iv.length; i++) {
+      var n = (ch.root + ch.iv[i]) % 12, m = lo + ((n - lo) % 12 + 12) % 12;
+      out.push(m);
+    }
+    return out.sort(function (a, b) { return a - b; });
+  }
+  function rootIn(ch, lo) { return lo + ((ch.root - lo) % 12 + 12) % 12; }
+  var VEL = { x: 0.8, X: 1, g: 0.4 };
+  // 音階上で n 度ずらす（ハモり用）
+  function diatonic(m, steps, scale) {
+    var pc = m % 12, idx = scale.indexOf(pc);
+    if (idx < 0) return m - 3;
+    var L = scale.length, j = (((idx + steps) % L) + L) % L, tpc = scale[j];
+    var r = m + (((tpc - pc) % 12) + 12) % 12;          // m 以上で最も近い同じ音名
+    if (steps < 0) { while (r >= m) r -= 12; }          // 下へずらすときは m より下で最も近い音
+    else { while (r <= m) r += 12; }
+    return r;
+  }
+
+  /* ---------------- 曲データ（すべてオリジナル） ---------------- */
+  var G_MAJOR = [7, 9, 11, 0, 2, 4, 6];
+  var FUNK_BASS_A = [[0, 0, 3], [3, 12, 1], [6, 0, 1], [7, 0, 1], [8, 7, 2], [10, 12, 1], [11, 0, 2], [14, 7, 1], [15, 12, 1]];
+  var FUNK_BASS_B = [[0, 0, 2], [2, 0, 1], [4, 12, 2], [6, 7, 2], [8, 0, 2], [10, 12, 1], [11, 7, 1], [12, 0, 2], [14, 12, 1], [15, 7, 1]];
+  var FUNK_BASS_C = [[0, 0, 1], [2, 0, 1], [3, 12, 2], [5, 7, 1], [6, 0, 2], [9, 0, 1], [10, 12, 1], [12, 7, 2], [15, 0, 1]];
+  var STAB_A = [[2, 1], [6, 1], [10, 1], [13, 2]];
+  var STAB_C = [[0, 1], [3, 1], [6, 2], [10, 1], [12, 1], [14, 1]];
+
+  var DR_A = { k: 'X.....x.x.....x.', s: '....X.......X...', h: 'x.g.x.g.x.g.x.g.', o: '..............x.', p: '.......g..g.....', q: '...g.........g..' };
+  var DR_B = { k: 'X..x....x..x....', s: '....X.......X..g', h: 'xgxgxgxgxgxgxgxg', m: '', p: '..g.....g.....g.', q: '' };
+  var DR_C = { k: 'X.....x...x.....', s: '....x.......x...', c: '....X.......X...', h: '..x...x...x...x.', m: 'gxgxgxgxgxgxgxgx', p: 'x..g..x....g.g..', q: '..x.......x.....' };
+  var FILL = { s: '....X.....g.xxXX', k: 'X.....x.x.......', h: 'x.g.x.g.x.......' };
+
+  var SONGS = {
+    battle: {
+      bpm: 140, swing: 0.1, gain: 1.0, transpose: 0,
+      inst: { lead: 'lead', bass: 'bass', chord: 'stab' }, chordLo: 55, bassLo: 36,
+      sections: {
+        A: {
+          chords: ['Gmaj7', 'Em7', 'Cmaj7', 'D7', 'Gmaj7', 'Em7', 'Am7 D7', 'G'],
+          lead: 'r/2 D5/2 G5/2 A5/2 B5/3 A5/1 G5/2 E5/2 | D5/4 B4/2 D5/2 E5/6 r/2 | ' +
+                'r/2 E5/1 F#5/1 G5/2 E5/2 G5/2 B5/2 A5/4 | F#5/2 E5/2 D5/2 A4/2 C5/4 D5/4 | ' +
+                'r/2 D5/2 G5/2 A5/2 B5/2 D6/2 B5/2 A5/2 | G5/3 E5/1 r/2 B4/2 E5/2 F#5/2 G5/4 | ' +
+                'A5/2 G5/2 E5/2 C5/2 D5/2 F#5/2 A5/2 C6/2 | B5/4 A5/2 G5/6 r/4',
+          bass: FUNK_BASS_A, stab: STAB_A, drums: DR_A
+        },
+        B: {
+          chords: ['Cmaj7', 'D7', 'Bm7', 'Em7', 'Am7', 'D7', 'Cmaj7', 'D7'],
+          lead: 'E5/1 G5/1 r/2 E5/1 G5/1 r/2 B5/3 A5/1 G5/4 | F#5/1 A5/1 r/2 F#5/1 A5/1 r/2 C6/3 B5/1 A5/4 | ' +
+                'D5/2 F#5/2 A5/2 F#5/2 B5/4 A5/2 F#5/2 | G5/6 F#5/2 E5/4 D5/4 | ' +
+                'C5/2 E5/2 A5/3 G5/1 E5/2 C5/2 E5/2 G5/2 | F#5/3 G5/1 A5/2 D5/2 F#5/2 E5/2 D5/2 C5/2 | ' +
+                'B4/2 C5/2 E5/2 G5/2 B5/2 C6/2 B5/2 G5/2 | A5/8 r/2 D5/1 E5/1 F#5/2 A5/2',
+          bass: FUNK_BASS_B, stab: STAB_A, drums: DR_B
+        },
+        C: {
+          chords: ['Em7', 'A7', 'Em7', 'A7', 'Cmaj7', 'D7', 'Em7', 'D7'],
+          lead: 'r/8 E5/1 G5/1 A5/2 B5/2 r/2 | r/8 C#6/1 B5/1 A5/2 G5/2 r/2 | ' +
+                'r/4 E6/2 D6/2 B5/2 A5/2 G5/2 r/2 | A5/4 E5/4 G5/4 r/4 | ' +
+                'E5/2 G5/2 B5/2 C6/4 B5/2 G5/2 r/2 | F#5/2 A5/2 C6/2 D6/4 C6/2 A5/2 r/2 | ' +
+                'B5/3 G5/3 E5/2 B5/3 G5/3 E5/2 | D5/2 E5/2 F#5/2 G5/2 A5/2 B5/2 C6/2 D6/2',
+          bass: FUNK_BASS_C, stab: STAB_C, drums: DR_C
+        }
+      },
+      order: [['A'], ['B'], ['A', { harm: -2, scale: G_MAJOR, drums: DR_B }], ['C']]
+    },
+    title: {
+      bpm: 124, swing: 0.16, gain: 1.12, transpose: 0,
+      inst: { lead: 'marimba', bass: 'pizz', chord: 'pluck' }, chordLo: 60, bassLo: 40,
+      sections: {
+        A: {
+          chords: ['C', 'Am', 'F', 'G', 'C', 'Am', 'Dm7 G', 'C'],
+          lead: 'E5/2 G5/2 C6/2 G5/2 A5/3 G5/1 E5/4 | r/2 C5/2 E5/2 A5/2 G5/4 E5/4 | ' +
+                'F5/2 A5/2 C6/2 A5/2 D6/3 C6/1 A5/4 | G5/6 D5/2 E5/2 F5/2 G5/4 | ' +
+                'E5/2 G5/2 C6/2 E6/2 D6/3 C6/1 G5/4 | A5/2 G5/2 E5/2 C5/2 E5/4 r/4 | ' +
+                'F5/2 E5/2 D5/2 F5/2 B5/3 A5/1 G5/4 | C6/8 r/4 G5/2 B5/2',
+          bass: [[0, 0, 3], [3, 7, 1], [6, 12, 2], [8, 7, 3], [11, 0, 1], [14, 7, 2]],
+          stab: [[0, 3], [3, 2], [6, 2], [10, 2], [12, 4]],
+          drums: { k: 'X.....x.X.......', c: '....x.......x...', m: 'xgxgxgxgxgxgxgxg', p: '.......g..g...g.', q: '..g..........g..' }
+        },
+        B: {
+          chords: ['F', 'G', 'Em', 'Am', 'Dm', 'G', 'C', 'G7'],
+          lead: 'A5/3 C6/1 A5/2 F5/2 G5/4 A5/4 | B5/3 D6/1 B5/2 G5/2 A5/4 B5/4 | ' +
+                'C6/2 B5/2 G5/2 E5/2 B5/4 G5/4 | A5/6 E5/2 A5/2 B5/2 C6/4 | ' +
+                'D6/2 C6/2 A5/2 F5/2 A5/4 D6/4 | B5/2 A5/2 G5/2 D5/2 G5/2 A5/2 B5/2 D6/2 | ' +
+                'E6/4 D6/2 C6/2 G5/4 E5/4 | F5/2 G5/2 B5/2 D6/2 F6/4 D6/2 B5/2',
+          bass: [[0, 0, 2], [2, 0, 1], [4, 7, 2], [6, 12, 2], [8, 0, 2], [10, 7, 2], [12, 12, 2], [14, 7, 2]],
+          stab: [[0, 2], [2, 2], [6, 2], [8, 2], [10, 2], [14, 2]],
+          drums: { k: 'X.....x.X.....x.', c: '....x.......x...', h: '..g...g...g...g.', m: 'xgxgxgxgxgxgxgxg', p: 'g..g..g....g..g.', q: '.......g......g.' }
+        }
+      },
+      order: [['A'], ['B']]
+    },
+    result: {
+      bpm: 108, swing: 0.12, gain: 1.22, transpose: 0,
+      inst: { lead: 'bell', bass: 'pizz', chord: 'pad' }, chordLo: 57, bassLo: 41,
+      sections: {
+        A: {
+          chords: ['F', 'Dm', 'Bb', 'C', 'F', 'Dm', 'Gm7 C', 'F'],
+          lead: 'C5/2 F5/2 A5/2 C6/2 A5/4 F5/4 | D5/2 F5/2 A5/2 D6/2 C6/4 A5/4 | ' +
+                'Bb4/2 D5/2 F5/2 Bb5/2 A5/3 G5/1 F5/4 | G5/4 E5/4 C5/4 E5/4 | ' +
+                'A5/2 C6/2 F6/4 E6/2 D6/2 C6/4 | D6/3 C6/1 A5/4 F5/4 A5/4 | ' +
+                'Bb5/2 A5/2 G5/2 F5/2 E5/2 F5/2 G5/2 C6/2 | F5/8 r/8',
+          bass: [[0, 0, 4], [6, 7, 2], [8, 12, 4], [12, 7, 4]],
+          stab: 'bar',
+          drums: { k: 'X.......x.......', c: '....x.......x...', m: 'x.g.x.g.x.g.x.g.', p: '..........g...g.' }
+        }
+      },
+      order: [['A'], ['A', { leadOct: 12, harm: -2, scale: [5, 7, 9, 10, 0, 2, 4] }]]
+    }
+  };
+  // ラストスパート：バトル曲の B・C を全音上げ＋テンポアップ＋チクタクとアルペジオ
+  SONGS.lastspurt = {
+    bpm: 162, swing: 0.05, gain: 0.95, transpose: 2,
+    inst: SONGS.battle.inst, chordLo: 55, bassLo: 36,
+    sections: SONGS.battle.sections,
+    order: [['B', { drums: { k: 'X..x..x.X..x..x.', s: '....X.......X..g', h: 'xgxgxgxgxgxgxgxg', w: '..g...g...g...g.' }, arp: true }],
+            ['C', { drums: { k: 'X.....x.X.x.....', s: '....x.......x...', c: '....X.......X..g', h: 'xgxgxgxgxgxgxgxg', p: 'x..g..x....g.g..', w: '..g...g...g...g.' }, arp: true }]]
+  };
+
+  // 曲データ → ステップごとのイベント列
+  function buildSong(def) {
+    var ev = [], bar = 0;
+    function at(step) { return ev[step] || (ev[step] = []); }
+    def.order.forEach(function (item) {
+      var sec = def.sections[item[0]], opt = item[1] || {};
+      var drums = opt.drums || sec.drums, nb = sec.chords.length, base = bar * 16;
+      var chordAt = [];
+      sec.chords.forEach(function (c, b) {
+        var parts = c.split(' ');
+        for (var s = 0; s < 16; s++) chordAt[b * 16 + s] = chordInfo(parts.length > 1 && s >= 8 ? parts[1] : parts[0]);
+      });
+      var tr = def.transpose || 0;
+      // メロディ
+      var mel = parseMel(sec.lead.replace(/\|/g, ' '));
+      if (mel.total !== nb * 16) throw new Error('melody length ' + mel.total + ' != ' + nb * 16);
+      mel.forEach(function (n) {
+        var m = n.m + (opt.leadOct || 0);
+        at(base + n.s).push({ i: def.inst.lead, m: m + tr, d: n.d, v: 0.85 + 0.15 * ((n.s % 4) === 0) });
+        if (opt.harm) at(base + n.s).push({ i: 'lead2', m: diatonic(m, opt.harm, opt.scale) + tr, d: n.d, v: 0.8 });
+      });
+      for (var b = 0; b < nb; b++) {
+        var bs = base + b * 16, last = (b === nb - 1);
+        // ベース
+        sec.bass.forEach(function (p) {
+          var ch = chordAt[b * 16 + p[0]];
+          at(bs + p[0]).push({ i: def.inst.bass, m: rootIn(ch, def.bassLo) + p[1] + tr, d: p[2], v: p[1] === 0 ? 1 : 0.8 });
+        });
+        // コード
+        if (sec.stab === 'bar') {
+          var cs = sec.chords[b].split(' ');
+          cs.forEach(function (c, k) {
+            at(bs + k * 8).push({ i: def.inst.chord, n: voicing(chordInfo(c), def.chordLo).map(function (x) { return x + tr; }), d: 16 / cs.length, v: 1 });
+          });
+        } else {
+          sec.stab.forEach(function (p) {
+            var ch = chordAt[b * 16 + p[0]];
+            at(bs + p[0]).push({ i: def.inst.chord, n: voicing(ch, def.chordLo).map(function (x) { return x + tr; }), d: p[1], v: 1 });
+          });
+        }
+        // アルペジオ（ラストスパート）
+        if (opt.arp) {
+          for (var s = 0; s < 16; s++) {
+            var vc = voicing(chordAt[b * 16 + s], 72), seq = [0, 1, 2, 1, 2, 3 % vc.length, 2, 1];
+            at(bs + s).push({ i: 'arp', m: vc[seq[s % 8] % vc.length] + tr, d: 1, v: s % 4 === 0 ? 1 : 0.6 });
+          }
+        }
+        // ドラム
+        var dr = last ? mergeFill(drums) : drums;
+        Object.keys(dr).forEach(function (k) {
+          var row = dr[k];
+          for (var s = 0; s < row.length; s++) {
+            var c = row.charAt(s);
+            if (VEL[c]) at(bs + s).push({ dr: k, v: VEL[c] * rnd(0.92, 1.0) });
+          }
+        });
+        if (b === 0) at(bs).push({ dr: 'x', v: 0.9 });
+      }
+      bar += nb;
+    });
+    for (var i = 0; i < bar * 16; i++) ev[i] = ev[i] || [];
+    return { ev: ev, steps: bar * 16, bars: bar, stepDur: 60 / def.bpm / 4, swing: def.swing, gain: def.gain };
+  }
+  function mergeFill(dr) {
+    var out = {};
+    Object.keys(dr).forEach(function (k) { out[k] = dr[k]; });
+    out.s = FILL.s; out.k = FILL.k; if (out.h) out.h = FILL.h; if (out.c) out.c = '....X.......X...';
+    return out;
+  }
+  var BUILT = {};
+  Object.keys(SONGS).forEach(function (k) { BUILT[k] = buildSong(SONGS[k]); });
+
+  /* ---------------- BGM スケジューラ（先読み） ---------------- */
+  var cur = null, curName = null, timer = null, horizonOverride = 0;
+  function makeSongBus(song) {
+    var out = G(0), dry = G(1), send = G(0.22);
+    var dl = ctx.createDelay(1.0), fb = G(0.28), lp = F('lowpass', 2200, 0.3);
+    dl.delayTime.value = song.stepDur * 3;           // 付点8分のディレイ
+    dry.connect(out); send.connect(dl); dl.connect(lp); lp.connect(fb); fb.connect(dl); lp.connect(out);
+    out.connect(musicBus);
+    return { out: out, dry: dry, send: send };
+  }
+  function stepTime(s, n) { return s.start + n * s.song.stepDur + ((n & 1) ? s.song.swing * s.song.stepDur : 0); }
+  // ミックスの音量バランス（楽器ごとの倍率）
+  var MIX = { drums: 1, lead: 1, lead2: 1, bass: 1, stab: 1, pluck: 1, marimba: 1, pizz: 1, bell: 1, pad: 1, arp: 1 };
+  var solo = null;                                   // テスト用：特定パートだけ鳴らす
+  function scheduleStep(s, n, t) {
+    var list = s.song.ev[n % s.song.steps], sd = s.song.stepDur;
+    for (var i = 0; i < list.length; i++) {
+      var e = list[i], part = e.dr ? 'drums' : e.i;
+      if (solo && !solo[part]) continue;
+      if (e.dr) DRUM[e.dr](t, e.v * MIX.drums, s.bus);
+      else INST[e.i](t, e.n || e.m, e.d * sd, e.v * MIX[part], s.bus);
+    }
+  }
+  function tick() {
+    if (!cur) return;
+    var now = ctx.currentTime, horizon = Math.max(now + LOOKAHEAD, horizonOverride);
+    // タブ復帰などで大きく遅れたときは、取りこぼしを飛ばして今の位置から再開
+    if (stepTime(cur, cur.n) < now - 0.05) {
+      var lag = now - stepTime(cur, cur.n);
+      cur.n += Math.ceil(lag / cur.song.stepDur) + 1;
+    }
+    var t;
+    while ((t = stepTime(cur, cur.n)) < horizon) { scheduleStep(cur, cur.n, t); cur.n++; }
+  }
+  function stopCurrent() {
+    if (!cur) return;
+    var old = cur, now = ctx.currentTime;
+    old.bus.out.gain.cancelScheduledValues(now);
+    old.bus.out.gain.setValueAtTime(old.bus.out.gain.value, now);
+    old.bus.out.gain.setTargetAtTime(0, now, 0.08);
+    if (!offline) setTimeout(function () { try { old.bus.out.disconnect(); } catch (e) { } }, 1500);
+    cur = null; curName = null;
+  }
+  function startSong(name) {
+    var song = BUILT[name];
+    if (!song) return;
+    var bus = makeSongBus(song), t0 = ctx.currentTime + 0.06;
+    bus.out.gain.setValueAtTime(0, ctx.currentTime);
+    bus.out.gain.linearRampToValueAtTime(song.gain, t0 + 0.05);
+    cur = { song: song, bus: bus, start: t0, n: 0 }; curName = name;
+    tick();
+    if (!offline && !timer) timer = setInterval(tick, TICK_MS);
+  }
+
+  /* ---------------- 効果音 ---------------- */
+  // 合成の「ワン！」：のこぎり波の声帯＋フォルマント（w→a→n）
+  function bark(t, out, pitch, vol) {
+    pitch = pitch || 1; vol = vol || 1;
+    var o = O('sawtooth', 380 * pitch, t);
+    o.frequency.setValueAtTime(380 * pitch, t);
+    o.frequency.linearRampToValueAtTime(600 * pitch, t + 0.045);
+    o.frequency.exponentialRampToValueAtTime(330 * pitch, t + 0.2);
+    var f1 = F('bandpass', 350, 4), f2 = F('bandpass', 750, 6), g1 = G(1), g2 = G(0.6);
+    f1.frequency.setValueAtTime(350, t); f1.frequency.linearRampToValueAtTime(850, t + 0.05); f1.frequency.linearRampToValueAtTime(450, t + 0.2);
+    f2.frequency.setValueAtTime(750, t); f2.frequency.linearRampToValueAtTime(1350, t + 0.05); f2.frequency.linearRampToValueAtTime(900, t + 0.2);
+    var env = G(0);
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(0.5 * vol, t + 0.02);
+    env.gain.setValueAtTime(0.5 * vol, t + 0.11);
+    env.gain.setTargetAtTime(0, t + 0.12, 0.035);
+    o.connect(f1); o.connect(f2); f1.connect(g1); f2.connect(g2); g1.connect(env); g2.connect(env);
+    // 息のノイズ
+    var n = noise(t, 0.08), bp = F('bandpass', 1600, 1), ng = G(0);
+    perc(ng, t, 0.05 * vol, 0.004, 0.02);
+    n.connect(bp); bp.connect(ng); ng.connect(out);
+    var soft = F('lowpass', 3200, 0.5); env.connect(soft); soft.connect(out); play(o, t, t + 0.45);
+    return t + 0.4;
+  }
+  // 合成の「ニャ〜ン」：i→a→o とフォルマントを動かす
+  function meow(t, out, pitch, vol) {
+    pitch = pitch || 1; vol = vol || 1;
+    var o = O('sawtooth', 560 * pitch, t);
+    o.frequency.setValueAtTime(560 * pitch, t);
+    o.frequency.linearRampToValueAtTime(780 * pitch, t + 0.14);
+    o.frequency.exponentialRampToValueAtTime(430 * pitch, t + 0.7);
+    var vib = O('sine', 6, t), vg = G(18); vib.connect(vg); vg.connect(o.detune);
+    var f1 = F('bandpass', 400, 5), f2 = F('bandpass', 2300, 8), g1 = G(1), g2 = G(0.45);
+    f1.frequency.setValueAtTime(400, t); f1.frequency.linearRampToValueAtTime(850, t + 0.15); f1.frequency.linearRampToValueAtTime(520, t + 0.65);
+    f2.frequency.setValueAtTime(2300, t); f2.frequency.linearRampToValueAtTime(1300, t + 0.15); f2.frequency.linearRampToValueAtTime(900, t + 0.65);
+    var env = G(0);
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(0.18 * vol, t + 0.04);   // n の鼻音
+    env.gain.linearRampToValueAtTime(0.5 * vol, t + 0.12);
+    env.gain.setValueAtTime(0.5 * vol, t + 0.45);
+    env.gain.setTargetAtTime(0, t + 0.46, 0.09);
+    o.connect(f1); o.connect(f2); f1.connect(g1); f2.connect(g2); g1.connect(env); g2.connect(env);
+    var soft = F('lowpass', 3400, 0.5); env.connect(soft); soft.connect(out);
+    play(o, t, t + 1.0); play(vib, t, t + 1.0);
+    return t + 1.0;
+  }
+  function blip(type, f0, f1, t, dt, peak, tau, out, lpF) {
+    var o = O(type, f0, t), g = G(0); glide(o.frequency, t, f0, f1, dt);
+    var e = perc(g, t, peak, 0.002, tau);
+    if (lpF) { var lp = F('lowpass', lpF, 0.6); o.connect(lp); lp.connect(g); } else o.connect(g);
+    g.connect(out); play(o, t, e); return e;
+  }
+  function noiseHit(t, dur, peak, a, tau, type, f0, f1, q, out) {
+    var n = noise(t, dur), f = F(type, f0, q), g = G(0);
+    if (f1 && f1 !== f0) glide(f.frequency, t, f0, f1, dur * 0.7);
+    perc(g, t, peak, a, tau);
+    n.connect(f); f.connect(g); g.connect(out);
+  }
+  function tone(type, m, t, dur, peak, out, lpF) {   // 短いメロディ音
+    var o = O(type, mtof(m), t), g = G(0), e = adsr(g, t, peak, 0.005, 0.08, 0.6, dur, 0.06);
+    if (lpF) { var lp = F('lowpass', lpF, 0.6); o.connect(lp); lp.connect(g); } else o.connect(g);
+    g.connect(out); play(o, t, e); return e;
+  }
+
+  var SFX = {
+    shoot: { vol: 2.4, max: 3, gap: 0.05, len: 0.1, fn: function (t, out) {         // ぴゅっ
+      var r = rnd(0.94, 1.06);
+      blip('square', 1050 * r, 520 * r, t, 0.06, 0.055, 0.022, out, 2400);
+      noiseHit(t, 0.04, 0.025, 0.001, 0.008, 'bandpass', 2600, 2600, 1.2, out);
+    } },
+    paint: { vol: 2.6, max: 2, gap: 0.07, len: 0.07, fn: function (t, out) {        // ぽつ（しずく）
+      var r = rnd(0.85, 1.2);
+      blip('sine', 650 * r, 1250 * r, t, 0.03, 0.045, 0.012, out);
+    } },
+    mop: { vol: 2.3, max: 2, gap: 0.09, len: 0.25, fn: function (t, out) {          // しゅっ
+      noiseHit(t, 0.25, 0.13, 0.03, 0.05, 'bandpass', 500, 1700, 1.4, out);
+      blip('triangle', 220, 160, t, 0.1, 0.04, 0.04, out);
+    } },
+    bucket: { vol: 1.4, max: 2, gap: 0.1, len: 0.35, fn: function (t, out) {        // ぽわん（投げる）
+      blip('sine', 260, 640, t, 0.14, 0.15, 0.06, out);
+      blip('triangle', 520, 1280, t, 0.14, 0.04, 0.05, out);
+      noiseHit(t, 0.2, 0.04, 0.02, 0.05, 'lowpass', 900, 600, 0.7, out);
+    } },
+    splat: { vol: 1.4, max: 3, gap: 0.06, len: 0.25, fn: function (t, out) {        // べちゃ
+      var r = rnd(0.9, 1.1);
+      noiseHit(t, 0.25, 0.17, 0.002, 0.05, 'lowpass', 2300 * r, 350, 1, out);
+      blip('sine', 220 * r, 70, t, 0.1, 0.17, 0.04, out);
+    } },
+    hit: { vol: 2, max: 2, gap: 0.08, len: 0.15, fn: function (t, out) {          // ぽこっ
+      blip('triangle', 620, 300, t, 0.05, 0.12, 0.03, out);
+      noiseHit(t, 0.08, 0.05, 0.001, 0.02, 'bandpass', 1200, 1200, 1.5, out);
+    } },
+    wet: { vol: 1.35, max: 1, gap: 0.4, len: 0.95, fn: function (t, out) {           // ぶるぶる…
+      var o = O('square', 520, t); glide(o.frequency, t, 520, 200, 0.7);
+      var lp = F('lowpass', 1300, 0.6), trem = G(0.5), lfo = O('sine', 16, t), lg = G(0.5), env = G(0);
+      lfo.connect(lg); lg.connect(trem.gain);
+      env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(0.09, t + 0.02);
+      env.gain.setValueAtTime(0.09, t + 0.5); env.gain.linearRampToValueAtTime(0, t + 0.82);
+      o.connect(lp); lp.connect(trem); trem.connect(env); env.connect(out);
+      var n = noise(t, 0.85), bp = F('bandpass', 1800, 1.2), ng = G(0);
+      ng.gain.setValueAtTime(0, t); ng.gain.linearRampToValueAtTime(0.05, t + 0.03); ng.gain.linearRampToValueAtTime(0, t + 0.8);
+      n.connect(bp); bp.connect(ng); ng.connect(trem);
+      play(o, t, t + 0.85); play(lfo, t, t + 0.85);
+    } },
+    respawn: { vol: 1.2, max: 1, gap: 0.3, len: 0.7, fn: function (t, out) {        // きらりん
+      [72, 76, 79, 84].forEach(function (m, i) {
+        var tt = t + i * 0.06;
+        blip('triangle', mtof(m), mtof(m), tt, 0.01, 0.09, 0.09, out);
+        blip('sine', mtof(m + 12), mtof(m + 12), tt, 0.01, 0.025, 0.05, out);
+      });
+      blip('sine', mtof(88), mtof(88), t + 0.26, 0.01, 0.03, 0.15, out);
+    } },
+    dive: { vol: 1.33, max: 1, gap: 0.12, len: 0.4, fn: function (t, out) {          // ずぼっ
+      noiseHit(t, 0.3, 0.13, 0.004, 0.07, 'lowpass', 2500, 300, 0.9, out);
+      blip('sine', 380, 110, t, 0.16, 0.15, 0.06, out);
+    } },
+    undive: { vol: 1.5, max: 1, gap: 0.12, len: 0.25, fn: function (t, out) {       // ぽんっ
+      blip('sine', 180, 720, t, 0.07, 0.15, 0.05, out);
+      noiseHit(t, 0.1, 0.04, 0.001, 0.02, 'highpass', 1500, 1500, 0.7, out);
+    } },
+    bombReady: { vol: 1.3, max: 1, gap: 0.5, len: 0.9, fn: function (t, out) {      // ちゃりーん（準備OK）
+      [[81, 0], [88, 0.09], [93, 0.18]].forEach(function (p) {
+        blip('sine', mtof(p[0]), mtof(p[0]), t + p[1], 0.01, 0.09, 0.14, out);
+        blip('triangle', mtof(p[0]) * 2, mtof(p[0]) * 2, t + p[1], 0.01, 0.015, 0.05, out);
+      });
+    } },
+    bomb: { vol: 1, max: 2, gap: 0.2, len: 1.3, fn: function (t, out) {           // ワン！＋ざっぱーん
+      bark(t, out, 1, 1);
+      var t2 = t + 0.17;
+      noiseHit(t2, 0.9, 0.26, 0.006, 0.17, 'lowpass', 3200, 380, 0.8, out);
+      blip('sine', 130, 40, t2, 0.3, 0.32, 0.11, out);
+      for (var i = 0; i < 6; i++) {
+        var tt = t2 + 0.08 + i * rnd(0.05, 0.09), r = rnd(0.8, 1.4);
+        blip('sine', 600 * r, 1150 * r, tt, 0.03, 0.03, 0.012, out);
+      }
+    } },
+    countdown: { vol: 2.5, max: 1, gap: 0.2, len: 0.3, fn: function (t, out) {      // ポッ
+      tone('square', 81, t, 0.11, 0.06, out, 2000);
+      tone('sine', 81, t, 0.11, 0.08, out);
+    } },
+    go: { vol: 1.5, max: 1, gap: 0.3, len: 0.8, fn: function (t, out) {             // ゴー！（上昇ファンファーレ）
+      [67, 71, 74].forEach(function (m, i) { tone('square', m + 12, t + i * 0.05, 0.05, 0.045, out, 2600); });
+      [79, 83, 86].forEach(function (m) { tone('square', m, t + 0.15, 0.4, 0.035, out, 2800); });
+      tone('triangle', 67, t + 0.15, 0.4, 0.09, out);
+    } },
+    whistle: { vol: 1.7, max: 1, gap: 0.3, len: 1.0, fn: function (t, out) {        // 審判のふえ「ピッ、ピーッ」
+      [[0, 0.11], [0.2, 0.55]].forEach(function (b) {
+        var t0 = t + b[0], o = O('sine', 2300, t0), fm = O('sine', 27, t0), fg = G(80), g = G(0);
+        fm.connect(fg); fg.connect(o.frequency);
+        g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.075, t0 + 0.012);
+        g.gain.setValueAtTime(0.075, t0 + b[1]); g.gain.linearRampToValueAtTime(0, t0 + b[1] + 0.03);
+        o.connect(g); g.connect(out); play(o, t0, t0 + b[1] + 0.05); play(fm, t0, t0 + b[1] + 0.05);
+        var n = noise(t0, b[1] + 0.04), bp = F('bandpass', 2300, 3), ng = G(0);
+        ng.gain.setValueAtTime(0, t0); ng.gain.linearRampToValueAtTime(0.03, t0 + 0.01);
+        ng.gain.setValueAtTime(0.03, t0 + b[1]); ng.gain.linearRampToValueAtTime(0, t0 + b[1] + 0.03);
+        n.connect(bp); bp.connect(ng); ng.connect(out);
+      });
+    } },
+    win: { vol: 1.2, max: 1, gap: 1, len: 1.6, fn: function (t, out) {              // かち！＋ワンワン
+      [[72, 0, 0.09], [76, 0.1, 0.09], [79, 0.2, 0.09], [84, 0.32, 0.45]].forEach(function (p) {
+        tone('square', p[0], t + p[1], p[2], 0.05, out, 2600);
+        tone('triangle', p[0], t + p[1], p[2], 0.07, out);
+      });
+      [60, 64, 67].forEach(function (m) { tone('triangle', m, t + 0.32, 0.45, 0.05, out); });
+      bark(t + 0.9, out, 1.1, 0.8); bark(t + 1.12, out, 1.15, 0.8);
+    } },
+    lose: { vol: 1.2, max: 1, gap: 1, len: 1.9, fn: function (t, out) {             // ざんねん…＋ニャ〜ン
+      [[76, 0], [74, 0.18], [71, 0.36], [67, 0.54]].forEach(function (p, i) {
+        tone('triangle', p[0], t + p[1], i === 3 ? 0.4 : 0.15, 0.09, out);
+        tone('square', p[0], t + p[1], i === 3 ? 0.4 : 0.15, 0.02, out, 1600);
+      });
+      meow(t + 0.95, out, 1, 0.75);
+    } },
+    tap: { vol: 2.9, max: 2, gap: 0.04, len: 0.08, fn: function (t, out) {          // ぽち
+      blip('sine', 1000, 1400, t, 0.02, 0.09, 0.015, out);
+    } }
+  };
+  var LOW_PRI = { shoot: 1, paint: 1, mop: 1, splat: 1, hit: 1 };
+  var MAX_VOICES = 14;
+  var voices = [], lastAt = {};
+  function playSfx(name, t) {
+    var def = SFX[name];
+    if (!def) return false;
+    // 鳴っている音の整理
+    for (var i = voices.length - 1; i >= 0; i--) if (voices[i].end <= t) voices.splice(i, 1);
+    if (lastAt[name] !== undefined && t - lastAt[name] < def.gap && t >= lastAt[name]) return false;   // スロットリング
+    var same = 0;
+    for (i = 0; i < voices.length; i++) if (voices[i].name === name) same++;
+    if (same >= def.max) return false;                                     // 同時発音数の上限
+    if (voices.length >= MAX_VOICES && LOW_PRI[name]) return false;        // 全体の上限（にぎやかな音から間引く）
+    lastAt[name] = t;
+    voices.push({ name: name, end: t + def.len });
+    var out = G(def.vol || 1); out.connect(sfxBus);
+    def.fn(t, out);
+    return true;
+  }
+
+  /* ---------------- 初期化・公開API ---------------- */
+  function buildGraph() {
+    offline = (typeof OfflineAudioContext !== 'undefined' && ctx instanceof OfflineAudioContext);
+    comp = ctx.createDynamicsCompressor();
+    // 安全用のリミッター寄りの設定（通常のBGMはしきい値の下で素通り、効果音が重なったときだけ抑える）
+    comp.threshold.value = -10; comp.knee.value = 6; comp.ratio.value = 10;
+    comp.attack.value = 0.003; comp.release.value = 0.15;
+    master = G(muted ? 0 : MASTER_VOL);
+    musicBus = G(MUSIC_VOL); sfxBus = G(SFX_VOL);
+    var hp = F('highpass', 30, 0.7);                // 直流・超低域カット
+    musicBus.connect(hp); sfxBus.connect(hp); hp.connect(comp); comp.connect(master); master.connect(ctx.destination);
+    var len = Math.floor(ctx.sampleRate * 2);
+    noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+    var d = noiseBuf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    ready = true;
+  }
+
+  var SND = {
+    init: function () {
+      try {
+        if (!ctx) {
+          if (ctxOpt) ctx = ctxOpt;
+          else {
+            var AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            try { ctx = new AC({ latencyHint: 'interactive' }); } catch (e) { ctx = new AC(); }
+          }
+          buildGraph();
+          if (!offline) {
+            // iOS のロック解除用に無音を1つ鳴らす
+            var b = ctx.createBuffer(1, 1, ctx.sampleRate), s = ctx.createBufferSource();
+            s.buffer = b; s.connect(ctx.destination); s.start(0);
+            if (typeof document !== 'undefined') {
+              document.addEventListener('visibilitychange', function () {
+                if (document.hidden) { if (ctx.state === 'running') ctx.suspend(); }
+                else if (ctx.state !== 'running') ctx.resume();
+              });
+            }
+          }
+          if (pendingBgm !== undefined) { var p = pendingBgm; pendingBgm = undefined; SND.bgm(p); }
+        }
+        if (!offline && ctx.state !== 'running' && ctx.resume) ctx.resume();
+      } catch (e) { /* 音が出なくてもゲームは止めない */ }
+    },
+    bgm: function (name) {
+      if (name !== null && name !== undefined && !BUILT[name]) return;
+      if (!ready) { pendingBgm = name; return; }
+      if (name === curName) return;               // 同じ曲なら続けて流す
+      stopCurrent();
+      if (name) startSong(name);
+    },
+    sfx: function (name) {
+      if (!ready || muted) return;
+      if (!offline && ctx.state !== 'running') return;
+      try { playSfx(name, ctx.currentTime + 0.005); } catch (e) { }
+    },
+    setMute: function (b) {
+      muted = !!b;
+      if (master) {
+        var now = ctx.currentTime;
+        master.gain.cancelScheduledValues(now);
+        master.gain.setValueAtTime(master.gain.value, now);
+        master.gain.setTargetAtTime(muted ? 0 : MASTER_VOL, now, 0.03);
+      }
+    },
+    isMuted: function () { return muted; },
+    current: function () { return curName; },
+    /* --- テスト用（OfflineAudioContext で使う） --- */
+    _prime: function (sec) { horizonOverride = sec; tick(); },      // sec 秒まで先にスケジュール
+    _sfxAt: function (name, t) { return playSfx(name, t); },
+    _solo: function (parts) { solo = null; if (parts) { solo = {}; parts.forEach(function (p) { solo[p] = 1; }); } },
+    _info: function () {
+      var o = {};
+      Object.keys(BUILT).forEach(function (k) {
+        var s = BUILT[k];
+        o[k] = { bpm: SONGS[k].bpm, bars: s.bars, steps: s.steps, loopSec: s.steps * s.stepDur };
+      });
+      return o;
+    },
+    _sfxNames: function () { return Object.keys(SFX); }
+  };
+  return SND;
+}
+
+/* ===== stages.js ===== */
+// =====================================================================
+// stages.js（担当C）— ぬりぬり ワンだふる！ ステージ・ブキ・バランス定義
+// すべてオリジナルの砂浜ステージ／ブキ。グローバル定数 STAGES, WEAPONS, BALANCE を提供。
+//
+// ■ マップ
+//   map[y][x]：72行 × 48文字。x=列(0..47, 左→右)、y=行(0..71, 上→下)。1セル=8px。
+//   '.' 砂（ぬれる）  '~' 海（通れない・ぬれない）  '#' 堤防の壁
+//   'R' 岩  'P' パラソル  'C' 砂のお城  'T' ヤシ（いずれも通れない・ぬれない）
+//   '1' 柴犬チームの陣地（下側）  '2' ネコ団の陣地（上側）  ※陣地もふつうにぬれる
+//   点対称：map[y][x] と map[71-y][47-x] は '1'<->'2' を入れかえると一致する。
+// ■ spawn
+//   spawn[team] = [[x,y],…3か所]（セル座標）。ワールド座標の中心は (x*8+4, y*8+4)。
+//   spawn[2][i] は spawn[1][i] の点対称の位置。
+// ■ 障害物の描き方（ART.props）の目安
+//   'P' 'C' は 2x2〜3x3 の塊。塊の左上セルに 24x24 画像を置くか、塊サイズに合わせて拡大。
+//   'R' は1〜2セル、'T' は1セル（ヤシ画像は上にはみ出して描くと雰囲気が出る）。
+// =====================================================================
+
+const STAGES = [
+  {
+    id: 'osanpo',
+    name: 'おさんぽビーチ',
+    desc: 'はじめてならここ。見通しのよい浜辺で、まんなかの岩とパラソルを取り合おう',
+    theme: {"sand": "#f6e3b0", "sea": "#5cc8ea", "wall": "#c9a46a"},
+    spawn: { 1: [[19, 65], [23, 67], [28, 65]], 2: [[28, 6], [24, 4], [19, 6]] },
+    map: [
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~..........222222..........~~~~~~~~~~~',
+      '~~~~~~~...........222222222222...........~~~~~~~',
+      '~~~~~~...........22222222222222...........~~~~~~',
+      '~~~~~...........2222222222222222...........~~~~~',
+      '~~~~............2222222222222222............~~~~',
+      '~~~.............2222222222222222.............~~~',
+      '~~~.............2222222222222222.............~~~',
+      '~~~..............22222222222222..............~~~',
+      '~~~...T............2222222222............T...~~~',
+      '~~............................................~~',
+      '~~............................................~~',
+      '~~...........######..........######...........~~',
+      '~~............................................~~',
+      '~~............................................~~',
+      '~~............................................~~',
+      '~~~~.......................R...............T..~~',
+      '~~~~......##........................##........~~',
+      '~~~~......##.........RR.............##........~~',
+      '~~~~......##........................##........~~',
+      '~~........##........................##........~~',
+      '~~........##...................PP...##...R....~~',
+      '~~.............PP..............PP...........~~~~',
+      '~~.............PP..........................~~~~~',
+      '~~.........................................~~~~~',
+      '~~..T.....##........................##.....~~~~~',
+      '~~........##........................##.....~~~~~',
+      '~~........##............PP..........##......~~~~',
+      '~~........##............PP..........##........~~',
+      '~~........##........................##........~~',
+      '~~....R.........PP............................~~',
+      '~~..............PP..........RR..R.............~~',
+      '~~...............R.....~~.......R.........T...~~',
+      '~~....................~~~~....................~~',
+      '~~....................~~~~....................~~',
+      '~~....................~~~~....................~~',
+      '~~....................~~~~....................~~',
+      '~~...T.........R.......~~.....R...............~~',
+      '~~.............R..RR..........PP..............~~',
+      '~~............................PP.........R....~~',
+      '~~........##........................##........~~',
+      '~~........##..........PP............##........~~',
+      '~~~~......##..........PP............##........~~',
+      '~~~~~.....##........................##........~~',
+      '~~~~~.....##........................##.....T..~~',
+      '~~~~~.........................................~~',
+      '~~~~~..........................PP.............~~',
+      '~~~~...........PP..............PP.............~~',
+      '~~....R...##...PP...................##........~~',
+      '~~........##........................##........~~',
+      '~~........##........................##......~~~~',
+      '~~........##.............RR.........##......~~~~',
+      '~~........##........................##......~~~~',
+      '~~..T...............R.......................~~~~',
+      '~~............................................~~',
+      '~~............................................~~',
+      '~~............................................~~',
+      '~~...........######..........######...........~~',
+      '~~............................................~~',
+      '~~............................................~~',
+      '~~~...T............1111111111............T...~~~',
+      '~~~..............11111111111111..............~~~',
+      '~~~.............1111111111111111.............~~~',
+      '~~~.............1111111111111111.............~~~',
+      '~~~~............1111111111111111............~~~~',
+      '~~~~~...........1111111111111111...........~~~~~',
+      '~~~~~~...........11111111111111...........~~~~~~',
+      '~~~~~~~...........111111111111...........~~~~~~~',
+      '~~~~~~~~~~~..........111111..........~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    ]
+  },
+  {
+    id: 'oshiro',
+    name: 'すなのおしろ公園',
+    desc: '砂のお城とパラソルがいっぱいの公園。かくれて、回りこんで、ぬりかえそう',
+    theme: {"sand": "#f3d9a2", "sea": "#4fbfe0", "wall": "#d1a970"},
+    spawn: { 1: [[19, 65], [23, 67], [28, 65]], 2: [[28, 6], [24, 4], [19, 6]] },
+    map: [
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~................................~~~~~~~~',
+      '~~~~~..............2222222222..............~~~~~',
+      '~~~~..............222222222222..............~~~~',
+      '~~~..............22222222222222..............~~~',
+      '~~~.............2222222222222222.............~~~',
+      '~~~.............2222222222222222.............~~~',
+      '~~...............22222222222222...............~~',
+      '~~................222222222222................~~',
+      '~~............#....2222222222....#............~~',
+      '~~............#..................#............~~',
+      '~~............#..................#............~~',
+      '~~............######........######............~~',
+      '~~..T.........................................~~',
+      '~~......................................R.....~~',
+      '~~.....................CC.....................~~',
+      '~~............R........CC........CCC..........~~',
+      '~~...............................CCC..........~~',
+      '~~....CCC........................CCC..........~~',
+      '~~....CCC...........PP....................CC..~~',
+      '~~....CCC...........PP....PP..............CC..~~',
+      '~~........................PP..................~~',
+      '~~............................................~~',
+      '~~........#######..............#######........~~',
+      '~~.........................PP.................~~',
+      '~~.........................PP.................~~',
+      '~~..T.........................................~~',
+      '~~.......#............................#.......~~',
+      '~~.......#......CCC##......##CCC......#....T..~~',
+      '~~.......#..R...CCC..........CCC......#.......~~',
+      '~~.......#......CCC..........CCC......#.......~~',
+      '~~.......#......#..............#...R..#.......~~',
+      '~~.......#......#..............#......#.......~~',
+      '~~..PP........................................~~',
+      '~~..PP................RR......................~~',
+      '~~......................RR................PP..~~',
+      '~~........................................PP..~~',
+      '~~.......#......#..............#......#.......~~',
+      '~~.......#..R...#..............#......#.......~~',
+      '~~.......#......CCC..........CCC......#.......~~',
+      '~~.......#......CCC..........CCC...R..#.......~~',
+      '~~..T....#......CCC##......##CCC......#.......~~',
+      '~~.......#............................#.......~~',
+      '~~.........................................T..~~',
+      '~~.................PP.........................~~',
+      '~~.................PP.........................~~',
+      '~~........#######..............#######........~~',
+      '~~............................................~~',
+      '~~..................PP........................~~',
+      '~~..CC..............PP....PP...........CCC....~~',
+      '~~..CC....................PP...........CCC....~~',
+      '~~..........CCC........................CCC....~~',
+      '~~..........CCC...............................~~',
+      '~~..........CCC........CC........R............~~',
+      '~~.....................CC.....................~~',
+      '~~.....R......................................~~',
+      '~~.........................................T..~~',
+      '~~............######........######............~~',
+      '~~............#..................#............~~',
+      '~~............#..................#............~~',
+      '~~............#....1111111111....#............~~',
+      '~~................111111111111................~~',
+      '~~...............11111111111111...............~~',
+      '~~~.............1111111111111111.............~~~',
+      '~~~.............1111111111111111.............~~~',
+      '~~~..............11111111111111..............~~~',
+      '~~~~..............111111111111..............~~~~',
+      '~~~~~..............1111111111..............~~~~~',
+      '~~~~~~~~................................~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    ]
+  },
+  {
+    id: 'yashi',
+    name: 'ヤシの木こみち',
+    desc: 'ヤシの並木の細いこみち。くねくね道と横道をつかって、うしろからぬりこもう',
+    theme: {"sand": "#efdba0", "sea": "#43b3d6", "wall": "#b9935c"},
+    spawn: { 1: [[19, 65], [23, 67], [28, 65]], 2: [[28, 6], [24, 4], [19, 6]] },
+    map: [
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~..............................~~~~~~~~~',
+      '~~~~~~.............2222222222.............~~~~~~',
+      '~~~~~.............222222222222.............~~~~~',
+      '~~~~.............22222222222222.............~~~~',
+      '~~~..............22222222222222..............~~~',
+      '~~~..............22222222222222..............~~~',
+      '~~~..............22222222222222..............~~~',
+      '~~................222222222222................~~',
+      '~~..................22222222..................~~',
+      '~~............................................~~',
+      '~~............................................~~',
+      '~~...........#######........#######...........~~',
+      '~~.......T....................................~~',
+      '~~..................................T......T..~~',
+      '~~.............T..T..#........~~..............~~',
+      '~~...................#.......~~~~.............~~',
+      '~~#######............#......~~~~~~.....#######~~',
+      '~~#######......T..T..#......~~~~~~.....#######~~',
+      '~~...................#......~~~~~~............~~',
+      '~~...................#..T...~~~~~~............~~',
+      '~~..T..........T..T..#......~~~~~~....T.......~~',
+      '~~...................#......~~~~~~............~~',
+      '~~.....######........#......~~~~~~............~~',
+      '~~.....######..T..T.........~~~~~~..#####.....~~',
+      '~~...........................~~~~...#####.....~~',
+      '~~............................~~..............~~',
+      '~~............########........................~~',
+      '~~............................................~~',
+      '~~#####.....................####..............~~',
+      '~~#####..............T...................#####~~',
+      '~~.......................................#####~~',
+      '~~.............T..CC..........................~~',
+      '~~................CC........T....#####........~~',
+      '~~.....................R......................~~',
+      '~~......................R.....................~~',
+      '~~........#####....T........CC................~~',
+      '~~..........................CC..T.............~~',
+      '~~#####.......................................~~',
+      '~~#####...................T..............#####~~',
+      '~~..............####.....................#####~~',
+      '~~............................................~~',
+      '~~........................########............~~',
+      '~~..............~~............................~~',
+      '~~.....#####...~~~~...........................~~',
+      '~~.....#####..~~~~~~.........T..T..######.....~~',
+      '~~............~~~~~~......#........######.....~~',
+      '~~............~~~~~~......#...................~~',
+      '~~.......T....~~~~~~......#..T..T..........T..~~',
+      '~~............~~~~~~...T..#...................~~',
+      '~~............~~~~~~......#...................~~',
+      '~~#######.....~~~~~~......#..T..T......#######~~',
+      '~~#######.....~~~~~~......#............#######~~',
+      '~~.............~~~~.......#...................~~',
+      '~~..............~~........#..T..T.............~~',
+      '~~..T......T..................................~~',
+      '~~....................................T.......~~',
+      '~~...........#######........#######...........~~',
+      '~~............................................~~',
+      '~~............................................~~',
+      '~~..................11111111..................~~',
+      '~~................111111111111................~~',
+      '~~~..............11111111111111..............~~~',
+      '~~~..............11111111111111..............~~~',
+      '~~~..............11111111111111..............~~~',
+      '~~~~.............11111111111111.............~~~~',
+      '~~~~~.............111111111111.............~~~~~',
+      '~~~~~~.............1111111111.............~~~~~~',
+      '~~~~~~~~~..............................~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    ]
+  }
+];
+
+// =====================================================================
+// ■ ブキ（名前・性能はオリジナル）
+//   共通フィールド
+//     name        表示名
+//     rate        1秒あたりの発射数（mop はふり回数）
+//     range       射程(px)。shower/bucket は弾の飛ぶ最大距離、mop は前方にとどく長さ
+//     bulletSpeed 弾の速さ(px/秒)（mop は 0 = 即時）
+//     paintRadius 着弾でぬる円の半径(セル)。距離 <= paintRadius のセルをぬる
+//     dmg         1発あたりのダメージ（hpMax=100 に対して）
+//     inkCost     1発あたりのぺんき消費（inkMax=100 に対して）
+//     spread      発射方向のぶれ（±度、一様ランダム）
+//     walkMul     うっている間の移動速度倍率
+//     hitRadius   弾の当たり判定の半径(px)
+//   ブキ別
+//     shower.trail       弾が飛ぶあいだにぬる足あとの半径(セル)。trailEvery は足あとの間隔(px)の目安
+//     mop                うっている間ずっと前方に幅 width(セル) の帯をぬる（連続ぬり）。
+//                        rate は「1秒あたりのふり回数」：ぺんき消費 = inkCost*rate /秒、
+//                        前方 range(px) 以内の相手に dmg*rate /秒（= 280/秒 → 約0.36秒でびしょびしょ）
+//     bucket.arcHeight   放物線の最高点の高さ(px・見た目用)。弾は着弾まで当たらない（低い壁はこえる）
+//     bucket.minRange    最短着弾距離(px)。ねらい距離は minRange〜range（スティックの倒し具合で）
+//     bucket.directRadius 着弾点から directRadius(px) 以内の相手に dmg（= paintRadius*8*0.55）
+//     bucket.splashDmg   それより外側で paintRadius 以内の相手へのダメージ（= dmg*0.5）
+// =====================================================================
+const WEAPONS = {
+  shower: {
+    name: 'ぺんきシャワー',
+    desc: 'れんしゃが得意。まんなかの距離でたたかいやすい',
+    rate: 8,
+    range: 72,
+    bulletSpeed: 260,
+    paintRadius: 1.3,
+    trailEvery: 16,
+    trail: 0.7,
+    dmg: 15,
+    inkCost: 1.0,
+    spread: 6,
+    walkMul: 0.85,
+    hitRadius: 7
+  },
+  mop: {
+    name: 'ぶんぶんしっぽ',
+    desc: 'まえを太くぬりながら進む。ちかづけばすぐにびしょびしょ',
+    rate: 4,
+    range: 24,
+    bulletSpeed: 0,
+    width: 5,
+    radius: 2.3,
+    paintRadius: 0,
+    dmg: 45,
+    inkCost: 2.0,
+    spread: 0,
+    walkMul: 1.1,
+    hitRadius: 6
+  },
+  bucket: {
+    name: 'ぺんきバケツ',
+    desc: 'ふんわり投げて大きくぬる。とおくまで届き、かべもこえる',
+    rate: 1.25,
+    range: 104,
+    minRange: 32,
+    bulletSpeed: 150,
+    arcHeight: 26,
+    paintRadius: 3,
+    dmg: 55,
+    directRadius: 13,
+    splashDmg: 27,
+    inkCost: 7.5,
+    spread: 3,
+    walkMul: 0.6,
+    hitRadius: 8
+  }
+};
+
+// =====================================================================
+// ■ バランス
+//   速度は px/秒、時間は秒。enemyInkSlow は相手の色の上での移動速度倍率。
+//   inkRegen はうっていない時、inkRegenDive はほりほり中の回復量（1秒あたり）。
+//   うっている最中は回復しない。inkRegenDelay 秒うたなかったら normal 回復が始まる。
+//   hpRegen は hpRegenDelay 秒ダメージを受けなかったら1秒あたり回復する量。
+//   bombGaugeCells：自分で新しくぬったセル数（相手色をぬり返した分もふくむ）でゲージ満タン。
+//   bombRadius(セル)の円をぬり、bombWetRadius(セル)以内の相手は bombDmg（目安）。
+//   lastSpurtSec：残りこの秒数でラストスパート（BGM切替。lastSpurtGaugeMul はゲージ増加倍率・任意）。
+//   cpu：
+//     react        相手を見つけてから撃ちはじめるまで(秒)
+//     aimErr       ねらいのぶれ（±度）
+//     paintPref    ぬり優先の割合（0〜1）。相手が見えても、この確率でぬりを続ける（1-paintPref が攻め）
+//     diveRate     移動中にほりほりを使う頻度（0〜1。自分色の上・ぺんき少ない時は優先）
+//     fireRange    ブキ射程の何倍の距離から撃ちはじめるか
+//     viewRange    相手に気づく距離(px)
+//     attackRatio  攻めの割合（= 1 - paintPref。参考値）
+//     diveInkBelow ぺんきがこの量を下回ったら、ほりほりで回復しにいく
+//     bombUse      ゲージ満タン時に、相手が近い/周りが相手色ならボムを使う確率（毎秒判定）
+//     retreatHp    HPがこれ以下なら後ろに下がって回復を待つ（0=下がらない）
+//     thinkSec     目的地を考えなおす間隔
+//     leadAim      動く相手の先読みをするか
+// =====================================================================
+const BALANCE = {
+  matchSec: 90,
+  respawnSec: 2,
+  lastSpurtSec: 30,
+  lastSpurtGaugeMul: 1.5,
+  hpMax: 100,
+  hpRegen: 30,
+  hpRegenDelay: 1.2,
+  inkMax: 100,
+  inkRegen: 8,
+  inkRegenDive: 34,
+  inkRegenDelay: 0.4,
+  walkSpeed: 52,
+  diveSpeed: 92,
+  enemyInkSlow: 0.55,
+  bodyRadius: 5,
+  spawnInvincibleSec: 1.5,
+  bombGaugeCells: 300,
+  bombRadius: 6,
+  bombWetRadius: 4,
+  bombDmg: 100,
+  cpu: {
+    easy:   { react: 0.9, aimErr: 22, paintPref: 0.85, diveRate: 0.15, fireRange: 0.80, viewRange: 72,  attackRatio: 0.25, diveInkBelow: 10, bombUse: 0.25, retreatHp: 0,  thinkSec: 1.6, leadAim: false },
+    normal: { react: 0.55, aimErr: 12, paintPref: 0.72, diveRate: 0.40, fireRange: 0.95, viewRange: 96,  attackRatio: 0.45, diveInkBelow: 20, bombUse: 0.60, retreatHp: 30, thinkSec: 1.1, leadAim: false },
+    hard:   { react: 0.24, aimErr: 6,  paintPref: 0.58, diveRate: 0.75, fireRange: 1.05, viewRange: 120, attackRatio: 0.60, diveInkBelow: 30, bombUse: 0.90, retreatHp: 40, thinkSec: 0.7, leadAim: true }
+  }
+};
+
+/* ===== main.js ===== */
+'use strict';
+/* ぬりぬり ワンだふる！ main.js — 統括実装 */
+const CELL=8,GW=48,GH=72,WW=GW*CELL,WH=GH*CELL,VW=216;let VH=384,TY=0;
+const TEAMC={1:'#ff8a1f',2:'#2ad4b8'},TEAMD={1:'#c65800',2:'#0f8f7a'},TEAML={1:'#ffc27a',2:'#a6f7e8'};
+const TEAMNAME={1:'しばいぬチーム',2:'ネコだん'};
+const BLOCK=new Set(['~','#','R','P','C','T']),SOLIDB=new Set(['#','R','P','C','T']);
+const NAMES={poromi:'ぽろみ',shiro:'しろ',goma:'ごま',tora:'トラ',kuro:'クロ',mike:'ミケ'};
+const WNAME={shower:'ぺんきシャワー',mop:'ぶんぶんしっぽ',bucket:'ぺんきバケツ'};
+const CPUNAME={easy:'やさしい',normal:'ふつう',hard:'つよい'};
+const clamp=(v,a,b)=>v<a?a:v>b?b:v,rnd=(a,b)=>a+Math.random()*(b-a),hyp=Math.hypot;
+const mk=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
+const DIRS=['down','up','left','right'];
+function dirOf(x,y){return Math.abs(x)>Math.abs(y)?(x<0?'left':'right'):(y<0?'up':'down')}
+
+let ART,SND,STG,W8,BAL;
+const S={mode:'title',stageIdx:0,weapon:'shower',cpu:'normal',time:0,shake:0,banner:null,feed:[],mute:false,
+  grid:null,map:null,players:[],bullets:[],parts:[],rings:[],counts:{1:0,2:0},total:1,judge:null,stats:null,best:null,
+  input:{mx:0,my:0,ax:0,ay:0,fire:false,dive:false,bomb:false,aimMag:1},testInput:null,last30:false};
+
+/* ---------- defaults (担当Cの値で上書き) ---------- */
+function defaults(){
+  const B=Object.assign({matchSec:90,respawnSec:3,hpMax:100,inkMax:100,inkRegen:12,inkRegenDive:45,walkSpeed:44,diveSpeed:78,
+    enemyInkSlow:0.5,hpRegen:40,hpRegenDelay:1.2,bombGaugeCells:160,bombRadius:5,lastSpurtSec:30,
+    cpu:{easy:{react:0.8,aimErr:22,paintPref:0.8,diveRate:0.2,fireRange:0.8},normal:{react:0.45,aimErr:12,paintPref:0.6,diveRate:0.45,fireRange:0.95},hard:{react:0.22,aimErr:6,paintPref:0.45,diveRate:0.7,fireRange:1.05}}},
+    typeof BALANCE!=='undefined'?BALANCE:{});
+  for(const k of['easy','normal','hard'])B.cpu[k]=Object.assign({react:0.45,aimErr:12,paintPref:0.6,diveRate:0.4,fireRange:0.95},B.cpu[k]||{});
+  const Wd={shower:{rate:7,range:72,bulletSpeed:220,paintRadius:1.2,trail:0.7,dmg:18,inkCost:1.6,spread:5,walkMul:0.8},
+    mop:{rate:10,range:16,width:3,paintRadius:1.5,dmg:8,inkCost:1.2,walkMul:0.95,spread:0},
+    bucket:{rate:1.6,range:84,bulletSpeed:150,paintRadius:3.2,dmg:70,inkCost:9,spread:0,walkMul:0.6}};
+  const Wx=typeof WEAPONS!=='undefined'?WEAPONS:{};
+  for(const k in Wd)Wd[k]=Object.assign(Wd[k],Wx[k]||{});
+  return[B,Wd];
+}
+
+/* ---------- canvas ---------- */
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const wb=mk(VW,384),wx=wb.getContext('2d');
+let SC=1,OX=0,OY=0,DPR=1;
+function resize(){DPR=Math.min(window.devicePixelRatio||1,3);const w=innerWidth,h=innerHeight;cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);cv.style.width=w+'px';cv.style.height=h+'px';
+  VH=Math.round(clamp(VW*cv.height/cv.width,384,480));TY=Math.round((VH-384)/2);if(wb.height!==VH)wb.height=VH;SC=Math.min(cv.width/VW,cv.height/VH);OX=(cv.width-VW*SC)/2;OY=(cv.height-VH*SC)/2;
+  const sb=safeBottom()*DPR/SC;S.safe=sb;BTN.dive.y=VH-46-sb;BTN.bomb.y=VH-100-sb}
+addEventListener('resize',resize);
+function safeBottom(){try{const d=document.createElement('div');d.style.cssText='position:fixed;bottom:0;height:0;padding-bottom:env(safe-area-inset-bottom)';document.body.appendChild(d);const v=parseFloat(getComputedStyle(d).paddingBottom)||0;d.remove();return v}catch(e){return 0}}
+
+/* ---------- stage build ---------- */
+let base,over,overB,paintC,pctx,miniC,mctx,props=[];
+function cellAt(cx,cy){if(cx<0||cy<0||cx>=GW||cy>=GH)return'~';return S.map[cy][cx]}
+function blockedPx(x,y){return BLOCK.has(cellAt(Math.floor(x/CELL),Math.floor(y/CELL)))}
+function solidPx(x,y){return SOLIDB.has(cellAt(Math.floor(x/CELL),Math.floor(y/CELL)))}
+function paintable(cx,cy){const c=cellAt(cx,cy);return c==='.'||c==='1'||c==='2'}
+function buildStage(i){
+  const st=STG[i];S.map=st.map.map(r=>r.split(''));S.grid=new Uint8Array(GW*GH);
+  base=mk(WW,WH);over=mk(WW,WH);overB=mk(WW,WH);paintC=mk(WW,WH);pctx=paintC.getContext('2d');miniC=mk(GW,GH);mctx=miniC.getContext('2d');
+  const b=base.getContext('2d');let total=0;
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){
+    const c=S.map[y][x];if(paintable(x,y))total++;
+    const t=ART.sand[(x*7+y*13+((x*y)%5))%ART.sand.length];b.drawImage(t,x*CELL,y*CELL);
+    if(c==='1'||c==='2'){b.fillStyle=c==='1'?'rgba(255,138,31,.10)':'rgba(42,212,184,.10)';b.fillRect(x*CELL,y*CELL,CELL,CELL)}}
+  S.total=total;
+  for(const [cv2,ph] of[[over,0],[overB,1]]){const o=cv2.getContext('2d');
+    for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const c=S.map[y][x];
+      if(c==='~'){const sea=(st.theme&&st.theme.sea)||'#2f8fd8';o.fillStyle=sea;o.fillRect(x*CELL,y*CELL,CELL,CELL);
+        o.fillStyle='rgba(255,255,255,.18)';if(((x+y*3+ph*2)%7)===0)o.fillRect(x*CELL+1,y*CELL+2+ph*2,4,1);
+        // 波打ち際の泡
+        for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const n=cellAt(x+dx,y+dy);if(n!=='~'&&n!==undefined&&!(x+dx<0||y+dy<0||x+dx>=GW||y+dy>=GH)){o.fillStyle='rgba(255,255,255,.75)';
+          if(dx===1)o.fillRect(x*CELL+CELL-2-ph,y*CELL,2,CELL);if(dx===-1)o.fillRect(x*CELL+ph,y*CELL,2,CELL);if(dy===1)o.fillRect(x*CELL,y*CELL+CELL-2-ph,CELL,2);if(dy===-1)o.fillRect(x*CELL,y*CELL+ph,CELL,2)}}}
+      else if(c==='#'){o.fillStyle='#8d8a84';o.fillRect(x*CELL,y*CELL,CELL,CELL);o.fillStyle='#b5b1a8';o.fillRect(x*CELL,y*CELL,CELL,2);o.fillStyle='#6c6964';o.fillRect(x*CELL,y*CELL+CELL-1,CELL,1);o.fillRect(x*CELL+((y%2)?3:6),y*CELL+2,1,5)}}}
+  // props: 連結ブロブごとに1つ
+  props=[];const seen=new Uint8Array(GW*GH);
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const c=S.map[y][x];if(!'RPCT'.includes(c)||seen[y*GW+x])continue;
+    const q=[[x,y]];seen[y*GW+x]=1;let x0=x,x1=x,y0=y,y1=y;
+    while(q.length){const[a,bq]=q.pop();x0=Math.min(x0,a);x1=Math.max(x1,a);y0=Math.min(y0,bq);y1=Math.max(y1,bq);
+      for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=a+dx,ny=bq+dy;if(nx>=0&&ny>=0&&nx<GW&&ny<GH&&!seen[ny*GW+nx]&&S.map[ny][nx]===c){seen[ny*GW+nx]=1;q.push([nx,ny])}}}
+    const cx=(x0+x1+1)/2*CELL,by=(y1+1)*CELL,w=(x1-x0+1)*CELL,h=(y1-y0+1)*CELL;
+    if(c==='T'&&(w>CELL||h>CELL)){for(let yy=y0;yy<=y1;yy++)for(let xx=x0;xx<=x1;xx++)if(S.map[yy][xx]==='T')props.push({c,x:(xx+.5)*CELL,y:(yy+1)*CELL,w:CELL,h:CELL});}
+    else props.push({c,x:cx,y:by,w,h})}
+}
+
+/* ---------- paint ---------- */
+function setCell(cx,cy,team,owner){if(!paintable(cx,cy))return 0;const i=cy*GW+cx;if(S.grid[i]===team)return 0;S.grid[i]=team;if(owner)owner.painted++;return 1}
+function paint(px,py,r,team,owner,visual=true){
+  const cx=px/CELL,cy=py/CELL,R=Math.ceil(r);let n=0;
+  for(let y=Math.floor(cy-R);y<=Math.floor(cy+R);y++)for(let x=Math.floor(cx-R);x<=Math.floor(cx+R);x++){
+    const dx=x+.5-cx,dy=y+.5-cy;if(dx*dx+dy*dy<=r*r)n+=setCell(x,y,team,owner)}
+  if(owner&&n){owner.gauge=Math.min(BAL.bombGaugeCells,owner.gauge+n);if(owner.human&&owner.gauge>=BAL.bombGaugeCells&&!owner.bombAnn){owner.bombAnn=true;SND.sfx('bombReady')}}
+  if(visual)stamp(px,py,r*CELL,team);
+  return n}
+function stamp(px,py,rad,team){
+  pctx.fillStyle=TEAMC[team];pctx.beginPath();pctx.arc(px,py,Math.max(2,rad),0,7);pctx.fill();
+  const k=Math.min(6,1+rad/4|0);
+  for(let i=0;i<k;i++){const a=Math.random()*7,d=rad*rnd(.7,1.15),s=rnd(1.2,Math.max(1.6,rad*.35));
+    pctx.beginPath();pctx.arc(px+Math.cos(a)*d,py+Math.sin(a)*d,s,0,7);pctx.fill()}
+  if(rad>5){pctx.fillStyle=TEAML[team];pctx.globalAlpha=.55;pctx.beginPath();pctx.arc(px-rad*.3,py-rad*.35,rad*.28,0,7);pctx.fill();pctx.globalAlpha=1}
+}
+function teamAt(px,py){const cx=Math.floor(px/CELL),cy=Math.floor(py/CELL);if(cx<0||cy<0||cx>=GW||cy>=GH)return 0;return S.grid[cy*GW+cx]}
+function countPaint(){let a=0,b=0;for(let i=0;i<S.grid.length;i++){const g=S.grid[i];if(g===1)a++;else if(g===2)b++}S.counts={1:a,2:b};return S.counts}
+function updateMini(){const id=mctx.createImageData(GW,GH),d=id.data;
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=(y*GW+x)*4,c=S.map[y][x],g=S.grid[y*GW+x];let r=232,gg=214,bb=168,a=255;
+    if(c==='~'){r=47;gg=143;bb=216;a=200}else if(SOLIDB.has(c)){r=110;gg=104;bb=96}else if(g===1){r=255;gg=138;bb=31}else if(g===2){r=42;gg=212;bb=184}
+    d[i]=r;d[i+1]=gg;d[i+2]=bb;d[i+3]=a}
+  mctx.putImageData(id,0,0)}
+
+/* ---------- players ---------- */
+function newPlayer(team,i,weapon,human){const kind=team===1?['poromi','shiro','goma'][i]:['tora','kuro','mike'][i];
+  const sp=STG[S.stageIdx].spawn[team][i];
+  return{team,i,kind,name:NAMES[kind],weapon,human,x:(sp[0]+.5)*CELL,y:(sp[1]+.5)*CELL,sx:(sp[0]+.5)*CELL,sy:(sp[1]+.5)*CELL,
+    dir:team===1?'up':'down',ax:0,ay:team===1?-1:1,hp:BAL.hpMax,ink:BAL.inkMax,state:'alive',t:0,wetT:0,inv:0,diving:false,cd:0,frame:0,walkT:0,
+    gauge:0,bombAnn:false,painted:0,splats:0,deaths:0,lastHit:-9,printT:0,
+    ai:human?null:{tx:0,ty:0,field:null,retarget:0,seen:0,target:null,strafe:Math.random()<.5?1:-1,diveHold:0,stuck:0,lx:0,ly:0}}}
+function canStand(x,y){const r=3.5;return!(blockedPx(x-r,y-r)||blockedPx(x+r,y-r)||blockedPx(x-r,y+r)||blockedPx(x+r,y+r))}
+function moveP(p,dx,dy){if(dx&&canStand(p.x+dx,p.y))p.x+=dx;else if(dx){/* 角すべり */if(canStand(p.x+dx,p.y-3))p.y-=1;else if(canStand(p.x+dx,p.y+3))p.y+=1}
+  if(dy&&canStand(p.x,p.y+dy))p.y+=dy;else if(dy){if(canStand(p.x-3,p.y+dy))p.x-=1;else if(canStand(p.x+3,p.y+dy))p.x+=1}}
+function los(x0,y0,x1,y1){const d=hyp(x1-x0,y1-y0),n=Math.ceil(d/4);for(let k=1;k<n;k++){if(solidPx(x0+(x1-x0)*k/n,y0+(y1-y0)*k/n))return false}return true}
+function enemiesOf(p){return S.players.filter(q=>q.team!==p.team&&q.state==='alive')}
+
+function hurt(q,dmg,by){if(q.state!=='alive'||q.inv>0)return;q.hp-=dmg;q.lastHit=S.time;
+  if(q.human||by&&by.human)SND.sfx('hit');
+  for(let k=0;k<3;k++)S.parts.push({type:'drop',x:q.x,y:q.y-6,vx:rnd(-40,40),vy:rnd(-60,-10),t:0,life:.45,team:by?by.team:3-q.team});
+  if(q.hp<=0){q.state='wet';q.wetT=0;q.diving=false;q.deaths++;if(by)by.splats++;
+    paint(q.x,q.y,2.2,by?by.team:3-q.team,by);SND.sfx('wet');
+    pushFeed(`${by?by.name:'?'} が ${q.name} を びしょびしょにした！`,by?by.team:0);
+    if(q.human){S.shake=Math.max(S.shake,.25);buzz(90)}
+    if(by&&by.human){S.parts.push({type:'txt',t:0,life:1,x:q.x,y:q.y-18,s:'びしょっ！',team:by.team});buzz(25)}}}
+function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}}
+function pushFeed(t,team){S.feed.unshift({t,team,life:3});if(S.feed.length>3)S.feed.pop()}
+
+/* ---------- weapons ---------- */
+function fire(p,dt){const w=W8[p.weapon];
+  if(p.weapon==='mop'){const cost=w.inkCost*w.rate*dt;if(p.ink<cost)return false;
+    p.ink-=cost;const R=(w.radius||2.3);p.spin=(p.spin||0)+dt*14;
+    p.mopV=(p.mopV||0)+dt;if(p.mopV>.1){p.mopV=0;paint(p.x,p.y+2,R,p.team,p,false);for(let k=0;k<3;k++){const a=p.spin+k*2.1;stamp(p.x+Math.cos(a)*R*CELL*.7,p.y+2+Math.sin(a)*R*CELL*.55,rnd(3,5),p.team)}
+      S.parts.push({type:'swirl',x:p.x,y:p.y,t:0,life:.18,a:p.spin,team:p.team,R:R*CELL})}
+    p.mopS=(p.mopS||0)+dt;if(p.mopS>.2){p.mopS=0;if(p.human||near(p))SND.sfx('mop')}
+    for(const q of enemiesOf(p)){const d=hyp(q.x-p.x,q.y-p.y);if(d<(w.range||24)+4)hurt(q,w.dmg*w.rate*dt,p)}
+    return true}
+  if(p.cd>0)return true;if(p.ink<w.inkCost){return false}
+  p.ink-=w.inkCost;p.cd=1/w.rate;
+  const sp=(w.spread||0)*Math.PI/180,a=Math.atan2(p.ay,p.ax)+rnd(-sp,sp);
+  if(p.weapon==='bucket'){const dist=clamp((w.range||84)*(p.human?Math.max(.35,S.input.aimMag||1):(p.ai&&p.ai.aimDist?clamp(p.ai.aimDist/(w.range||84),.3,1):1)),w.minRange||20,w.range||84);
+    S.bullets.push({k:'bucket',x:p.x,y:p.y-4,sx:p.x,sy:p.y-4,tx:p.x+Math.cos(a)*dist,ty:p.y+Math.sin(a)*dist,t:0,T:dist/(w.bulletSpeed||150),team:p.team,owner:p});
+    if(p.human||near(p))SND.sfx('bucket')}
+  else{const v=w.bulletSpeed||220;S.bullets.push({k:'shot',x:p.x+Math.cos(a)*6,y:p.y-3+Math.sin(a)*6,vx:Math.cos(a)*v,vy:Math.sin(a)*v,d:0,R:(w.range||72)*rnd(.9,1.05),team:p.team,owner:p,tr:0});
+    if(p.human||near(p))SND.sfx('shoot')}
+  return true}
+function near(p){const h=S.players[0];return hyp(p.x-h.x,p.y-h.y)<90}
+function bomb(p){if(p.gauge<BAL.bombGaugeCells||p.state!=='alive')return;p.bombAnn=false;p.diving=false;
+  const R=BAL.bombRadius;for(let k=0;k<3;k++)setTimeout(()=>{},0);
+  paint(p.x,p.y,R,p.team,p);for(let k=0;k<10;k++){const a=k/10*7,d=R*CELL*rnd(.6,1);stamp(p.x+Math.cos(a)*d,p.y+Math.sin(a)*d,rnd(4,7),p.team)}
+  p.gauge=0;S.rings.push({x:p.x,y:p.y,t:0,life:.6,R:R*CELL+6,team:p.team});
+  if(p.human||near(p)){S.flash=.22;S.hitstop=.15;S.parts.push({type:'txt',t:0,life:1.1,x:p.x,y:p.y-26,s:'ワン！',team:p.team,big:1})}
+  for(const q of enemiesOf(p)){const d=hyp(q.x-p.x,q.y-p.y);if(d<(BAL.bombWetRadius||4)*CELL)hurt(q,BAL.bombDmg||100,p);else if(d<R*CELL+4)hurt(q,40,p)}
+  for(let k=0;k<24;k++)S.parts.push({type:'drop',x:p.x,y:p.y-4,vx:rnd(-120,120),vy:rnd(-140,0),t:0,life:.7,team:p.team});
+  if(p.human||near(p)){SND.sfx('bomb');S.shake=Math.max(S.shake,.35)}if(p.human)buzz(60);
+  pushFeed(`${p.name}の ワンだふるボム！`,p.team)}
+
+/* ---------- AI ---------- */
+function bfsField(tx,ty){const f=new Int16Array(GW*GH).fill(-1),q=[ty*GW+tx];f[ty*GW+tx]=0;let h=0;
+  while(h<q.length){const i=q[h++],x=i%GW,y=(i/GW)|0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=GW||ny>=GH)continue;const j=ny*GW+nx;if(f[j]>=0||BLOCK.has(S.map[ny][nx]))continue;f[j]=f[i]+1;q.push(j)}}
+  return f}
+function pickTarget(p){const C=BAL.cpu[p.team===2?S.cpu:'normal'];const ai=p.ai;let best=null,bs=-1e9;
+  const foes=enemiesOf(p);
+  if(foes.length&&Math.random()>C.paintPref){let fq=null,fd=1e9;for(const q of foes){const d=hyp(q.x-p.x,q.y-p.y);if(d<fd){fd=d;fq=q}}
+    if(fq){ai.tx=clamp(Math.floor(fq.x/CELL),0,GW-1);ai.ty=clamp(Math.floor(fq.y/CELL),0,GH-1);ai.field=bfsField(ai.tx,ai.ty);ai.mode='hunt';return}}
+  for(let k=0;k<50;k++){const x=(Math.random()*GW)|0,y=(Math.random()*GH)|0;if(!paintable(x,y))continue;const g=S.grid[y*GW+x];
+    let s=(g===p.team?-3:g===0?2:3)-hyp(x*CELL-p.x,y*CELL-p.y)/70;
+    // 前線（中央寄り）を好む
+    s-=Math.abs(y-GH/2)/40;
+    // 仲間とかぶらない
+    for(const o of S.players)if(o!==p&&o.team===p.team&&o.ai&&o.ai.tx!==undefined)s-=Math.max(0,1.2-hyp(o.ai.tx-x,o.ai.ty-y)/8);
+    if(s>bs){bs=s;best=[x,y]}}
+  if(!best)best=[GW>>1,GH>>1];ai.tx=best[0];ai.ty=best[1];ai.field=bfsField(ai.tx,ai.ty);ai.mode='paint'}
+function aiThink(p,dt){const ai=p.ai,C=BAL.cpu[p.team===2?S.cpu:'normal'],w=W8[p.weapon];const inp={mx:0,my:0,ax:p.ax,ay:p.ay,fire:false,dive:false,bomb:false};
+  ai.retarget-=dt;const cx=Math.floor(p.x/CELL),cy=Math.floor(p.y/CELL);
+  if(ai.retarget<=0||!ai.field||(cx===ai.tx&&cy===ai.ty)){pickTarget(p);ai.retarget=rnd((C.thinkSec||1.2)*.8,(C.thinkSec||1.2)*1.6)}
+  // 交戦相手
+  let foe=null,fd=1e9;const range=(p.weapon==='mop'?34:(w.range||72))*C.fireRange;
+  for(const q of enemiesOf(p)){const d=hyp(q.x-p.x,q.y-p.y);if(q.diving&&d>26)continue;if(d<Math.min(range+30,C.viewRange||999)&&d<fd&&los(p.x,p.y-3,q.x,q.y-3)){fd=d;foe=q}}
+  if(foe){ai.seen+=dt}else ai.seen=0;
+  // 移動方向（BFS場の下り坂）
+  let mx=0,my=0;if(ai.field){let bd=ai.field[cy*GW+cx];if(bd<0)bd=9999;let bx=0,by=0;
+    for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=GW||ny>=GH)continue;const v=ai.field[ny*GW+nx];
+      if(v>=0&&v<bd&&(dx===0||dy===0||(!BLOCK.has(S.map[cy][nx])&&!BLOCK.has(S.map[ny][cx])))){bd=v;bx=dx;by=dy}}
+    const tx=(cx+bx+.5)*CELL,ty=(cy+by+.5)*CELL;mx=tx-p.x;my=ty-p.y;const m=hyp(mx,my);if(m>0.5){mx/=m;my/=m}else{mx=my=0}}
+  const retreat=foe&&C.retreatHp&&p.hp<C.retreatHp;
+  if(retreat){const dx=p.x-foe.x,dy=p.y-foe.y,d=hyp(dx,dy)||1;mx=dx/d;my=dy/d;if(teamAt(p.x,p.y)===p.team)ai.diveHold=Math.max(ai.diveHold,.6)}
+  else if(foe&&ai.seen>C.react){const dx=foe.x-p.x,dy=foe.y-p.y,d=hyp(dx,dy);const err=(C.aimErr*Math.PI/180)*rnd(-1,1);
+    const ld=C.leadAim?.9:.3;const a=Math.atan2(dy+(foe.vy||0)*d/220*ld,dx+(foe.vx||0)*d/220*ld)+err;inp.ax=Math.cos(a);inp.ay=Math.sin(a);ai.aimDist=d;
+    if(d<range){inp.fire=true}
+    // 間合い
+    const want=p.weapon==='mop'?0:p.weapon==='bucket'?range*.75:range*.6;
+    const k=d>want?1:-.8,dd=d||1;mx=dx/dd*k+(-dy/dd)*ai.strafe*.6;my=dy/dd*k+(dx/dd)*ai.strafe*.6;const m=hyp(mx,my)||1;mx/=m;my/=m;
+    if(Math.random()<dt*.6)ai.strafe*=-1}
+  else{ // ぬりながら進む
+    if(mx||my){const ahead=teamAt(p.x+mx*14,p.y+my*14);const wa=Math.atan2(my,mx)+Math.sin(S.time*3+p.i)*.6;inp.ax=Math.cos(wa);inp.ay=Math.sin(wa);ai.aimDist=(w.range||60)*.7;
+      if(ahead!==p.team&&p.ink>15)inp.fire=true;else if(p.weapon!=='mop'&&Math.random()<.35&&p.ink>40)inp.fire=true}
+    // 足元・周囲の未塗りを塗る
+    if(!inp.fire&&p.ink>30&&teamAt(p.x,p.y)!==p.team){inp.fire=true;inp.ax=mx||inp.ax;inp.ay=my||inp.ay}}
+  // ほりほり
+  const under=teamAt(p.x,p.y);
+  if(ai.diveHold>0){ai.diveHold-=dt;if(under===p.team&&p.ink<BAL.inkMax*.95){inp.dive=true;inp.fire=false;if(!foe){}}}
+  else if(under===p.team&&!foe&&(p.ink<(C.diveInkBelow||25)||(Math.random()<C.diveRate*dt*2&&hyp(mx,my)>0))){ai.diveHold=p.ink<25?2.2:rnd(.5,1.4)}
+  if(ai.diveHold>0&&under===p.team&&!(foe&&ai.seen>C.react)){inp.dive=true;inp.fire=false}
+  // ボム
+  if(p.gauge>=BAL.bombGaugeCells){const close=enemiesOf(p).some(q=>hyp(q.x-p.x,q.y-p.y)<BAL.bombRadius*CELL*.9);if((close&&Math.random()<dt*(C.bombUse||.6)*3)||Math.random()<dt*.08)inp.bomb=true}
+  // 詰まり対策
+  ai.stuck=hyp(p.x-ai.lx,p.y-ai.ly)<.2&&(mx||my)?ai.stuck+dt:0;ai.lx=p.x;ai.ly=p.y;if(ai.stuck>.6){ai.retarget=0;ai.stuck=0;mx=rnd(-1,1);my=rnd(-1,1)}
+  inp.mx=mx;inp.my=my;return inp}
+
+/* ---------- update ---------- */
+function updatePlayer(p,dt){
+  p.inv=Math.max(0,p.inv-dt);p.cd=Math.max(0,p.cd-dt);p.boost=Math.max(0,(p.boost||0)-dt);
+  if(p.state==='wet'){if(p.human)S.input.bomb=false;p.wetT+=dt;if(p.wetT>=BAL.respawnSec){p.state='alive';p.x=p.sx;p.y=p.sy;p.hp=BAL.hpMax;p.ink=BAL.inkMax;p.inv=BAL.spawnInvincibleSec||1.5;p.diving=false;p.boost=3;if(p.human)SND.sfx('respawn')}return}
+  const inp=p.human?(S.testInput||S.input):aiThink(p,dt);
+  const under=teamAt(p.x,p.y);
+  // dive
+  const wantDive=inp.dive&&under===p.team;
+  if(wantDive&&!p.diving){p.diving=true;if(p.human||near(p))SND.sfx('dive');puff(p,6)}
+  else if(!wantDive&&p.diving){p.diving=false;if(p.human||near(p))SND.sfx('undive');puff(p,4)}
+  // aim
+  let firing=false;const trying=!p.diving&&inp.fire;
+  if(!p.diving&&inp.fire){let ax=inp.ax,ay=inp.ay;const m=hyp(ax,ay);if(m>.1){ax/=m;ay/=m;
+      if(p.human){// エイムアシスト
+        let bq=null,bd=1e9;for(const q of enemiesOf(p)){const dx=q.x-p.x,dy=q.y-p.y,d=hyp(dx,dy);if(d>(W8[p.weapon].range||72)+20||q.diving)continue;const c=(dx*ax+dy*ay)/d;if(c>.94&&d<bd&&los(p.x,p.y,q.x,q.y)){bd=d;bq=q}}
+        if(bq){const dx=bq.x-p.x,dy=bq.y-p.y,d=hyp(dx,dy);ax=ax*.5+dx/d*.5;ay=ay*.5+dy/d*.5;const n=hyp(ax,ay);ax/=n;ay/=n}}
+      p.ax=ax;p.ay=ay}
+    firing=fire(p,dt)}
+  // move
+  let mx=inp.mx,my=inp.my;const mm=hyp(mx,my);if(mm>1){mx/=mm;my/=mm}
+  let sp=p.diving?BAL.diveSpeed:BAL.walkSpeed;if(firing)sp*=W8[p.weapon].walkMul||.8;if(!p.diving&&under&&under!==p.team)sp*=BAL.enemyInkSlow;if(p.boost>0)sp*=1.5;
+  const ox=p.x,oy=p.y;
+  if(mm>.08){moveP(p,mx*sp*dt,my*sp*dt);if(!firing)p.dir=dirOf(mx,my);if(!firing){p.ax=mx/Math.max(mm,1e-3);p.ay=my/Math.max(mm,1e-3)}p.walkT+=dt}
+  if(firing)p.dir=dirOf(p.ax,p.ay);
+  p.vx=(p.x-ox)/dt;p.vy=(p.y-oy)/dt;p.frame=mm>.08?Math.floor(p.walkT*8)%4:0;
+  // 足あと
+  if(!p.diving&&mm>.08&&teamAt(p.x,p.y)===p.team){p.printT+=dt;if(p.printT>.22){p.printT=0;S.parts.push({type:'paw',x:p.x+(p.frame%2?2:-2),y:p.y+3,t:0,life:2.5,team:p.team})}}
+  if(p.diving&&mm>.08){p.boneT=(p.boneT||0)+dt;if(p.boneT>1.5){p.boneT=0;if(Math.random()<.18){p.gauge=Math.min(BAL.bombGaugeCells,p.gauge+45);if(p.human){S.parts.push({type:'txt',t:0,life:1.2,x:p.x,y:p.y-14,s:'ほね みっけ！',team:p.team});SND.sfx('bombReady')}}}}
+  if(p.diving&&mm>.08&&Math.random()<dt*12)S.parts.push({type:'sand',x:p.x+rnd(-4,4),y:p.y+3,vx:rnd(-15,15),vy:rnd(-25,-5),t:0,life:.4});
+  // ink / hp
+  const reg=p.diving?BAL.inkRegenDive:(trying?0:BAL.inkRegen);p.ink=Math.min(BAL.inkMax,p.ink+reg*dt);
+  if(S.time-p.lastHit>BAL.hpRegenDelay)p.hp=Math.min(BAL.hpMax,p.hp+BAL.hpRegen*dt*(p.diving?1.6:1));
+  if(inp.bomb){bomb(p);if(p.human)S.input.bomb=false}
+}
+function puff(p,n){for(let k=0;k<n;k++)S.parts.push({type:'sand',x:p.x+rnd(-5,5),y:p.y+2,vx:rnd(-30,30),vy:rnd(-40,-10),t:0,life:.45})}
+function updateBullets(dt){
+  for(const b of S.bullets){
+    if(b.k==='shot'){const st=Math.hypot(b.vx,b.vy)*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.d+=st;b.tr+=st;
+      const w=W8[b.owner.weapon];if(b.tr>9){b.tr=0;if(Math.random()<.75)paint(b.x,b.y+2,w.trail||.7,b.team,b.owner)}
+      let end=b.d>=b.R;if(solidPx(b.x,b.y))end=true;
+      for(const q of S.players){if(q.team===b.team||q.state!=='alive')continue;if(hyp(q.x-b.x,q.y-3-b.y)<(w.hitRadius||7)){hurt(q,w.dmg,b.owner);end=true;break}}
+      if(end){b.dead=1;paint(b.x,b.y+2,w.paintRadius||1.2,b.team,b.owner);splash(b.x,b.y,b.team,4);if(near(b.owner)&&Math.random()<.4)SND.sfx('paint')}}
+    else{b.t+=dt;const u=Math.min(1,b.t/b.T);b.x=b.sx+(b.tx-b.sx)*u;b.y=b.sy+(b.ty-b.sy)*u;b.z=Math.sin(u*Math.PI)*(W8.bucket.arcHeight||22);
+      if(u>=1||(u>.15&&solidPx(b.x,b.y)&&b.z<6)){b.dead=1;const w=W8.bucket,R=w.paintRadius||3.2;paint(b.x,b.y,R,b.team,b.owner);splash(b.x,b.y,b.team,10);
+        for(const q of S.players){if(q.team===b.team||q.state!=='alive')continue;const d=hyp(q.x-b.x,q.y-b.y);if(d<R*CELL+3)hurt(q,d<(w.directRadius||R*CELL*.55)?w.dmg:(w.splashDmg||w.dmg*.5),b.owner)}
+        if(near(b.owner))SND.sfx('splat')}}}
+  S.bullets=S.bullets.filter(b=>!b.dead)}
+function splash(x,y,team,n){for(let k=0;k<n;k++)S.parts.push({type:'drop',x,y,vx:rnd(-50,50),vy:rnd(-70,-10),t:0,life:.35,team})}
+let miniT=0;
+function step(dt){
+  if(S.hitstop>0){S.hitstop-=dt;S.flash=Math.max(0,(S.flash||0)-dt);return}
+  S.time+=dt;S.flash=Math.max(0,(S.flash||0)-dt);
+  if(S.mode==='play'){S.left-=dt;
+    if(!S.last30&&S.left<=BAL.lastSpurtSec){S.last30=true;S.banner={t:'あと30びょう！',life:1.6};SND.bgm('lastspurt')}
+    if(S.left<=3&&Math.ceil(S.left)!==S.lastCount&&S.left>0){S.lastCount=Math.ceil(S.left);SND.sfx('countdown');S.banner={t:String(S.lastCount),life:.9,big:1}}
+    const ord=S.players.slice().sort(()=>Math.random()-.5);for(const p of ord)updatePlayer(p,dt);updateBullets(dt);
+    if(S.left<=0){S.left=0;finish()}}
+  else if(S.mode==='intro'){S.introT+=dt;const rem=S.introLen-S.introT;const n=Math.floor(rem)+1;if(rem<=3&&n!==S.lastCount&&n>=1){S.lastCount=n;SND.sfx('countdown');S.banner={t:String(n),life:.9,big:1}}
+    if(S.introT>=S.introLen){S.mode='play';S.banner={t:'GO!',life:.8,big:1};SND.sfx('go');SND.bgm('battle')}}
+  else if(S.mode==='finish'){S.finT+=dt;if(S.finT>2.2)startJudge()}
+  else if(S.mode==='judge'){S.judge.t+=dt;if(S.judge.t>1.2&&!S.judge.snd){S.judge.snd=1;SND.sfx('paint')}if(S.judge.t>4.2&&!S.judge.done){S.judge.done=1;SND.sfx(S.judge.win?'win':'lose');SND.bgm('result')}}
+  for(const q of S.parts){q.t+=dt;if(q.vx!==undefined){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=200*dt}}
+  S.parts=S.parts.filter(q=>q.t<q.life);if(S.parts.length>400)S.parts.splice(0,S.parts.length-400);
+  for(const r of S.rings)r.t+=dt;S.rings=S.rings.filter(r=>r.t<r.life);
+  for(const f of S.feed)f.life-=dt;S.feed=S.feed.filter(f=>f.life>0);
+  if(S.banner){S.banner.life-=dt;if(S.banner.life<=0)S.banner=null}
+  S.shake=Math.max(0,S.shake-dt);
+  if(S.mode==='play'||S.mode==='finish'){miniT-=dt;if(miniT<=0){miniT=.25;updateMini();countPaint()}}
+}
+
+/* ---------- match flow ---------- */
+function startMatch(stageIdx=S.stageIdx,weapon=S.weapon,cpu=S.cpu){
+  S.stageIdx=stageIdx;S.weapon=weapon;S.cpu=cpu;buildStage(stageIdx);
+  const others=['shower','mop','bucket'].filter(w=>w!==weapon);const foeW=['shower','mop','bucket'].sort(()=>Math.random()-.5);
+  S.players=[newPlayer(1,0,weapon,true),newPlayer(1,1,others[0],false),newPlayer(1,2,others[1],false),newPlayer(2,0,foeW[0],false),newPlayer(2,1,foeW[1],false),newPlayer(2,2,foeW[2],false)];
+  // 陣地は最初から自チーム色
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const c=S.map[y][x];if(c==='1'||c==='2'){S.grid[y*GW+x]=+c;pctx.fillStyle=TEAMC[+c];pctx.fillRect(x*CELL,y*CELL,CELL,CELL)}}
+  S.bullets=[];S.parts=[];S.rings=[];S.feed=[];S.left=BAL.matchSec;S.last30=false;S.lastCount=0;S.introT=0;S.introLen=3;S.mode='intro';S.time=0;
+  try{S.tut=!localStorage.getItem('nuri_tut');localStorage.setItem('nuri_tut','1')}catch(e){S.tut=true}
+  S.introLen=S.tut?7:3.4;updateMini();countPaint();SND.bgm(null)}
+function finish(){S.mode='finish';S.finT=0;S.bullets=[];S.banner={t:'フィニッシュ！',life:2,big:1};SND.sfx('whistle');SND.bgm(null);
+  for(const p of S.players){p.diving=false}}
+function startJudge(){const c=countPaint();const a=c[1]/S.total*100,b=c[2]/S.total*100;
+  const h=S.players[0];const win=c[1]>c[2],tie=c[1]===c[2];
+  S.judge={t:0,a,b,win,tie,snd:0,done:0};S.mode='judge';
+  S.stats={painted:h.painted,splats:h.splats,deaths:h.deaths,pts:h.painted+h.splats*20};
+  const sc=q=>q.painted+q.splats*20;S.stats.mvp=S.players.filter(q=>q.team===1).sort((a,b)=>sc(b)-sc(a))[0];S.stats.king=S.players.slice().sort((a,b)=>b.painted-a.painted)[0];
+  try{const k='nuri_best';const best=JSON.parse(localStorage.getItem(k)||'{}');S.best=best;const key=S.stageIdx+'_'+S.cpu;
+    if(!best[key]||S.stats.pts>best[key]){best[key]=S.stats.pts;S.newBest=true;localStorage.setItem(k,JSON.stringify(best))}else S.newBest=false}catch(e){S.newBest=false}
+}
+
+/* ---------- input ---------- */
+const touches=new Map();let stick=null,aimT=null;
+function toV(e){const r=cv.getBoundingClientRect();const x=((e.clientX-r.left)*DPR-OX)/SC,y=((e.clientY-r.top)*DPR-OY)/SC;return[x,y]}
+const BTN={dive:{x:184,y:338,r:24},bomb:{x:184,y:284,r:20},mute:{x:206,y:12,r:9},pause:{x:10,y:12,r:9}};
+function inBtn(b,x,y){return hyp(x-b.x,y-b.y)<=b.r+4}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();SND.init();const[x,y]=toV(e);cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);
+  if(S.mode!=='play'&&S.mode!=='intro'){uiTap(x,y);return}
+  if(inBtn(BTN.mute,x,y)){S.mute=!S.mute;SND.setMute(S.mute);return}
+  if(inBtn(BTN.dive,x,y)){touches.set(e.pointerId,'dive');S.input.dive=true;return}
+  if(inBtn(BTN.bomb,x,y)){if(S.players[0].gauge>=BAL.bombGaugeCells&&S.players[0].state==='alive')S.input.bomb=true;return}
+  if(e.pointerType==='mouse'&&!inBtn(BTN.dive,x,y)){mouseAim={x,y};touches.set(e.pointerId,'mouse');S.input.fire=true;mouseFire();return}
+  if(x<VW*.5){stick={id:e.pointerId,ox:x,oy:y,x,y};touches.set(e.pointerId,'stick')}
+  else{aimT={id:e.pointerId,ox:x,oy:y,x,y};touches.set(e.pointerId,'aim');S.input.fire=true;
+    // タップだけでも前方へ撃つ
+    const p=S.players[0];S.input.ax=p.ax;S.input.ay=p.ay;S.input.aimMag=.8}},{passive:false});
+cv.addEventListener('pointermove',e=>{const k=touches.get(e.pointerId);if(!k)return;const[x,y]=toV(e);
+  if(k==='stick'){stick.x=x;stick.y=y;let dx=x-stick.ox,dy=y-stick.oy;const d=hyp(dx,dy),R=26;if(d>R){stick.ox+=dx*(1-R/d);stick.oy+=dy*(1-R/d);dx=x-stick.ox;dy=y-stick.oy}S.input.mx=dx/R;S.input.my=dy/R}
+  if(k==='mouse'){mouseAim={x,y};return}
+  if(k==='aim'){aimT.x=x;aimT.y=y;const dx=x-aimT.ox,dy=y-aimT.oy,d=hyp(dx,dy);if(d>4){S.input.ax=dx/d;S.input.ay=dy/d;S.input.aimMag=clamp(d/40,.35,1)}}});
+function endT(e){const k=touches.get(e.pointerId);touches.delete(e.pointerId);if(k==='stick'){stick=null;S.input.mx=S.input.my=0}if(k==='aim'){aimT=null;S.input.fire=false}if(k==='dive')S.input.dive=false;if(k==='mouse'){mouseAim=null;S.input.fire=false}}
+cv.addEventListener('pointerup',endT);cv.addEventListener('pointercancel',endT);
+const keys=new Set();
+addEventListener('keydown',e=>{keys.add(e.key.toLowerCase());if(e.key===' '||e.key.startsWith('Arrow'))e.preventDefault();if(e.key.toLowerCase()==='e')S.input.bomb=true;
+  if(S.mode!=='play'&&S.mode!=='intro'&&(e.key==='Enter'||e.key===' ')){SND.init();uiKey()}});
+addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
+let mouseAim=null;
+function mouseFire(){const p=S.players[0];if(!p)return;const sx=p.x-camX,sy=p.y-6-camY,dx=mouseAim.x-sx,dy=mouseAim.y-sy,d=hyp(dx,dy)||1;S.input.ax=dx/d;S.input.ay=dy/d;S.input.aimMag=clamp(d/90,.35,1);S.input.fire=true}
+function mouseOK(e){return e.pointerType==='mouse'&&!('ontouchstart' in window&&navigator.maxTouchPoints>0)}
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+let keyUsed=false;function pollKeys(){const i=S.input;if(!keys.size){if(keyUsed){keyUsed=false;if(!stick){i.mx=i.my=0}if(!aimT&&!mouseAim)i.fire=false;if(!touches.size)i.dive=false}if(mouseAim&&!aimT)mouseFire();return}keyUsed=true;let mx=0,my=0;if(keys.has('a'))mx--;if(keys.has('d'))mx++;if(keys.has('w'))my--;if(keys.has('s'))my++;
+  if(!stick){i.mx=mx;i.my=my}let ax=0,ay=0;if(keys.has('arrowleft'))ax--;if(keys.has('arrowright'))ax++;if(keys.has('arrowup'))ay--;if(keys.has('arrowdown'))ay++;
+  if(!aimT){if(ax||ay){i.ax=ax;i.ay=ay;i.fire=true;i.aimMag=1}else if(mouseAim)mouseFire();else i.fire=false}
+  if(!touches.size)i.dive=keys.has('shift')||keys.has(' ')}
+
+/* ---------- UI (title/select/result) ---------- */
+let UI=[];
+function btn(id,x,y,w,h){UI.push({id,x,y:y+(S.mode==='title'?0:TY),w,h})}
+function uiTap(x,y){SND.sfx('tap');for(const b of UI)if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){uiDo(b.id);return}if(S.mode==='title')uiDo('play')}
+function uiKey(){if(S.mode==='title')uiDo('play');else if(S.mode==='select')uiDo('go');else if(S.mode==='judge'&&S.judge.done)uiDo('again')}
+function uiDo(id){
+  if(S.mode==='title'&&id==='play'){S.mode='select';SND.bgm('title');return}
+  if(S.mode==='select'){if(id==='go'){startMatch();return}
+    if(id==='sl')S.stageIdx=(S.stageIdx+STG.length-1)%STG.length;if(id==='sr')S.stageIdx=(S.stageIdx+1)%STG.length;
+    if(id==='mute'){S.mute=!S.mute;SND.setMute(S.mute)}if(id.startsWith('w_'))S.weapon=id.slice(2);if(id.startsWith('c_'))S.cpu=id.slice(2);if(id==='back'){S.mode='title'}return}
+  if(S.mode==='judge'&&S.judge.done){if(id==='again')startMatch();if(id==='menu'){S.mode='select';SND.bgm('title')}}}
+
+/* ---------- render ---------- */
+let camX=0,camY=0;
+function draw(){
+  const p=S.players[0];
+  if(('ontouchstart' in window)&&innerWidth>innerHeight*1.15&&innerHeight<600){ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#14202b';ctx.fillRect(0,0,cv.width,cv.height);ctx.setTransform(DPR,0,0,DPR,0,0);ctx.font=FONT(20);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText('スマホを たてに してね 📱',innerWidth/2,innerHeight/2);if(S.mode==='play')setPause(true);return}else if(S.paused&&!document.hidden&&document.hasFocus())setPause(false);
+  ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#14202b';ctx.fillRect(0,0,cv.width,cv.height);
+  if(S.mode==='title'){drawTitle();return}
+  if(S.mode==='select'){drawSelect();return}
+  // camera
+  if(p&&S.mode==='intro'){const u=clamp(S.introT/(S.introLen-.5),0,1),e=u*u*(3-2*u);const sx0=WW/2-VW/2,sy0=0;const tx=p.x-VW/2,ty=p.y-VH/2+20;camX=sx0+(tx-sx0)*e;camY=sy0+(ty-sy0)*e}
+  else if(p){const tx=p.x-VW/2+p.ax*18,ty=p.y-VH/2+p.ay*24+20;camX+=(tx-camX)*.12;camY+=(ty-camY)*.12}
+  if(S.mode==='judge'){camX+=((WW-VW)/2-camX)*.05;camY+=((WH-VH)/2-camY)*.05}
+  camX=clamp(camX,0,WW-VW);camY=clamp(camY,-20,WH-VH+150);
+  let sx=0,sy=0;if(S.shake>0){sx=rnd(-2,2)*S.shake*6;sy=rnd(-2,2)*S.shake*6}
+  const X=Math.round(camX+sx),Y=Math.round(camY+sy);
+  wx.fillStyle=(STG[S.stageIdx].theme&&STG[S.stageIdx].theme.sea)||'#2f8fd8';wx.fillRect(0,0,VW,VH);
+  wx.drawImage(base,-X,-Y);wx.drawImage(paintC,-X,-Y);wx.drawImage((Math.floor(S.time*2)%2)?overB:over,-X,-Y);
+  // paw prints
+  for(const q of S.parts)if(q.type==='paw'){wx.globalAlpha=Math.min(1,(q.life-q.t)/1)*.55;wx.fillStyle=TEAMD[q.team];const x=Math.round(q.x-X),y=Math.round(q.y-Y);wx.fillRect(x-1,y,3,2);wx.fillRect(x-2,y-2,1,1);wx.fillRect(x,y-3,1,1);wx.fillRect(x+2,y-2,1,1)}
+  wx.globalAlpha=1;
+  // y-sorted
+  const list=[];for(const pr of props)list.push({y:pr.y,f:()=>drawProp(pr,X,Y)});
+  for(const q of S.players)list.push({y:q.y,f:()=>drawPlayer(q,X,Y)});
+  list.sort((a,b)=>a.y-b.y);for(const o of list)o.f();
+  // bullets
+  for(const b of S.bullets){const x=Math.round(b.x-X),y=Math.round(b.y-Y);
+    if(b.k==='shot'){wx.fillStyle=TEAMD[b.team];wx.fillRect(x-2,y-1,4,3);wx.fillStyle=TEAMC[b.team];wx.fillRect(x-1,y-1,2,2)}
+    else{wx.fillStyle='rgba(0,0,0,.25)';wx.beginPath();wx.ellipse(x,y+2,4,2,0,0,7);wx.fill();wx.fillStyle=TEAMD[b.team];wx.beginPath();wx.arc(x,y-b.z,4,0,7);wx.fill();wx.fillStyle=TEAMC[b.team];wx.beginPath();wx.arc(x-1,y-b.z-1,2.6,0,7);wx.fill()}}
+  for(const q of S.parts){if(q.type==='paw'||q.type==='txt')continue;const x=Math.round(q.x-X),y=Math.round(q.y-Y);wx.globalAlpha=1-q.t/q.life;
+    if(q.type==='swirl'){wx.strokeStyle=TEAML[q.team];wx.lineWidth=2;wx.beginPath();wx.ellipse(x,y,q.R*.8,q.R*.55,0,q.a,q.a+2.2);wx.stroke()}
+    else if(q.type==='drop'){wx.fillStyle=TEAMC[q.team]||'#fff';wx.fillRect(x,y,2,2)}else if(q.type==='sand'){wx.fillStyle='#e9d29a';wx.fillRect(x,y,2,1)}}
+  wx.globalAlpha=1;
+  for(const r of S.rings){const u=r.t/r.life;wx.strokeStyle=TEAML[r.team];wx.globalAlpha=1-u;wx.lineWidth=3;wx.beginPath();wx.arc(r.x-X,r.y-Y,r.R*(.3+u*.8),0,7);wx.stroke();wx.globalAlpha=1}
+  // aim guide
+  if(p&&p.state==='alive'&&S.mode==='play'&&(S.input.fire||aimT)&&!p.diving){const w=W8[p.weapon];if(p.weapon==='mop'){wx.strokeStyle='rgba(255,255,255,.55)';wx.lineWidth=1;wx.beginPath();wx.ellipse(p.x-X,p.y-Y+2,(W8.mop.radius||2.3)*CELL,(W8.mop.radius||2.3)*CELL*.7,0,0,7);wx.stroke()}
+    const L=p.weapon==='mop'?0:p.weapon==='bucket'?(w.range||84)*Math.max(.35,S.input.aimMag||1):(w.range||72);
+    wx.fillStyle='rgba(255,255,255,.7)';for(let d=10;d<L;d+=7)wx.fillRect(Math.round(p.x-X+p.ax*d),Math.round(p.y-4-Y+p.ay*d),1,1);
+    if(p.weapon==='bucket'){wx.strokeStyle='rgba(255,255,255,.7)';wx.beginPath();wx.arc(p.x-X+p.ax*L,p.y-Y+p.ay*L,(w.paintRadius||3.2)*CELL,0,7);wx.stroke()}}
+  if(S.mode==='judge')drawJudgeWorld();
+  // blit
+  ctx.imageSmoothingEnabled=false;ctx.drawImage(wb,OX,OY,VW*SC,VH*SC);
+  ctx.setTransform(SC,0,0,SC,OX,OY);
+  if(S.mode==='judge')drawJudgeUI();else drawHUD();
+}
+function drawProp(pr,X,Y){const a=ART.props[pr.c];if(!a)return;const x=Math.round(pr.x-a.width/2-X),y=Math.round(pr.y-a.height-Y+(pr.c==='R'?2:pr.c==='T'?2:4));wx.drawImage(a,x,y)}
+const OUT=new Map();function outlined(img){let o=OUT.get(img);if(o)return o;o=mk(img.width+2,img.height+2);const x=o.getContext('2d');for(const[dx,dy]of[[0,1],[2,1],[1,0],[1,2]])x.drawImage(img,dx,dy);x.globalCompositeOperation='source-in';x.fillStyle='#fff';x.fillRect(0,0,o.width,o.height);x.globalCompositeOperation='source-over';OUT.set(img,o);return o}
+function drawPlayer(q,X,Y){
+  const x=Math.round(q.x-X),y=Math.round(q.y-Y);const isDog=q.team===1;
+  if(q.state==='wet'){if(q.wetT>1)return;const img=(isDog?ART.wet.dog:ART.wet.cat)[q.kind];const jx=Math.round(Math.sin(q.wetT*60)*1.5);wx.globalAlpha=1-q.wetT;wx.drawImage(img,x-12+jx,y-20);wx.globalAlpha=1;return}
+  if(q.inv>0&&q.inv<1.4&&Math.floor(q.inv*12)%2)return;
+  wx.fillStyle='rgba(0,0,0,.22)';wx.beginPath();wx.ellipse(x,y+2,6,2.5,0,0,7);wx.fill();
+  wx.strokeStyle=q.team===1?'#fff2e0':'#e6fffa';wx.lineWidth=2;wx.beginPath();wx.ellipse(x,y+2,8,3.5,0,0,7);wx.stroke();wx.strokeStyle=TEAMD[q.team];wx.lineWidth=1;wx.beginPath();wx.ellipse(x,y+2,8,3.5,0,0,7);wx.stroke();
+  if(q.diving){const img=isDog?ART.dive.dog:ART.dive.cat;wx.drawImage(img,x-img.width/2,y-img.height+3);
+    if(q.human){wx.fillStyle='#ffd84a';wx.fillRect(x-2,y-14,5,2);wx.fillRect(x-1,y-12,3,2);wx.fillRect(x,y-10,1,1)}return}
+  const img=(isDog?ART.dog:ART.cat)[q.kind][q.dir][q.frame];if(q.human)wx.drawImage(outlined(img),x-13,y-21);wx.drawImage(img,x-12,y-20);
+  // ink tank (human) / hp hint
+  if(q.human){const bob=Math.round(Math.sin(S.time*6)*1.5);wx.fillStyle='#1b2733';wx.fillRect(x-4,y-31+bob,9,2);wx.fillRect(x-3,y-29+bob,7,2);wx.fillRect(x-2,y-27+bob,5,2);wx.fillStyle='#ffd84a';wx.fillRect(x-3,y-31+bob,7,1);wx.fillRect(x-2,y-30+bob,5,2);wx.fillRect(x-1,y-28+bob,3,2);wx.fillRect(x,y-26+bob,1,1);
+    if(q.ink<BAL.inkMax*.98||S.input.fire){wx.fillStyle='rgba(0,0,0,.55)';wx.fillRect(x+9,y-16,3,12);wx.fillStyle=q.ink<20?'#ff4d4d':TEAMC[q.team];const h=Math.round(11*q.ink/BAL.inkMax);wx.fillRect(x+10,y-5-h,1,h)}}
+  if(q.hp<BAL.hpMax*.99){wx.fillStyle='rgba(0,0,0,.5)';wx.fillRect(x-7,y-24,14,2);wx.fillStyle=q.hp<35?'#ff4d4d':'#7cff6b';wx.fillRect(x-7,y-24,Math.max(0,Math.round(14*q.hp/BAL.hpMax)),2)}}
+const FONT=(s,b=true)=>`${b?'bold ':''}${s}px 'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Rounded Mplus 1c','Noto Sans JP',sans-serif`;
+function txt(t,x,y,s,col='#fff',al='center',out='#1b2733',ow=3){ctx.font=FONT(s);ctx.textAlign=al;ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=ow;ctx.strokeStyle=out;ctx.strokeText(t,x,y);ctx.fillStyle=col;ctx.fillText(t,x,y)}
+function rr(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,w,h,r):ctx.rect(x,y,w,h);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke()}}
+function drawHUD(){const p=S.players[0];
+  // timer
+  const t=Math.ceil(S.left||0),mm=Math.floor(t/60),ss=String(t%60).padStart(2,'0');
+  {const c=S.counts,T=S.total||1,a=c[1]/T,b=c[2]/T,hide=S.mode==='play'&&S.left<=10;const L=48,Wd=120;rr(L-2,24,Wd+4,9,4.5,'rgba(20,32,43,.75)');
+   if(hide){txt('？？？',108,28.5,7,'#ffd84a')}else{ctx.fillStyle=TEAMC[1];ctx.fillRect(L,26,Wd*a,5);ctx.fillStyle=TEAMC[2];ctx.fillRect(L+Wd-Wd*b,26,Wd*b,5);ctx.fillStyle='#fff';ctx.fillRect(L+Wd/2-.5,25,1,7)}}
+  rr(80,4,56,18,9,'rgba(20,32,43,.75)');txt(`${mm}:${ss}`,108,13.5,12,S.left<=BAL.lastSpurtSec&&S.mode==='play'?'#ffd84a':'#fff');
+  // team faces
+  ctx.imageSmoothingEnabled=false;
+  for(let i=0;i<3;i++){const a=S.players[i],b=S.players[3+i];const ax=58-i*14,bx=146+i*14;
+    for(const[q,xx]of[[a,ax],[b,bx]]){ctx.globalAlpha=q.state==='alive'?1:.3;rr(xx-6,6,12,12,6,TEAMC[q.team]);ctx.drawImage(q.team===1?ART.portrait.poromi:ART.portrait.cat,xx-5,7,10,10);ctx.globalAlpha=1;
+      if(q.state==='wet'){txt(String(Math.ceil(BAL.respawnSec-q.wetT)),xx,12,7,'#fff')}}}
+  // minimap
+  ctx.globalAlpha=.85;rr(2,36,26,38,3,'rgba(20,32,43,.6)');ctx.drawImage(miniC,3,37,24,36);ctx.globalAlpha=1;
+  for(const q of S.players){if(q.state!=='alive'||(q.team!==1))continue;ctx.fillStyle=q.human?'#fff':'#ffe2b8';ctx.fillRect(3+q.x/WW*24-1,37+q.y/WH*36-1,2,2)}
+  // mute
+  txt(S.mute?'🔇':'🔊',BTN.mute.x,BTN.mute.y,9,'#fff','center','rgba(0,0,0,0)',0);
+  for(const q of S.parts)if(q.type==='txt'){const u=q.t/q.life;ctx.globalAlpha=1-u*u;const sz=q.big?20*(1+Math.max(0,.25-q.t)*2):9;txt(q.s,q.x-camX,q.y-camY-u*10,sz,q.big?'#ffd84a':'#fff','center',TEAMD[q.team],q.big?5:3);ctx.globalAlpha=1}
+  // feed
+  S.feed.forEach((f,i)=>{ctx.globalAlpha=Math.min(1,f.life);txt(f.t,112,44+i*11,7,'#fff','center',f.team?TEAMD[f.team]:'#1b2733',2.5);ctx.globalAlpha=1});
+  // controls
+  if(S.mode==='play'||S.mode==='intro'){
+    if(stick){ctx.globalAlpha=.35;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(stick.ox,stick.oy,26,0,7);ctx.fill();ctx.globalAlpha=.7;ctx.beginPath();ctx.arc(stick.ox+clamp(S.input.mx,-1,1)*20,stick.oy+clamp(S.input.my,-1,1)*20,10,0,7);ctx.fill();ctx.globalAlpha=1}
+    else{ctx.globalAlpha=.5;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(40,VH-54-(S.safe||0),24,0,7);ctx.stroke();ctx.globalAlpha=1;txt('いどう',40,VH-54-(S.safe||0),7,'rgba(255,255,255,.9)','center','rgba(0,0,0,.5)',2)}
+    if(!aimT){ctx.globalAlpha=.5;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(126,VH-54-(S.safe||0),22,0,7);ctx.stroke();ctx.globalAlpha=1;txt('ねらってうつ',126,VH-54-(S.safe||0),6.5,'rgba(255,255,255,.9)','center','rgba(0,0,0,.5)',2)}
+    else{ctx.globalAlpha=.35;ctx.fillStyle=TEAMC[1];ctx.beginPath();ctx.arc(aimT.ox,aimT.oy,6,0,7);ctx.fill();ctx.globalAlpha=1}
+    // dive btn
+    const D=BTN.dive,on=p.diving;rr(D.x-D.r,D.y-D.r,D.r*2,D.r*2,D.r,on?TEAMC[1]:'rgba(20,32,43,.55)','rgba(255,255,255,.7)');txt('ほりほり',D.x,D.y,7.5,'#fff');
+    // bomb btn
+    const B=BTN.bomb,g=p.gauge/BAL.bombGaugeCells,ready=g>=1;
+    ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.25)';ctx.beginPath();ctx.arc(B.x,B.y,B.r,0,7);ctx.stroke();ctx.strokeStyle=TEAMC[1];ctx.beginPath();ctx.arc(B.x,B.y,B.r,-Math.PI/2,-Math.PI/2+g*Math.PI*2);ctx.stroke();
+    const pul=ready?1+Math.sin(S.time*10)*.08:1;rr(B.x-(B.r-3)*pul,B.y-(B.r-3)*pul,(B.r-3)*2*pul,(B.r-3)*2*pul,(B.r-3)*pul,ready?'#ffd84a':'rgba(20,32,43,.5)');
+    ctx.drawImage(ART.icons.bomb,B.x-8,B.y-11,16,16);txt(ready?'ワン！':Math.floor(g*100)+'%',B.x,B.y+8,6.5,ready?'#7a3b00':'#fff','center',ready?'#fff4c4':'#1b2733',2)}
+  if(S.flash>0){ctx.fillStyle=`rgba(255,250,230,${Math.min(.55,S.flash*2.5)})`;ctx.fillRect(0,0,VW,VH)}
+  if(S.banner){const b=S.banner;const s=b.big?(b.t.length>3?22:36):16;let k=b.big?1+Math.max(0,b.life-.6)*.6:1;ctx.font=FONT(s);const tw=ctx.measureText(b.t).width+10;k=Math.min(k,200/tw);ctx.save();ctx.translate(108,VH*.38);ctx.scale(k,k);txt(b.t,0,0,s,b.t==='GO!'?'#ffd84a':'#fff','center','#1b2733',5);ctx.restore()}
+  if(S.mode==='intro'&&S.introLen-S.introT>.4){rr(14,84,188,S.tut?118:52,10,'rgba(20,32,43,.78)');txt(STG[S.stageIdx].name,108,98,12,'#fff');txt(`ブキ：${WNAME[S.weapon]}`,108,113,8,TEAML[1]);txt('じぶんの いろを いっぱい ひろげよう！',108,128,8.5,'#ffd84a');
+    if(S.tut){txt('① みぎがわを スワイプ → ぺんきを うつ',108,148,7.5,'#fff');txt('② じぶんの いろで ほりほり → はやい＆回復',108,163,7.5,'#fff');txt('③ ゲージ まんたんで ワン！ → ドカンと ぬる',108,178,7.5,'#fff');txt('ほりほり中に ほねが みつかることも…？',108,193,6.8,TEAML[1])}}
+  if(p&&p.state==='wet'){txt('びしょびしょ…',108,VH/2+8,12,TEAML[2]);txt(`${Math.ceil(BAL.respawnSec-p.wetT)}びょうで ふっかつ`,108,VH/2+24,8,'#fff')}
+  if(p&&p.state==='alive'&&p.ink<p.inkMaxWarn){}
+  if(p&&p.state==='alive'&&p.ink<12&&S.mode==='play'){txt('ぺんきぎれ！ 指をはなすか ほりほりで回復',100,VH*.62,7.5,'#ffd84a')}
+}
+function drawJudgeWorld(){const o=ART.oyabun,of=ART.oyabunFlag;}
+function pawStamp(x,y,s,col){ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(x,y+s*.25,s*.42,s*.34,0,0,7);ctx.fill();for(const[dx,dy]of[[-.42,-.18],[-.15,-.42],[.15,-.42],[.42,-.18]]){ctx.beginPath();ctx.ellipse(x+dx*s,y+dy*s,s*.15,s*.18,0,0,7);ctx.fill()}}
+function drawJudgeUI(){const J=S.judge;ctx.imageSmoothingEnabled=false;ctx.translate(0,TY);const t=J.t;
+  rr(8,150,200,198,12,'rgba(20,32,43,.86)');
+  // おやぶん：くんくん
+  const sniff=t<3.6,bob=sniff?Math.round(Math.abs(Math.sin(t*9))*-3):0,lean=sniff?Math.round(Math.sin(t*2.2)*14):(J.win?-10:10);
+  ctx.drawImage(ART.oyabun,92+lean,138+bob,32,32);
+  if(sniff&&t>.3){txt(['くん','くんくん','くんくん…'][Math.floor(t*2)%3],108+lean+22,146,7,'#fff','left')}
+  ctx.drawImage(ART.portrait.poromi,14,156,28,28);ctx.drawImage(ART.portrait.cat,174,156,28,28);
+  txt('おやぶんの くんくんジャッジ',108,190,8.5,'#a9c0d3');
+  const u=clamp((t-.6)/2.6,0,1),e=1-Math.pow(1-u,3),A=J.a*e,B=J.b*e;
+  const L=20,R=196;rr(L,198,R-L,14,7,'#33424f');ctx.fillStyle=TEAMC[1];ctx.fillRect(L,198,(R-L)*A/100,14);ctx.fillStyle=TEAMC[2];ctx.fillRect(R-(R-L)*B/100,198,(R-L)*B/100,14);
+  txt(A.toFixed(1)+'%',L,222,10,TEAML[1],'left');txt(B.toFixed(1)+'%',R,222,10,TEAML[2],'right');
+  if(t>3.6){const k=clamp((t-3.6)/.25,0,1),sc=1+(1-k)*1.5;ctx.save();ctx.globalAlpha=.9*k;pawStamp(J.win?28:188,170,22*sc,J.win?TEAMC[1]:TEAMC[2]);ctx.restore();if(!J.stampS){J.stampS=1;SND.sfx('splat')}}
+  if(t>3.9){const win=J.win;txt(J.tie?'ひきわけ！':win?'しばいぬチームの かち！':'ネコだんの かち…',108,240,12.5,win?'#ffd84a':TEAML[2]);
+    txt(win?'おぴょ！ おぴょ！':'つぎは まけないぞ おぴょ',108,256,8.5,'#fff');
+    const st=S.stats;txt(`ぬったマス ${st.painted}　びしょっ ${st.splats}　されちゃった ${st.deaths}`,108,271,8,'#d8e4ee');
+    txt(`ポイント ${st.pts}${S.newBest?'　🏅じこベスト！':''}`,108,285,9.5,S.newBest?'#ffd84a':'#fff');
+    if(st.mvp)txt(`MVP ${st.mvp.name}　ぬり王 ${st.king.name}`,108,299,8,'#ffe2b8');}
+  UI=[];if(J.done){rr(20,310,84,30,15,TEAMC[1],'#fff');txt('もういちど',62,325,9.5,'#fff');btn('again',20,310,84,30);
+    rr(112,310,84,30,15,'#33424f','#fff');txt('メニューへ',154,325,9.5,'#fff');btn('menu',112,310,84,30)}}
+function drawTitle(){ctx.setTransform(SC,0,0,SC,OX,OY);ctx.imageSmoothingEnabled=false;
+  const g=ctx.createLinearGradient(0,0,0,VH);g.addColorStop(0,'#7fd3ff');g.addColorStop(.48,'#bfeaff');g.addColorStop(.5,'#2f8fd8');g.addColorStop(.62,'#4fb0ee');g.addColorStop(.63,'#f3dfa6');g.addColorStop(1,'#e8cf8e');ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH);ctx.translate(0,TY);
+  // ぺんきの水たまり
+  const t=S.time;for(let i=0;i<7;i++){ctx.fillStyle=i%2?TEAMC[2]:TEAMC[1];ctx.globalAlpha=.9;ctx.beginPath();ctx.ellipse(30+i*27,300+Math.sin(i*2.3)*24,18+Math.sin(t*2+i)*2,8,0,0,7);ctx.fill()}ctx.globalAlpha=1;
+  ctx.drawImage(ART.logo,8,40,200,64);
+  const bob=Math.round(Math.sin(t*4)*2);
+  ctx.drawImage(ART.dog.poromi.down[Math.floor(t*6)%4],52,208+bob,48,48);ctx.drawImage(ART.cat.tora.down[Math.floor(t*6+2)%4],116,208-bob,48,48);
+  txt('VS',108,232,12,'#fff');
+  if(Math.floor(t*2)%2===0)txt('タップで スタート',108,340,12,'#fff');
+  txt('しばいぬ と ネコ の ぺんき じんとり',108,118,8.5,'#1b2733','center','#fff',3);
+  UI=[];btn('play',0,0,VW,VH)}
+function drawSelect(){ctx.setTransform(SC,0,0,SC,OX,OY);ctx.imageSmoothingEnabled=false;ctx.fillStyle='#1d3346';ctx.fillRect(0,0,VW,VH);ctx.translate(0,TY);
+  UI=[];txt('じゅんび',108,22,14,'#fff');
+  // stage
+  txt('ステージ',108,46,8.5,'#a9c0d3');rr(16,54,184,30,8,'#2b4860');txt('◀',28,69,12,'#fff');txt('▶',188,69,12,'#fff');txt(STG[S.stageIdx].name,108,69,11,'#fff');btn('sl',8,54,40,30);btn('sr',168,54,40,30);
+  // stage preview
+  const st=STG[S.stageIdx];const pv=stagePreview(S.stageIdx);ctx.drawImage(pv,84,90,48,72);
+  // weapon
+  txt('ブキ',108,176,8.5,'#a9c0d3');const ws=['shower','mop','bucket'];
+  ws.forEach((w,i)=>{const x=14+i*64;const on=S.weapon===w;rr(x,184,60,54,8,on?TEAMC[1]:'#2b4860',on?'#fff':null);ctx.drawImage(ART.icons[w],x+18,188,24,24);txt(WNAME[w],x+30,222,7,'#fff');btn('w_'+w,x,184,60,54)});
+  const D={shower:'れんしゃで ぬりも たたかいも',mop:'しっぽを ぶんぶん！まわりを ぐるっと ぬる',bucket:'とおくへ ドバッと おおきく ぬる'};txt(D[S.weapon],108,248,7.5,'#ffe2b8');
+  // cpu
+  txt('ネコだんの つよさ',108,268,8.5,'#a9c0d3');['easy','normal','hard'].forEach((c,i)=>{const x=14+i*64,on=S.cpu===c;rr(x,274,60,30,15,on?TEAMC[2]:'#2b4860',on?'#fff':null);txt(CPUNAME[c],x+30,289,8.5,on?'#08332c':'#fff','center',on?'#e8fff9':'#1b2733',2);btn('c_'+c,x,274,60,30)});
+  rr(40,316,136,36,18,'#ffd84a','#fff');txt('しあい かいし！',108,334,12,'#7a3b00','center','#fff4c4',3);btn('go',40,316,136,36);
+  txt('◀ タイトル',30,368,7.5,'#a9c0d3','left');btn('back',0,356,90,28);txt(S.mute?'🔇 おと オフ':'🔊 おと オン',108,368,7.5,'#a9c0d3');btn('mute',80,356,56,28);
+  try{const best=JSON.parse(localStorage.getItem('nuri_best')||'{}')[S.stageIdx+'_'+S.cpu];if(best)txt(`じこベスト ${best}`,190,368,7.5,'#ffd84a','right')}catch(e){}}
+const pvCache={};
+function stagePreview(i){if(pvCache[i])return pvCache[i];const c=mk(GW,GH),x=c.getContext('2d'),id=x.createImageData(GW,GH);const m=STG[i].map;
+  for(let y=0;y<GH;y++)for(let xx=0;xx<GW;xx++){const ch=m[y][xx],k=(y*GW+xx)*4;let col=[232,214,168];if(ch==='~')col=[47,143,216];else if(SOLIDB.has(ch))col=[110,104,96];else if(ch==='1')col=[255,138,31];else if(ch==='2')col=[42,212,184];id.data.set([...col,255],k)}
+  x.putImageData(id,0,0);return pvCache[i]=c}
+
+/* ---------- loop ---------- */
+let lastT=0,acc=0;const FIX=1/60;
+function frame(ts){if(S.manual){try{draw()}catch(e){console.error(e)}requestAnimationFrame(frame);return}try{const dt=Math.min(.1,(ts-lastT)/1000||0);lastT=ts;if(!S.paused){pollKeys();acc+=dt;let n=0;while(acc>=FIX&&n<6){step(FIX);acc-=FIX;n++}if(n>=6)acc=0}draw()}catch(e){console.error(e)}requestAnimationFrame(frame)}
+
+/* ---------- boot ---------- */
+function boot(){resize();ART=makeArt();SND=makeSound();STG=STAGES;[BAL,W8]=defaults();
+  window.__N={S,BAL,W8,snd:()=>SND,start:(si=0,w='shower',c='normal')=>{startMatch(si,w,c);S.introT=S.introLen},tick:sec=>{const n=Math.round(sec/FIX);for(let i=0;i<n;i++)step(FIX)},
+    setInput:o=>{S.testInput=o?Object.assign({mx:0,my:0,ax:0,ay:-1,fire:false,dive:false,bomb:false},o):null},auto:()=>{const p=S.players[0];p.ai={tx:0,ty:0,field:null,retarget:0,seen:0,target:null,strafe:1,diveHold:0,stuck:0,lx:0,ly:0};p.human=false;p.autoHuman=true},counts:()=>{const c=countPaint();return{a:c[1],b:c[2],total:S.total}},draw};
+  requestAnimationFrame(frame)}
+function setPause(h){if(h===S.paused)return;S.paused=h;if(h){SND.bgm(null);touches.clear();stick=null;aimT=null;mouseAim=null;Object.assign(S.input,{mx:0,my:0,fire:false,dive:false,bomb:false})}else{if(S.mode==='play'){SND.bgm(S.last30?'lastspurt':'battle');S.hitstop=1;S.banner={t:'さいかい！',life:1,big:1}}else if(S.mode==='select')SND.bgm('title');else if(S.mode==='judge'&&S.judge&&S.judge.done)SND.bgm('result')}}
+document.addEventListener('visibilitychange',()=>setPause(document.hidden));addEventListener('blur',()=>setPause(true));addEventListener('focus',()=>setPause(false));
+boot();
+
+</script>
+</body></html>
