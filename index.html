@@ -1580,7 +1580,7 @@ async function titleScreen(){
   S.mode='field';bgm(musFor());S.flash=0.6;
   if(!cont){await say('おぴょは ぼうけんに でます');await say('さがさないで ください ぴょ');await say('じゅうじキー か がめんタップで あるく\nAボタンで コマンド\nBを おしながら あるくと ダッシュ');hideMsg();save()}
   else if(P.cleared&&!P.pg){P.pg=1;await say('どうくつの おくや しまの どこかに\nつよい ぬしたちが いるらしい…');hideMsg()}
-  if(cont&&P.beat.nushi&&!P.turtleHint){P.turtleHint=1;await say('【だいがた アップデート】\nひがしの はまべに うみがめが\nきている らしい…');hideMsg();save()}
+  if(cont&&P.beat.nushi&&!P.turtleHint){P.turtleHint=1;await say('【おおがた アップデート】\nひがしの はまべに うみがめが\nきている らしい…');hideMsg();save()}
   S.busy=false;S.idleT=0}
 window.__G={P,S,IN,EN,SK,RUSH,SET,readCode,myCode,tileAt,run,F:{battle,bossRush,shrineEvent,voyage,trueEnding,awakenScene,oyaAwakenScene,npcTalk,turtleEvent,giveStar},warpTo:(m,x,y,d)=>{P.map=m;P.x=x;P.y=y;P.dir=d||'down';S.trail=[{x,y:y+1,px:x,py:y+1,dir:'up'}];bgm(musFor())},press,setPad:d=>setPad(d),battle:k=>run(()=>battle(k)),save,get timeOrigin(){return performance.timeOrigin}};
 const start=()=>titleScreen();
