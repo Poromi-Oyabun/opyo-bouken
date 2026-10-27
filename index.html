@@ -238,7 +238,31 @@ const SFX2={
     const h=t+0.46;noise(h,0.25,0.32,'highpass',900);tone(520,h,0.08,'square',0.07,1400);tone(300,h+0.08,0.16,'square',0.07,60);return 0.72}
 };
 
-Object.assign(TR,TR2);Object.assign(SFX,SFX2);
+Object.assign(TR,TR2);
+/* ===== music5: むしの もり の BGM（すべて オリジナル） ===== */
+Object.assign(TR,{
+  mori:{bpm:116,v:[
+    {type:'square',vol:0.036,notes:n8(['67 71 74:2 72 71 69:2', '66 69 74:2 72:2 69:2', '67 71 76:3 74 71:2', '72:2 71 69 67:4', '74 76 79:2 78 76 74:2', '73 74 76:2 74:2 69:2', '72 74 76:2 79:2 76:2', '74:6 0:2', '71 74 79:2 78 76 74:2', '72 76 79:3 77 76:2', '74 79 83:2 81 79 78:2', '81:4 78:2 74:2', '72 76 81:2 79 77 76:2', '74 78 81:2 79 78 76:2', '79:2 74 71 67:2 71:2', '67:4 0:4'].join(' '))},
+    {type:'triangle',vol:0.12,notes:n8(['43:2 50:2 43:2 50:2', '38:2 45:2 38:2 45:2', '40:2 47:2 40:2 47:2', '36:2 43:2 36:2 43:2', '43:2 50:2 43:2 50:2', '38:2 45:2 38:2 45:2', '36:2 43:2 36:2 43:2', '38:2 45:2 38:2 45:2', '40:2 47:2 40:2 47:2', '36:2 43:2 36:2 43:2', '43:2 50:2 43:2 50:2', '38:2 45:2 38:2 45:2', '45:2 52:2 45:2 52:2', '38:2 45:2 38:2 45:2', '43:2 50:2 43:2 50:2', '43:2 50:2 43:2 50:2'].join(' '))},
+    {type:'square',vol:0.016,notes:n8(['0 71 0 74 0 71 0 74', '0 69 0 74 0 69 0 74', '0 71 0 76 0 71 0 76', '0 72 0 76 0 72 0 76', '0 71 0 74 0 71 0 74', '0 69 0 74 0 69 0 74', '0 72 0 76 0 72 0 76', '0 69 0 74 0 69 0 74', '0 71 0 76 0 71 0 76', '0 72 0 76 0 72 0 76', '0 71 0 74 0 71 0 74', '0 69 0 74 0 69 0 74', '0 72 0 76 0 72 0 76', '0 69 0 74 0 69 0 74', '0 71 0 74 0 71 0 74', '0 71 0 74 0 71 0 74'].join(' '))},
+  ]},
+  juka:{bpm:84,v:[
+    {type:'square',vol:0.028,notes:n8(['76:6 74 71', '72:4 67:4', '69:6 71 72', '71:4 75:4', '76:3 79:3 78 76', '74:4 72 71 72:2', '74:6 72 74', '75:8', '74:3 71:3 67:2', '69:4 74:4', '76:3 74 71:2 67:2', '72:6 71 69', '72:3 76:3 81:2', '78:4 75:2 71:2', '76:8', '0:8'].join(' '))},
+    {type:'square',vol:0.016,notes:n8(['52 59 64 67 71 67 64 59', '48 55 60 64 67 64 60 55', '45 52 57 60 64 60 57 52', '47 54 59 63 66 63 59 54', '52 59 64 67 71 67 64 59', '48 55 60 64 67 64 60 55', '50 57 62 66 69 66 62 57', '47 54 59 63 66 63 59 54', '43 50 55 59 62 59 55 50', '50 57 62 66 69 66 62 57', '52 59 64 67 71 67 64 59', '48 55 60 64 67 64 60 55', '45 52 57 60 64 60 57 52', '47 54 59 63 66 63 59 54', '52 59 64 67 71 67 64 59', '52 59 64 67 71 67 64 59'].join(' '))},
+    {type:'triangle',vol:0.11,notes:n8(['40:8', '36:8', '45:8', '35:8', '40:8', '36:8', '38:8', '35:8', '43:8', '38:8', '40:8', '36:8', '45:8', '35:8', '40:8', '40:8'].join(' '))},
+  ]},
+  mboss:{bpm:172,v:[
+    {type:'square',vol:0.04,notes:n8(['74 74 77 74 81:2 79 77', '76 77 76 74 69:2 72 73', '74 74 77 74 82:2 81 79', '81:2 79 77 76:2 72:2', '74 74 77 74 81:2 84 86', '84 81 77 81 86:2 84 81', '82:3 81 79:2 77:2', '76 77 79 81 85:4', '79:3 81 82:2 79:2', '81:3 79 77:2 74:2', '77:3 79 81:2 84:2', '86:6 0 86', '86:3 84 81:2 77:2', '84:3 81 79:2 76:2', '76 79 81 85:3 84 81', '81:2 85:2 88:3 0'].join(' '))},
+    {type:'triangle',vol:0.14,notes:n8(['38 38 50 38 38 50 38 50', '38 38 50 38 38 50 38 50', '34 34 46 34 34 46 34 46', '36 36 48 36 36 48 36 48', '38 38 50 38 38 50 38 50', '38 38 50 38 38 50 38 50', '34 34 46 34 34 46 34 46', '33 33 45 33 33 45 33 45', '43 43 55 43 43 55 43 55', '43 43 55 43 43 55 43 55', '38 38 50 38 38 50 38 50', '38 38 50 38 38 50 38 50', '34 34 46 34 34 46 34 46', '36 36 48 36 36 48 36 48', '33 33 45 33 33 45 33 45', '33 33 45 33 33 45 33 45'].join(' '))},
+    {type:'square',vol:0.013,notes:n8(['69 70 69 70 69 70 69 70', '69 70 69 70 69 70 69 70', '65 66 65 66 65 66 65 66', '67 68 67 68 67 68 67 68', '69 70 69 70 69 70 69 70', '69 70 69 70 69 70 69 70', '65 66 65 66 65 66 65 66', '64 65 64 65 64 65 64 65', '67 68 67 68 67 68 67 68', '67 68 67 68 67 68 67 68', '69 70 69 70 69 70 69 70', '69 70 69 70 69 70 69 70', '65 66 65 66 65 66 65 66', '67 68 67 68 67 68 67 68', '64 65 64 65 64 65 64 65', '64 65 64 65 64 65 64 65'].join(' '))},
+  ]},
+  mfinal:{bpm:150,v:[
+    {type:'square',vol:0.042,notes:n8(['84:2 79 75 72 75 79 84', '84:2 80 77 72 77 80 84', '86:3 84 82:2 77:2', '83:2 79 74 71:4', '84 87 91:2 89 87 84:2', '87 84 80:2 84 87 92:2', '91:3 89 87:2 86:2', '86:4 83:2 79:2', '87:3 84 82:2 79:2', '82:3 86 89:2 94:2', '91:3 87 84:2 87:2', '89:6 87 84', '84:3 80 77:2 80:2', '83:3 86 89:2 91:2', '91:4 87:2 84:2', '83:4 79 83 86 89'].join(' '))},
+    {type:'triangle',vol:0.14,notes:n8(['36:2 48:2 36:2 48:2', '32:2 44:2 32:2 44:2', '34:2 46:2 34:2 46:2', '31:2 43:2 31:2 43:2', '36:2 48:2 36:2 48:2', '32:2 44:2 32:2 44:2', '34:2 46:2 34:2 46:2', '31:2 43:2 31:2 43:2', '39:2 51:2 39:2 51:2', '34:2 46:2 34:2 46:2', '36:2 48:2 36:2 48:2', '32:2 44:2 32:2 44:2', '41:2 53:2 41:2 53:2', '31:2 43:2 31:2 43:2', '36:2 48:2 36:2 48:2', '31:2 43:2 31:2 43:2'].join(' '))},
+    {type:'square',vol:0.016,notes:n8(['60 63 67 63 60 63 67 63', '56 60 63 60 56 60 63 60', '58 62 65 62 58 62 65 62', '55 59 62 59 55 59 62 59', '60 63 67 63 60 63 67 63', '56 60 63 60 56 60 63 60', '58 62 65 62 58 62 65 62', '55 59 62 59 55 59 62 59', '55 58 63 58 55 58 63 58', '58 62 65 62 58 62 65 62', '60 63 67 63 60 63 67 63', '56 60 63 60 56 60 63 60', '53 56 60 56 53 56 60 56', '55 59 62 59 55 59 62 59', '60 63 67 63 60 63 67 63', '55 59 62 59 55 59 62 59'].join(' '))},
+  ]},
+});
+Object.assign(SFX,SFX2);
 const snd=document.getElementById('snd');
 snd.addEventListener('click',()=>{muted=!muted;snd.textContent=muted?'♪OFF':'♪ON';snd.setAttribute('aria-pressed',String(!muted));initAudio();if(master)master.gain.setTargetAtTime(muted?0:0.5,AC.currentTime,0.02)});
 
@@ -825,6 +849,10 @@ const ART2={
 const A2=(typeof ART2!=='undefined')?ART2:{tiles:{},sprites:{}};
 for(const k in A2.tiles){try{T[k]=bmp(A2.tiles[k].rows,A2.tiles[k].pal)}catch(e){}}
 for(const k in A2.sprites){try{EI[k]=bmp(A2.sprites[k].rows,A2.sprites[k].pal)}catch(e){}}
+/* ART5: むしの もり の ドット絵（キャラデザ担当・背景担当） */
+const ART5={"tiles":{"mgrass":{"rows":["lggggglggggggtgd","lgdgggggggtggggg","ggddggggggtggggg","lggggggglgggglgg","ggglggggtggggggg","lgggdgdggggggglg","gltggggglgggggdl","gggggggtgglggggg","ggtlgggggggggdgg","glgggggggglgdlgg","dgggggdglgggdlgg","gggggggllggggglg","tgglgggglggggggd","gggdlgllggddlltg","ggggggdtggggggdg","glgggggglgtdddgg"],"pal":{"g":"#3c9a4a","l":"#5ab85a","d":"#2c7a3c","t":"#1e5a2e"}},"mflower":{"rows":["gglgdglgdggggggt","ggggtggltddggdtg","ggggggdggggogggt","gggwgggggdoyoggg","ggwrwggggglolggg","lggwggdgglglglgg","lggglggggodggggg","ggdgtgggoyoggggg","ggllgtggtogggggg","ggltlgwtlgggglgg","ggdggwpwlggggddl","gdggglwgddggtwld","gggdtgggggggwrwg","ggggggggggtlgwgg","ggdggggddtgggggg","gggdgggggdgggggg"],"pal":{"g":"#3c9a4a","l":"#5ab85a","d":"#2c7a3c","t":"#1e5a2e","r":"#ff7a9a","y":"#ffd23f","p":"#c890ff","w":"#ffffff","o":"#fff2a0"}},"mtall":{"rows":["ggggtlgggdtggggd","gglgdggggggggggl","gggggggggggggdgg","dggggdgdlgdggtgg","gggglltgggggggdg","ggggdgggggggdggg","gdgggggKKdgKgggg","gtgKglgLLgdLKggg","KglLggKLLggLLdgt","LggLggLLLggLLggd","LKKLggLLKggLKdKK","LLLLKgLKLggLLdLL","LLLLLlLLLggLLgLL","LLLLLdLLLggLLgLL","LLLLLdLLLggLLgLL","LLLLLgLLLggLLtLL"],"pal":{"g":"#3c9a4a","l":"#5ab85a","d":"#2c7a3c","t":"#1e5a2e","L":"#4ac85a","K":"#8ae06a"}},"mtree":{"rows":["gggggFffffFggggg","ggghFhfffFfffggg","gghFhhffFffffFgg","ghFhhhfFffffFffg","gFhhhhFffffFfffg","FffffFffffFffffF","ffffFffffFffffFf","fffFffffFffffFff","gfFffffFffffFffg","gFffffFffffFfffg","ggfffFffffFfffgg","gggfFffTTtfffggg","gggggffTTtfggggg","gggggggTTtgggggg","gggggggTTtgggggg","gggggggTTtgggggg"],"pal":{"g":"#3c9a4a","f":"#2a7a3a","F":"#1a5a2a","h":"#4ab05a","T":"#7a4a24","t":"#4a2a12"}},"mpath":{"rows":["pgqggspgggpggggq","ppppqppqpppppppq","pspppqsssppspppp","qpppspppspppppps","qpppsppppspppqqp","qqsppqpppppppppq","pqqpppqpspppsppp","qpppppsqpqpsppsp","pppqppspqppspppp","pqpppppspqppppss","ppqqspspppqppqpp","psqppppsppppppqp","spppqpppppppqsqp","pppppppppppppppq","pqppppsppsqpqppp","ggppgggsggggqgsg"],"pal":{"p":"#c8a068","q":"#a8804a","s":"#e0c08a","g":"#3c9a4a"}},"mmush":{"rows":["gdglggggggglggdg","tggggggggggggggg","dgggggggdggdgggg","ggdgggdgggglgtgt","lgdgggggdwdggglg","ggtlgwRRRRRlllgt","ggggRRRRRRRRtggl","dggRRRwRRRwRRgdl","tggRRRRRRRRRRgdg","glgggggssgggtddg","tgdggggssgggdlgg","dggggggssgggtggg","gggglglssggldlgt","glggglgssggggggg","gdtgggtgggdgglgg","ltggdggdgtldtggg"],"pal":{"g":"#3c9a4a","l":"#5ab85a","d":"#2c7a3c","t":"#1e5a2e","R":"#e83a3a","w":"#ffffff","s":"#f0e0c8"}},"mdoor":{"rows":["BbbbbbbBbbbbbbBb","bbbbBbbbbbbBbbbb","bBbbbbbbBbbbbbbB","bbbbbBbbbbbbBbbb","bbBbboooooobbbbb","bbbbBooooooBbBbb","bbbBooOOOOoobbbb","BbbbooOOOOoobbBb","bbbbooOOOOoobbbb","bBbbooOOOOoobbbB","bbbbooOOOOooBbbb","bbBbooOOOOoobbbb","bbbbooOOOOoobBbb","bbbBooOOOOoobbbb","BbbbooOOOOoobbBb","bbbbooOOOOoobbbb"],"pal":{"b":"#7a4a24","B":"#4a2a12","o":"#ffd880","O":"#fff4c0"}},"mdoorC":{"rows":["BbbbbbbBbbbbbbBb","bbbbBbbbbbbBbbbb","bBbbbbbbBbbbbbbB","bbbbbBbbbbbbBbbb","bbBbbvBBBBvbbbbb","bbbbBvBBBBvBbBbb","bbbBBvBBBBvBbbbb","BbbbBvBBBBvBbbBb","bbbbvvvvvvvvbbbb","bBbbBvBBBBvBbbbB","bbbbBvBBBBvBBbbb","bbBbBvBBBBvBbbbb","bbbbvvvvvvvvbBbb","bbbBBvBBBBvBbbbb","BbbbBvBBBBvBbbBb","bbbbBvBBBBvBbbbb"],"pal":{"b":"#7a4a24","B":"#4a2a12","v":"#3a9a3a"}},"jwall":{"rows":["hbbbbBbbbbBhbbbB","BbbbbBbbbhBbbbbB","BbbbbBbhbbBbbbbB","BbbbbhbbbbBbbbbB","bbBhbbbBbbbbBbhb","bhBbbbbBbbbbhbbb","bbBbbbbBbbhbBbbb","bbBbbbbBhbbbBbbb","BbbbbBhbbbBbbbbB","BbbbhBbbbbBbbbbh","BbhbbBbbbbBbbhbB","hbbbbBbbbbBhbbbB","bbBbbbbBbhbbBbbb","bbBbbbbhbbbbBbbb","bbBbbhbBbbbbBbbb","bbBhbbbBbbbbBbhb"],"pal":{"b":"#6a3e1c","B":"#40220c","h":"#8a5a30"}},"jfloor":{"rows":["fFFffffffffffFFf","FFfffFFFFFFfffFF","FfffFFffffFFfffF","fffFffffffffFfff","ffFfffFFFFfffFff","fFFffFffffFffFFf","fFffFffffffFffFf","fFffFffFFffFffFf","fFffFffFFffFffFf","fFffFffffffFffFf","fFFffFffffFffFFf","ffFfffFFFFfffFff","fffFffffffffFfff","FfffFFffffFFfffF","FFfffFFFFFFfffFF","fFFffffffffffFFf"],"pal":{"f":"#b8844a","F":"#9a6a38"}},"jmoss":{"rows":["fFFffffffffffFFf","FFfffFFFFFFfffFF","FffmMFffffFFfffF","fffFmMffffffFfff","ffFfffFFFFfffFff","fFFffFffmMFffFFf","fFffFffffffFffFf","fFffFffFFffFffFf","fFffFffFFffFfmMf","fFffFfffmMfFfmMf","fFFffFffffFffFmM","ffFfffFFmMffmMff","fffFffffffffFfff","FfffFFfffmMMfffF","FFfffFFFmmMfffFF","fFFffffffffffFFf"],"pal":{"f":"#b8844a","F":"#9a6a38","m":"#7aff9a","M":"#c8ffd8"}},"jexit":{"rows":["ffffffffffffffff","ffffffffffffffff","ffffffffffffffff","ffffffffffffffff","fffffoooooofffff","ffffoooOOoooffff","fffoooOOOOooofff","fffooOOOOOOoofff","fffooOOOOOOoofff","fffooOOOOOOoofff","fffoooOOOOooofff","ffffoooOOoooffff","fffffoooooofffff","ffffffffffffffff","ffffffffffffffff","ffffffffffffffff"],"pal":{"f":"#b8844a","o":"#ffd880","O":"#fff4c0"}}},"sprites":{"tentou":{"rows":["....................",".......kkkk.kkk.....",".....kkhhhhkhrrkk...","....khhhhhhkrrrrrk..","..kkhkhhhhrkrrrrrrk.","..kkhkhkkrrkrkkrrrk.",".kbbbbbkkrrkrkkrrrrk","kbbbbbbbrrrkrrrrrrRk","kbwebwbbrrrkrrrrRRRk","kbeebebbrrrkrrkkRRRk","kbbbbbbbrrrkrRkkRRk.",".kbbbbbrrrrkRRRRRRk.","..kkkrrrrRRkRRRRRk..",".....kkrRRRkRRRkk...","......kkkkkkkkk.....",".....k...k...k......"],"pal":{"r":"#e83a2c","R":"#a8201c","h":"#ff9a80","b":"#2a2030","k":"#1a1020","e":"#111111","w":"#ffffff"}},"dango":{"rows":["..........kkkk........",".....kkkkkhhhhkkkk..k.","....kGhhGhhGhgGggGkkGk","k..kkGhhGhhGggGggGgkGk",".kkhhGhhGggGggGggGggGk",".kgggGhgGggGggGggGggGk","kgggggggGggGggGggGggGk","kgweggggGggGggGggGGGGk","kgeegGggGggGggGgGGGGGk","kgggGGggGggGgGGGGGGGGk",".kgGGGggGggGGGGGGGGkGk","..kkkGggGGGGGGGGGGkkGk","....kGkkGkGGGGGkkGkkGk",".....k.kkkkkkkkk.k.kk."],"pal":{"g":"#8a8fa4","G":"#5c6076","h":"#c4c8d8","k":"#1a1020","e":"#111111","w":"#ffffff"}},"chou":{"rows":["....kkkk..k...kkkk....","..kkooookkbkkkooookk..",".koooooookbbkoooooook.","koooooooowbwoooooooook","kooooooooobboooooooook","kooowwoooobboooooowwok","kooooooooObboooooooOOk","koooooooOObbooooooOOOk","koooooOOOObbooooOOOOOk",".koooyyyyObboyyyyOOOk.","..kkyyyyyybbyyyyyykk..","..kyyyyyyybbyyyyyyyk..","..kyyywwyybbyyyywwYk..","..kyyyyyyYbbyyyyyYYk..","...kyyyYYYbbyyyYYYk...","....kyYYYkbbkyYYYk....",".....kkkk.kk.kkkk.....","......................"],"pal":{"o":"#ff9a3a","O":"#d0601c","y":"#ffd23f","Y":"#d8a020","b":"#2a2030","k":"#1a1020","e":"#111111","w":"#ffffff"}},"nijichou":{"rows":["....kkkk..k...kkkk....","..kkooookkbkkkooookk..",".koooooookbbkoooooook.","koooooooowbwoooooooook","kooooooooobboooooooook","kooowwoooobboooooowwok","kooooooooObboooooooOOk","koooooooOObbooooooOOOk","koooooOOOObbooooOOOOOk",".koooyyyyObboyyyyOOOk.","..kkyyyyyybbyyyyyykk..","..kyyyyyyybbyyyyyyyk..","..kyyywwyybbyyyywwYk..","..kyyyyyyYbbyyyyyYYk..","...kyyyYYYbbyyyYYYk...","....kyYYYkbbkyYYYk....",".....kkkk.kk.kkkk.....","......................"],"pal":{"o":"#ff6ad0","O":"#7a6aff","y":"#5ae0ff","Y":"#7aff8a","b":"#3a2a50","k":"#1a1020","e":"#111111","w":"#ffffff"}},"hachi":{"rows":["........kkkkkkkk....",".......kaaaaaaaak...","..k...kaaaaaaaaaak..","...k..kaaaaaaaaaak..","...kkkkaaaaaaaaaak..","..kbbbbbaaaayaayybk.",".kbbbbbbbyybyybyybk.",".kbwebwbbyybyybyybyk","kbbeebbbbbybyybyybYk",".kbbbbbbbyybyybyybYk",".kbbbbbbbyybyybYYbYk","..kbbbbbyyybyYbYYbk.","...kkkkkkyybYYbYYbk.",".........kkbYYbkkbk.","........kk.kkkkk.k..","........k..k..k....."],"pal":{"y":"#ffd23f","Y":"#d8a020","b":"#2a2030","a":"#cfeaff","k":"#1a1020","e":"#111111","w":"#ffffff"}},"imomushi":{"rows":["........................","....kk..................","..kkhhkk................",".khhhgggkkk.kk.kkk.kk...","khhhgggggggkggkgggkggk..","khgwegwggygggyggygggygk.","kggeegegGggggggggggggggk","kggggggGGggggggGggggggGk","kggpgGGpGggGggGGggGggGGk",".kggGGGGgGGGgGGgGGGgGGk.","..kkGGkkGGGkGGkGGGkGGk..","....kk..kkk.kk.kkk.kk...","........................"],"pal":{"g":"#7ad04a","G":"#4a9a2a","h":"#b8f080","y":"#ffe040","p":"#f4a0b0","k":"#1a1020","e":"#111111","w":"#ffffff"}},"tonbo":{"rows":["..........................","......kkkkkkkkkkkkkk......",".....kaaaaaaaaaaaaaak.....","...kkaaaaaaaaaaaaaaaak....","..kbbbaaaaaaaaaaaaaak.....",".kbwebwebkkkkkkkkkkk......",".kbeebeebkkkkkkkkkkkkkkkk.","kbbbbbbbbBBbbBbbBbbBbbBbbk",".kbbbbbBBBBBBBBBBBBBBBBBBk",".kbbbbBBBkkkkkkkkkkkkkkkk.","..kbBBBaaaaaaaaaaaakk.....","...kkaaaaaaaaaaaaaaaak....",".....kaaaaaaaaaaaaaak.....","......kkkkkkkkkkkkkk......"],"pal":{"b":"#3a8ae0","B":"#1a50a0","a":"#d8f0ff","k":"#1a1020","e":"#111111","w":"#ffffff"}},"semi":{"rows":["....................","....................",".......kkkkkk.......","...kkkkaaggggk......","..kggggaaaaaagkkk...",".kgggggaaAAAAAaaakk.","kgwegwegaaaaaaAAAAAk","kgeegeegaaaaaaaaaaak","kggggggGaAAAAAaaaaak","kggggGGGaaaaaaAAAAAk",".kggGGGgaaaaaaaaaaak","..kGGGgggAAAAAaaaaak","...kkkkGGGGGGkAAAAAk",".......kkkkkkkkkkkk.","......kk.kk.kk......","......k..k..k......."],"pal":{"g":"#5a7a3a","G":"#3a5226","a":"#d8ecf4","A":"#9ab8c8","k":"#1a1020","e":"#111111","w":"#ffffff"}},"kamemushi":{"rows":["..s...............","s.................",".s...kkkkkkkkkkk..","..kkkgggggggggggk.",".kggggggggggggggk.","kgggggggggggggggk.","kgwegggggggggggggk","kgeegGgggggggggggk","kgggGGgggggggggggk",".kGGGggggGGGGGGGgk","..kkkkgggGGGGGGgk.","......kgggGGGGgk..",".......kggGGGgk...","........kgGGgkk...",".......k.kggk.....","..........kk......"],"pal":{"g":"#5ab05a","G":"#3a7a3a","s":"#c8e090","k":"#1a1020","e":"#111111","w":"#ffffff"}},"kuwa":{"rows":["........................","........................","..kk....................",".kbbk...................","kbbk.......kkkkkkkk.....","kbbbk....kkhhhhBbbbkk...",".kbbbkkkkhhhhhbBbbbbbk..","..kbbbbbbbhhhbbBbbbbbbk.","...kbbwebbbbbbbBbbbbbbk.","...kbbeebbbbbbbBbbbbbbk.","...kbbbbbBBbbbbBbbbbBBk.","...kbbbbBBBbbbbBbbBBBBk.","...kkbbBBBbbbbbBBBBBBBk.","..kbbbbkkbbbbbBBBBBBBk..",".kbbbbk..kkbBBBBBBBkk...","kbbbbk.....kkkkBkkk.k...","kbbbk......kk..kk..kk...",".kkk.......k...k...k...."],"pal":{"b":"#6a3a1c","B":"#3a1c0c","h":"#b07040","k":"#1a1020","e":"#111111","w":"#ffffff"}},"kumo":{"rows":["..........ktk.........","..........ktk.........","..........ktk.........","........kkktkk........",".......khhhtppk.......","......khhhhppppk......","...k.khhhpepepppk..k..","....khhhpppppppppkk...","....khppweppweppPk....","....kpppeeppeepPPk....","..kkkppppppppPPPPkkkk.",".....kppppppPPPPk.....",".....kkppPkkkPPkkk....","....kk.kpPPPPPkk.kk...","...k...kkkkkkk.k...k..","......k.........k.....","......k.........k.....",".....k...........k...."],"pal":{"p":"#8a5ac8","P":"#5a3290","h":"#c8a0f0","t":"#e8e8f0","k":"#1a1020","e":"#111111","w":"#ffffff"}},"ari":{"rows":["............................","............................",".k..k.....k..k.....k..k.....",".kk.k.....k.kk.....kk.k.....",".kkk......kkk......kkk......","krrrkkkkkkrrrkkkkkkrrrkkkkkk","rwerrrrrrrwerrrrrrrwerrrrrrr","reeRRrrrrreeRRrrrrreeRRrrrrr","krRRrrrrrRrRRrrrrrRrRRrrrrrR",".kkkrrrRRRkkkrrrRRRkkkrrrRRR","....kkkkkk...kkkkkk...kkkkkk","...kkkkkk...kkkkkk...kkkkkk.","...k.k.k....k.k.k....k.k.k..","............................"],"pal":{"r":"#c0402a","R":"#80241a","k":"#1a1020","e":"#111111","w":"#ffffff"}},"kabuto":{"rows":["....k...................",".kkkbk..................","kbbbk...................","kbbk....................","kbbk........kkkkkk......","kbbk......kkhhhBhbkk....","kbbk.....khhhhhBbbbbk...","kbbbkkkkkhhhhhbBbbbbbk..",".kbbbbbbbbhhbbbBbbbbbbk.","..kbbbbbbbbbbbbBbbbbbbk.","..kbbbwebbbbbbbBbbbbbBBk","..kbbbeebBBbbbbBbbbBBBk.","...kbbbbBBbbbbbBbBBBBBk.","...kbbBBBBbbbbbBBBBBBk..","....kkkkkkbbbBBBBBBBk...","..........kkBBBBBBkk....","............kkkBkk..k...","...........k...k...k...."],"pal":{"b":"#5a2e18","B":"#2e160a","h":"#a8683c","k":"#1a1020","e":"#111111","w":"#ffffff"}},"kinkabuto":{"rows":["....k...................",".kkkbk..................","kbbbk...................","kbbk....................","kbbk........kkkkkk......","kbbk......kkhhhBhbkk....","kbbk.....khhhhhBbbbbk...","kbbbkkkkkhhhhhbBbbbbbk..",".kbbbbbbbbhhbbbBbbbbbbk.","..kbbbbbbbbbbbbBbbbbbbk.","..kbbbwebbbbbbbBbbbbbBBk","..kbbbeebBBbbbbBbbbBBBk.","...kbbbbBBbbbbbBbBBBBBk.","...kbbBBBBbbbbbBBBBBBk..","....kkkkkkbbbBBBBBBBk...","..........kkBBBBBBkk....","............kkkBkk..k...","...........k...k...k...."],"pal":{"b":"#f0b828","B":"#a87000","h":"#fff4a0","k":"#1a1020","e":"#111111","w":"#ffffff"}},"jobachi":{"rows":["..................................",".............kkkkkk...kkkkkk......","...........kkaaaaaakkkaaaaaakk....","..........kaaaaaaaaaaaaaaaaaaak...",".........raaaaaaaaaaaaaaaaaaaaak..",".........gaaaaaaaaaaaAaaaaaaaaaAk.","......g..gaagaaaaaAAAAaaaaaaaAAAk.","......g..gkagaaaAAAAAaaaaaaAAAAk..","......g..g.kgaAAAAAkaaaaAAAAAAk...",".....gggggggggkkkkk.kkAAAAAAkk....",".....ggggggggg.kkkkkkkkkkkkkk.....",".....kbbbbbbbkkbbyybbyybbkkbbk....","....kbbbbbbbbbybbyybbyybbyybbk....","...kbbbbbbbbbbbbbyybbyybbyybbk....","...kbbwebbwebbbbbyybbyybbyybbk....","...kbbeebbewbbbbbyybbyybbyybbyk...","...kbbbbbbbbbBBbbyybbyybbyybbyyk..","...kbbbbbbbbBBBbbyybbyybbyybbyyk..","...kbbbbbbbBBBBbbyybbyybbyybbYYk..","....kbbbpBBBBpybbbybbbybbbybbbYkkk",".....kbbBBBBByybbbybbbybbbYbbbYk..","......kyyyyyyyyybbyybbyybbYYbbYk..",".....kyyyyyyyyyybbyybbYYbbYYbbk...",".....kyyyyyyyyyybbyybbYYbbYYbbk...","......kyyyyyyyyybbyYbbYYbbYYbbk...",".......kkkkkkyyybbYYbbYYbbYkbbk...",".............kkYbbYYbbYYbbkkbbk...","..............kkbbkkbbkkbbkkbbk...",".............kkkbkkkbkkkbbkkbbk...",".............k..kk..kk..kk..kk....","............kk..kk..kk............","............k...k...k............."],"pal":{"y":"#ffd23f","Y":"#d8a020","b":"#2a2030","B":"#141018","a":"#d8f0ff","A":"#a8d0ec","g":"#ffe066","r":"#e83a5c","p":"#f4a0b0","k":"#1a1020","e":"#111111","w":"#ffffff"}},"okama":{"rows":[".......k.............kk...........","........kk........kkkk............",".........kk...kkkkkk..............","........kkkkkkggwwegk.............",".......kgwweggggeeek..............","........keeeggggeee...............",".........eeeggggggk...............","..........kggggggk................","..........kgpgggp.................",".......kkk.kggggk.................","......kgggk.kgkk..................","......kgggk..kk...................","......kggkgk.....kkk..............","......kkgggk....kgggk.............","......kggggk..kkgggggk............",".......kggGGkkgggggggk............",".......kggGGgggggggggkkkk.........",".......kggGGGgggggGGgghhhkk.......",".......kgggGGggggGGGgghhgggk......","........kggGGggGGGGggghgggggk.....","........kggGGkGGGGhGggggggggk.....",".........kkGGGGGGhGggggggggggk....","...........kGGGkkGhggggggggggk....","...........kGGkkGhhggggggggggk....","............kkkGkhggggggggggGk....",".............kGkkggggggggggGGk....","............kGk.kgggggggggGGGk....","............kGk.kggggggggGGGGk....","............kGk.kgggggggGGGGGk....","............kGk..kgggggGGGGGk.....","...........kGk...kgggGGGGGGGk.....","...........kGk...kkGGGGGGGGk......","...........kGk..kGGkkGGGGkGGk.....","...........kGk.kGkk..kkkk.kkGk...."],"pal":{"g":"#6ac84a","G":"#3a8a2a","h":"#a8f080","p":"#f4a0b0","k":"#1a1020","e":"#111111","w":"#ffffff"}},"kabuking":{"rows":[".......kkk................................","....kkkbbbk...............................","...kbbbbbbk...............................","..kbbbbbbk................................","..kbbbkkk.............r...................","..kbbbk...........g...g...g...............","..kbbbk...........g...g...g...............","..kbbbk...........g...g...g...............","..kbbbk...........ggggggggg...............","..kbbbk..........kggggggggg...............","..kbbbk.........kbbkkkkkkkkkkkkk..........","..kbbbbk.......kbbbkhhhhhhBhhhbbkkk.......","..kbbbbbk......kbbhhhhhhhhBhbbbbbbbk......","...kbbbbkkkkkkkbbbhhhhhhhhBbbbbbbbbbk.....","...kbbbbbbbbbbbbbhhhhhhhbbBbbbbbbbbbbk....","....kbbbbbbbbbbbbhhhhhbbbbBbbbbbbbbbbbk...",".....kbbbbbbbbbbbhhhbbbbbbBbbbbbbbbbbbbk..",".....kbbbbbbbbbbbbbbbbbbbbBbbbbbbbbbbbbbk.",".....kbbbbwebwebbbbbbbbbbbBbbbbbbbbbbbbBk.",".....kbbbbeebeebbbbbbbbbbbBbbbbbbbbbbBBBk.",".....kbbbbbbbbbbBBbbbbbbbbBbbbbbbbbbBBBBk.",".....kbbbbbbbbbBBBbbbbbbbbBbbbbbbbBBBBBBk.",".....kbbbbbbbBBBBBbbbbbbbbBbbbbbBBBBBBBBk.","......kbbbbbBBBBBbbbbbbbbbBbbbBBBBBBBBBk..",".......kbbBBBBBBbbbbbbbbbbBbBBBBBBBBBBk...","........kBBBBBBbbbbbbbbbbbBBBBBBBBBBBk....",".........kkkkkkkbbbbbbbbBBBBBBBBBBBBk.....","................kbbbbbBBBBBBBBBBBBBk......",".................kkkBBBBBBBBBBBBkkk.......","....................kkkkkkkkkkkkk....k....","...................k.....kk....k....k.....","..................k.....k.....k....k......"],"pal":{"b":"#6a3418","B":"#34180a","h":"#c88850","g":"#ffd23f","r":"#e83a5c","k":"#1a1020","e":"#111111","w":"#ffffff"}},"omurasaki":{"rows":["..................k.........k.................","...k...............k.......k..............k...","..kuk..............kk.....kk.............kuk..","..kuukk.............kk...kk............kkuuk..","..kuuuukk............kkkkk...........kkuuuuk..",".kuuuuuuuk..........kbkbkk..........kuuuuuuuk.",".kuuuuuuuukk.......kbbbbbbk.......kkuuuuuuuuk.",".kuuuuuuuuuuk......kbwebwek......kuuuuuuuuuuk.",".kuuuuuuuuuuukk....kbeebeek....kkuuuuuuuuuuuk.",".kuuuuuuwwuuuuuk...kbbbbbbk...kuuuuuuuwwuuuuk.","kuuuuuuuwwuuuuuukk..kbbbbk..kkuuuuuuuuwwuuuuuk","kuuuuuuuuuuuuuuuuukkkbbbbkkkuuuuuuuuuuuuuuuuuk","kuuuuuuuuuuuuuuuuuuukbbbbkuuuuuuuuuuuuuuuuuuuk",".kuuuuuuuuuuwwuuuuuuubbbbuuuuuuuuuwwuuuuuuuuk.","..kuuuuuuuuuwwuuuuuuubbbbuuuuuuuuuwwuuuuuuuk..","..kuuuwwuuuuuuuuuuuuubbbbuuuuuuuuuuuuuuuwwuk..","...kuuwwuuuuuuuuuuuuubbbbuuuuuuuuuuuuuuuwwk...","....kuuuuuuuuuuuuuuuubbbbuuuuuuuuuuuuuuuuk....",".....kuuuuuuuuuuuuuuubbbbuuuuuuuuuuuuuuuk.....",".....kuuuuuuuuuuuuuvvbbbbvvuuuuuuuuuuuuuk.....","......kuuuuuuuuvvvvvvbbbbvvvvvvuuuuuuuuk......",".......kuuvvvvvvvvvvvbbbbvvvvvvvvvvvuuk.......",".......kvvvvvvvvvvvvvbbbbvvvvvvvvvvvvvk.......",".......kvvvvvvvvvvvvvbbbbvvvvvvvvvvvvvk.......",".......kvvvvvvvvvvvvvbbbbvvvvvvvvvvvvvk.......",".......kvvvvvvvvvvvvvbbbbvvvvvvvvvvvvvk.......",".......kvvvvvoovvvvvkbbbbkvvvvvvvoovvvk.......","........kvvvvoovvvvk.kbbk.kvvvvvvoovvk........","........kvvvvvvvvvvk.kbbk.kvvvvvvvvvvk........","........kvvvvvvvvvk...kk...kvvvvvvvvvk........","........kvvvvvkkkk..........kkkkvvvvvk........",".........kkkkk..................kkkkk.........","..............................................",".............................................."],"pal":{"u":"#5a4ad8","v":"#3a2a90","w":"#ffffff","o":"#ff9a3a","b":"#2a2030","k":"#1a1020","e":"#111111"}},"omurasaki2":{"rows":["..................k.........k.................","...k...............k.......k..............k...","..kuk..............kk.....kk.............kuk..","..kuukk.............kk...kk............kkuuk..","..kuuuukk............kkkkk...........kkuuuuk..",".kuuuuuuuk..........kbkbkk..........kuuuuuuuk.",".kuuuuuuuukk.......kbbbbbbk.......kkuuuuuuuuk.",".kuuuuuuuuuuk......kbwebwek......kuuuuuuuuuuk.",".kuuuuuuuuuuukk....kbeebeek....kkuuuuuuuuuuuk.",".kuuuuuuwwuuuuuk...kbbbbbbk...kuuuuuuuwwuuuuk.","kuuuuuuuwwuuuuuukk..kbbbbk..kkuuuuuuuuwwuuuuuk","kuuuuuuuuuuuuuuuuukkkbbbbkkkuuuuuuuuuuuuuuuuuk","kuuuuuuuuuuuuuuuuuuukbbbbkuuuuuuuuuuuuuuuuuuuk",".kuuuuuuuuuuwwuuuuuuubbbbuuuuuuuuuwwuuuuuuuuk.","..kuuuuuuuuuwwuuuuuuubbbbuuuuuuuuuwwuuuuuuuk..","..kuuuwwuuuuuuuuuuuuubbbbuuuuuuuuuuuuuuuwwuk..","...kuuwwuuuuuuuuuuuuubbbbuuuuuuuuuuuuuuuwwk...","....kuuuuuuuuuuuuuuuubbbbuuuuuuuuuuuuuuuuk....",".....kuuuuuuuuuuuuuuubbbbuuuuuuuuuuuuuuuk.....",".....kuuuuuuuuuuuuuvvbbbbvvuuuuuuuuuuuuuk.....","......kuuuuuuuuvvvvvvbbbbvvvvvvuuuuuuuuk......",".......kuuvvvvvvvvvvvbbbbvvvvvvvvvvvuuk.......",".......kvvvvvvvvvvvvvbbbbvvvvvvvvvvvvvk.......",".......kvvvvvvvvvvvvvbbbbvvvvvvvvvvvvvk.......",".......kvvvvvvvvvvvvvbbbbvvvvvvvvvvvvvk.......",".......kvvvvvvvvvvvvvbbbbvvvvvvvvvvvvvk.......",".......kvvvvvoovvvvvkbbbbkvvvvvvvoovvvk.......","........kvvvvoovvvvk.kbbk.kvvvvvvoovvk........","........kvvvvvvvvvvk.kbbk.kvvvvvvvvvvk........","........kvvvvvvvvvk...kk...kvvvvvvvvvk........","........kvvvvvkkkk..........kkkkvvvvvk........",".........kkkkk..................kkkkk.........","..............................................",".............................................."],"pal":{"u":"#2a1a5a","v":"#120a30","w":"#c8b0ff","o":"#ff4aa0","b":"#0a0614","k":"#6a4aff","e":"#111111"}}}};
+for(const k in ART5.tiles){try{T[k]=bmp(ART5.tiles[k].rows,ART5.tiles[k].pal)}catch(e){}}
+for(const k in ART5.sprites){try{EI[k]=bmp(ART5.sprites[k].rows,ART5.sprites[k].pal)}catch(e){}}
 T.palm=T.palm||T.tree;T.isand=T.isand||tint(T.sand,'#ffd8e8',0.28);T.igrass=T.igrass||tint(T.grass,'#3aa8c0',0.22);
 T.rwall=T.rwall||tint(T.wall,'#5a6ab0',0.55);T.rfloor=T.rfloor||tint(T.floor,'#3a2a80',0.45);T.shrine=T.shrine||T.home;
 T.turtle=T.turtle||tileCanvas(x=>{x.drawImage(T.sand,0,0);px(x,'#1a2a10',2,6,12,7);px(x,'#4a9a3a',3,7,10,5);px(x,'#c8a040',5,8,6,3);px(x,'#7ac060',13,8,2,3)});
@@ -877,8 +905,8 @@ const EN={
   nushi:{n:'うみの ぬし',hp:900,atk:46,def:28,agi:14,exp:2000,g:800,img:'nushi',boss:'nushi',salt:1,acts:[['だいつなみ！！',1],['しおを ふきかけた！',1],['しずかに ちからを ためている…',0]],drop:'crown'}
 };
 const ZK=['ball','crab','jelly','wave','gull','hop','crow','hop2','pball','dwave','mist','bat','mist2','bat2','rcrab','gball','boss','nkani','kboss','nushi'];
-const EXPT=[0,0];for(let L=2;L<=51;L++)EXPT[L]=Math.round(2*Math.pow(L-1,2.5)+4*(L-1));
-const MAXLV=50;
+const EXPT=[0,0];for(let L=2;L<=71;L++)EXPT[L]=Math.round(2*Math.pow(L-1,2.5)+4*(L-1));
+const MAXLV=70;
 const FIELD=MAPS.field,CAVE=MAPS.cave,B2=MAPS.b2;
 const HOLES={'9,6':['it','fbone',1],'23,7':['it','snack',2],'26,20':['none'],'11,21':['g',30]};
 const CHESTS={'field:4,7':['it','jerky',1],'field:27,9':['g',150],'cave:8,11':['it','fbone',1],'b2:3,1':['eq','harness'],'b2:9,1':['it','bone',3]};
@@ -917,6 +945,48 @@ const STARS={'isle:13,7':'s','ruin:13,6':'r'};
 Object.assign(SYM,{O:'tako',Q:'raineko',V:'kage',J:'kujira'});
 const RECLV={boss:5,nkani:12,kboss:16,nushi:24,tako:32,raineko:35,kage:38,kujira:44};
 
+/* ================= data v5「むしの もり」（クリア後の あたらしい しま） ================= */
+Object.assign(EQ,{
+  mitsumant:{n:'みつばちの マント',s:'a',v:50,regen:8,rare:1},
+  kama:{n:'みどりの ブーメラン',s:'w',v:58,rare:1},
+  tsuno:{n:'カブトの つのボール',s:'w',v:68,rare:1},
+  nijihane:{n:'にじいろの はね',s:'a',v:66,regen:12,rare:1}});
+Object.assign(IT,{mitsu:{n:'はちみつ',k:'full',rare:1}});
+ITO.push('mitsu');
+SK.push({k:'ibuki',n:'もりの いぶき',lv:50,mp:20},{k:'guru',n:'ぐるぐる まんまる',lv:56,mp:24},{k:'mega',n:'メガ おぴょ',lv:62,mp:32});
+Object.assign(EN,{
+  // もりの そと
+  tentou:{n:'てんてんテントウ',hp:350,atk:100,def:60,agi:30,exp:420,g:130,img:'tentou',acts:[['てんとう アタック！',1],['ころんと ひっくりかえった',0]],rare:['mitsu',1/30]},
+  dango:{n:'まるまるダンゴムシ',hp:380,atk:96,def:130,agi:8,exp:450,g:140,img:'dango',acts:[['まるまって ころがってきた！',1],['まるまって ガードしている',0]],rare:['cheese',1/14]},
+  chou:{n:'ひらひらチョウ',hp:300,atk:102,def:50,agi:70,exp:430,g:130,img:'chou',acts:[['りんぷんを ふりまいた！',1],['ひらひらダンス！',-5]],rare:['milk',1/3]},
+  hachi:{n:'はりきりバチ',hp:320,atk:112,def:56,agi:64,exp:470,g:150,img:'hachi',acts:[['はりで ちくっ！',1],['ぶんぶん とびまわっている',0]],rare:['mitsu',1/12]},
+  imomushi:{n:'もぐもぐイモムシ',hp:420,atk:94,def:64,agi:6,exp:440,g:120,img:'imomushi',heal:1,acts:[['はっぱごと たいあたり！',1],['はっぱを もぐもぐ たべている',0]],rare:['fbone',1/16]},
+  tonbo:{n:'すいすいトンボ',hp:310,atk:106,def:52,agi:90,exp:460,g:140,img:'tonbo',acts:[['すいーっと ぶつかってきた！',1],['めを ぐるぐる まわしている',0]],rare:['sasami',1/12]},
+  semi:{n:'ミンミンゼミ',hp:340,atk:104,def:60,agi:40,exp:450,g:140,img:'semi',acts:[['とびついてきた！',1],['ミーンミンミン！\nうるさくて やるきが へった',-6]],rare:['milk',1/3]},
+  kamemushi:{n:'くさいカメムシ',hp:360,atk:102,def:70,agi:24,exp:460,g:150,img:'kamemushi',acts:[['ぶつかってきた！',1],['くさい においを はなった！',-1]],rare:['jerky',1/14]},
+  // たいじゅの なか
+  kuwa:{n:'はさみクワガタ',hp:500,atk:126,def:100,agi:30,exp:620,g:200,img:'kuwa',acts:[['おおあごで はさんだ！',1],['あごを カチカチ ならした',0]],rare:['jerky',1/10]},
+  kumo:{n:'もりの クモ',hp:450,atk:122,def:80,agi:50,exp:600,g:190,img:'kumo',acts:[['いとを とばしてきた！',1],['いとまき こうげき！',-7]],rare:['mitsu',1/10]},
+  ari:{n:'ありんこたい',hp:420,atk:108,def:90,agi:44,exp:600,g:200,img:'ari',acts:[['みんなで いっせいに かみついた！',2],['ぎょうれつを ととのえている',0]],rare:['gsnack',1/24]},
+  kabuto:{n:'つのつのカブト',hp:580,atk:132,def:130,agi:18,exp:680,g:230,img:'kabuto',acts:[['つので つきあげた！',1],['どっしり かまえている',0]],rare:['fbone',1/10]},
+  // レア
+  kinkabuto:{n:'きんいろカブト',hp:24,atk:60,def:560,agi:80,exp:6000,g:400,img:'kinkabuto',gold:1,acts:[['つので つんつん！',1],['きんいろに かがやいている',0]],rare:['awd',.5],flee:.35},
+  nijichou:{n:'にじいろチョウ',hp:18,atk:50,def:480,agi:90,exp:4800,g:200,img:'nijichou',gold:1,acts:[['ひらひら ぶつかってきた',1],['にじいろの りんぷんが まっている',0]],rare:['gsnack',.5],flee:.4},
+  // ボス
+  jobachi:{n:'じょおうバチ',hp:6200,atk:104,def:70,agi:50,exp:9000,g:9000,img:'jobachi',boss:'hachi',big:1,acts:[['はりの あらし！！',-3],['はたらきバチを よんだ！',2],['はりで ちくちく！',1],['はねを ぶんぶん ふるわせている…',0]],drop:'mitsumant'},
+  okama:{n:'おおカマキリ',hp:6000,atk:116,def:84,agi:62,exp:11000,g:10000,img:'okama',boss:'kama',big:1,acts:[['カマで れんぞくぎり！！',-3],['いっせんの カマ！！',-2],['かげうつし！',-5],['しずかに カマを かまえた…',0]],drop:'kama'},
+  kabuking:{n:'カブトだいおう',hp:8800,atk:128,def:116,agi:20,exp:14000,g:12000,img:'kabuking',boss:'kabuto',big:1,acts:[['つので なげとばした！！',-2],['どっしり ぶつかってきた！',2],['つのを ひからせた…\nやるきを すわれた！',-6],['ちからを ためている…',0]],drop:'tsuno'},
+  omurasaki:{n:'もりの じょおう オオムラサキ',hp:10000,atk:128,def:100,agi:72,exp:25000,g:30000,img:'omurasaki',boss:'murasaki',big:1,acts:[['りんぷんの あらし！！',-3],['はねの ひかり！！',-2],['まぼろしの まい！',-5],['にじいろの かぜ！！',1],['ゆめの りんぷん…\nやるきを すわれた！',-6],['おおきく はねを ひろげた…',0]],drop:'nijihane'}
+});
+ZK.push('tentou','dango','chou','hachi','imomushi','tonbo','semi','kamemushi','kuwa','kumo','ari','kabuto','kinkabuto','nijichou','jobachi','okama','kabuking','omurasaki');
+Object.assign(BTITLE,{hachi:'はなばたけの じょおう',kama:'もりの けんし',kabuto:'たいじゅの おう',murasaki:'もりの ぬし'});
+const MAPS5={"mori": ["~~~~~~~~~~~~~~~~~~~~~~~~~~", "~~~~~~TTTTTTZTTTTTTTT~~~~~", "~~~~TTTkkkkkpkkkkkTTTTT~~~", "~~~TTkkkTkkkpgkkTkkkBTTT~~", "~~TTkkgggggpggggggkkkkTT~~", "~~TkgfgTggmpggTgfggkkkkT~~", "~~TkggggggpggggggggggkkT~~", "~TTggfggTgpgfgggTmgggkkTT~", "~TMgggggggpggngggggggfgkT~", "~TTgfgmggppggggggTgggggXT~", "~~TggggggpggfgggggggggTTT~", "~~TTgfggpggggTgfgggggTT~~~", "~~~TTggpggfgggggggfTTbb~~~", "~~~~bTTpgggggTTTggTbbbb~~~", "~~~~bbbpbbbbbbbbbbbbbb~~~~", "~~~~~bbbbbGbbbbbbbbbb~~~~~", "~~~~~~~~bbbbbbbbbb~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~~~"], "juka": ["####################", "######____F____#####", "######_________#####", "#########_##########", "#X__#_____l____#__X#", "#_#_#_#####_##_#_###", "#_#___#___#_#__#___#", "#_#####_#_#_#_####_#", "#___l___#___#_____l#", "##########A#########", "#___#_____l_____#__#", "#_###_#########_##_#", "#_____#___X___#____#", "#####_#_#####_#_####", "#X____l___Z_____l_X#", "####################"]};
+const MORI=MAPS5.mori,JUKA=MAPS5.juka;
+Object.assign(CHESTS,{'mori:23,9':['it','mitsu',2],'juka:1,14':['it','gsnack',2],'juka:18,14':['it','awd',2],'juka:10,12':['it','mitsu',3],'juka:1,4':['g',5000],'juka:18,4':['it','fbone',3]});
+Object.assign(SYM,{B:'jobachi',M:'okama',A:'kabuking',F:'omurasaki'});
+Object.assign(RECLV,{jobachi:48,okama:52,kabuking:56,omurasaki:60});
+const MORI_OPEN=()=>!!P.beat.kujira;
+
 Object.assign(IT,{medal:{n:'めいじんの はなメダル',k:'key',rare:1},starf:{n:'ほしの かけら',k:'key',rare:1}});ITO.push('medal','starf');
 
 /* ================= state ================= */
@@ -932,17 +1002,21 @@ const S={mode:'title',walk:null,shakeT:0,red:0,flash:0,dark:0,battle:null,parts:
 
 
 /* ================= rendering ================= */
-const GM={field:()=>FIELD,cave:()=>CAVE,b2:()=>B2,isle:()=>ISLE,ruin:()=>RUIN};
+const GM={field:()=>FIELD,cave:()=>CAVE,b2:()=>B2,isle:()=>ISLE,ruin:()=>RUIN,mori:()=>MORI,juka:()=>JUKA};
 function tileAt(map,x,y){
-  const G=GM[map]();const out=(map==='field'||map==='isle')?'~':'#';
+  const G=GM[map]();const out=(map==='field'||map==='isle'||map==='mori')?'~':'#';
   if(y<0||y>=G.length||x<0||x>=G[0].length)return out;let c=G[y][x];
   if(map==='field'){if(c==='W'&&P.beat.wave)c='.';if(c==='K'&&P.beat.kani)c='.';if(c==='R'&&P.beat.karasu)c='T';if(c==='o'&&P.dug.includes(x+','+y))c='d';if(c==='G'&&!P.beat.nushi)c='.'}
   if(map==='b2'&&c==='N'&&P.beat.nushi)c='_';
   if(map==='isle'){if(c==='O'&&P.beat.tako)c='a';if(c==='Q'&&P.beat.neko)c='i';if(c==='o'&&P.dug.includes('isle:'+x+','+y))c='d';if(c==='*'&&P.starGot.s)c='i'}
   if(map==='ruin'){if(c==='V'&&P.beat.kage)c='_';if(c==='J'&&P.beat.kujira)c='_';if(c==='*'&&P.starGot.r)c='_'}
+  if(map==='mori'){if(c==='B'&&P.beat.hachi)c='k';if(c==='M'&&P.beat.kama)c='g';if(c==='Z'&&!(P.beat.hachi&&P.beat.kama))c='z'}
+  if(map==='juka'){if(c==='A'&&P.beat.kabuto)c='_';if(c==='F'&&P.beat.murasaki)c='l'}
   return c}
-const SOLID=new Set(['~','^','S','W','#','K','R','N','X','P','Y','G','O','Q','V','J','n']);
+const SOLID=new Set(['~','^','S','W','#','K','R','N','X','P','Y','G','O','Q','V','J','n','m','B','M','A','F','z']);
 function tileImg(c){const m=P.map;
+  if(m==='mori')return{g:T.mgrass,f:T.mflower,k:T.mtall,T:T.mtree,p:T.mpath,m:T.mmush,b:T.sand,G:T.turtle,n:T.mgrass,X:T.mgrass,Z:T.mdoor,z:T.mdoorC,B:T.mtall,M:T.mgrass}[c]||T.mgrass;
+  if(m==='juka')return{'#':T.jwall,_:T.jfloor,l:T.jmoss,Z:T.jexit,X:T.jfloor,A:T.jfloor,F:T.jmoss}[c]||T.jfloor;
   if(m==='isle')return{a:T.isand,i:T.igrass,P:T.palm,Y:T.shrine,Z:T.door,G:T.turtle,O:T.isand,Q:T.igrass,o:T.ihole,d:T.idug,X:T.isand,'^':T.rock,n:T.igrass,'*':T.istar}[c]||T.isand;
   if(m==='ruin')return{'#':T.rwall,_:T.rfloor,X:T.rfloor,Z:T.rexit,V:T.rfloor,J:T.rfloor,'*':T.rstar}[c]||T.rfloor;
   const cave=m!=='field';return{'.':T.sand,',':T.grass,'=':T.path,'T':T.tree,'^':T.rock,'H':T.home,'C':T.cave,'S':T.sign,'o':T.hole,'d':T.dug,'W':T.sand,'K':T.sand,'R':T.tree,'G':T.turtle,'#':m==='b2'?T.wall2:T.wall,'_':m==='b2'?T.floor2:T.floor,'D':T.stairs,'U':T.stairs,'E':T.floor,'L':T.down,'N':T.floor2,'X':cave?(m==='b2'?T.floor2:T.floor):T.grass}[c]||T.sand}
@@ -966,9 +1040,10 @@ function drawWorld(t){
   if(P.oya&&S.trail.length){const tr=S.trail[0];let ox2=tr.x,oy2=tr.y;if(S.walk&&tr.px!=null){ox2=tr.px+(tr.x-tr.px)*pw;oy2=tr.py+(tr.y-tr.py)*pw}g.drawImage((P.oyaAw?WK.og:WK.o)[tr.dir][frame],Math.round(ox2*TS-ox),Math.round(oy2*TS-oy)-2)}
   g.drawImage(WK.p[P.dir][frame],Math.round(cx*TS-ox),Math.round(cy*TS-oy)-2);
   if(P.aw&&rnd()<0.08)S.parts.push({x:cx*TS-ox+4+rnd()*8,y:cy*TS-oy+10,vx:0,vy:-12,life:0.6,c:'#ffd23f',tw:1});
-  const dk=P.map==='cave'||P.map==='b2'||P.map==='ruin';
-  if(dk){const r=((P.map==='b2'?2.0:P.map==='ruin'?2.8:2.3)+S.light*6)*TS,pcx=cx*TS-ox+8,pcy=cy*TS-oy+8;const ex=1*TS-ox+8,ey=1*TS-oy+8,hasE=P.map==='cave';
+  const dk=P.map==='cave'||P.map==='b2'||P.map==='ruin'||P.map==='juka';
+  if(dk){const r=((P.map==='b2'?2.0:P.map==='ruin'?2.8:P.map==='juka'?3.2:2.3)+S.light*6)*TS,pcx=cx*TS-ox+8,pcy=cy*TS-oy+8;const ex=1*TS-ox+8,ey=1*TS-oy+8,hasE=P.map==='cave';
     for(let yy=0;yy<SW;yy+=2)for(let xx=0;xx<SW;xx+=2){const d=Math.hypot(xx-pcx,yy-pcy)/r;const de=hasE?Math.hypot(xx-ex,yy-ey)/(TS*1.6):9;const dd=Math.min(d,de);if(dd>0.75){const th=BAY[((yy>>1)&3)*4+((xx>>1)&3)]/16;if(dd>1||th<(dd-0.75)*4){g.fillStyle='#000';g.fillRect(xx,yy,2,2)}}}}
+  if(P.map==='mori'){for(let i=0;i<4;i++){const lx=(i*71+t*10)%SW,ly=(i*53+t*14)%SW;px(g,i%2?'#8ad05a':'#ffd23f',lx|0,ly|0,2,1)}}
   if(P.map==='isle'&&!dk){for(let i=0;i<3;i++){const sx=(i*67+t*9)%SW,sy=(i*41+t*4)%60;if(Math.sin(t*2+i)>0.7)px(g,'#fffbe0',sx|0,sy|0,1,1)}}
 }
 
@@ -1010,7 +1085,7 @@ addEventListener('resize',fit);fit();
 const IN={typing:false,skip:false,res:null,choice:null,keys:new Set(),auto:false,bHeld:false};
 let lines=[];
 function setMsg(){msgT.textContent=lines.join('\n')}
-async function say(text,o={}){
+async function say(text,o={}){if(window.__LOGSAY)window.__LOGSAY.push(String(text));
   const wait=o.wait!==false;msgW.hidden=false;if(!o.add)lines=[];const parts=String(text).split('\n');const cps=SET.text==='fast'?16:34;
   for(let pi=0;pi<parts.length;pi++){lines.push('');if(lines.length>3)lines.shift();const chars=[...parts[pi]];IN.typing=true;IN.skip=false;more.hidden=true;
     for(let i=0;i<chars.length;i++){if(IN.skip){lines[lines.length-1]=parts[pi];break}lines[lines.length-1]+=chars[i];setMsg();if(chars[i]!==' '&&chars[i]!=='　'&&chars[i]!=='…'&&i%2===0)SFX.blip();await sleep(chars[i]==='…'?90:cps)}
@@ -1151,9 +1226,11 @@ async function oyabunArrives(){bgm(null);await sleep(300);await say('…とお�
   await tween(900,p=>S.battle.oyaIn=p*0.85);await sleep(200);SFX.bark();more.hidden=false;await waitA();more.hidden=true;
   bgm('hero');await sleep(SFX.join()*300);await say('おやぶん が かけつけた！');await tween(400,p=>S.battle.oyaIn=0.85*(1-p));P.oya=true;showStatus(true)}
 
-function zone(){const c=tileAt(P.map,P.x,P.y);if(P.map==='b2')return'deep';if(P.map==='cave')return'cave';if(P.map==='ruin')return'ruin';if(P.map==='isle')return'isle';if(c==='T')return'forest';if(c===','||c==='=')return'grass';return'beach'}
+function zone(){const c=tileAt(P.map,P.x,P.y);if(P.map==='b2')return'deep';if(P.map==='cave')return'cave';if(P.map==='ruin')return'ruin';if(P.map==='isle')return'isle';if(P.map==='mori')return'mori';if(P.map==='juka')return'juka';if(c==='T')return'forest';if(c===','||c==='=')return'grass';return'beach'}
 function nearSea(){for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(tileAt('field',P.x+dx,P.y+dy)==='~')return true;return false}
 function pickEnemy(){const z=zone();
+  if(z==='mori'){if(rnd()<1/45)return'nijichou';if(rnd()<1/70)return'kinkabuto';const c=tileAt(P.map,P.x,P.y);const L=c==='k'?['hachi','tonbo','semi','chou','hachi']:P.y<8?['tentou','chou','semi','kamemushi','imomushi']:['tentou','dango','imomushi','chou','kamemushi'];return L[Math.floor(rnd()*L.length)]}
+  if(z==='juka'){if(rnd()<1/45)return'kinkabuto';const L=['kuwa','kumo','ari','kabuto','hachi'];return L[Math.floor(rnd()*L.length)]}
   if(z==='isle'||z==='ruin'){if(rnd()<1/50)return'niji';if(z==='isle'&&rnd()<1/40)return'maneki'}else if(rnd()<1/48)return'gball';let L;
   if(z==='ruin')L=['iseki','hotaru','iseki','hotaru'];else if(z==='isle')L=P.y<6?['kobaneko','hitode','tobiuo','kobaneko']:['yadokari','tobiuo','hitode','kobaneko'];
   else if(z==='deep')L=['mist2','bat2','rcrab'];else if(z==='cave')L=['mist','bat'];
@@ -1167,9 +1244,12 @@ function bumpEvent(c,x,y){
   else if(c==='G')run(()=>turtleEvent(P.map==='field'));
   else if(c==='Y')run(shrineEvent);
   else if(c==='n')run(npcTalk);
+  else if(c==='z')run(async()=>{SFX.no();await say('おおきな きの とびらは\nつるで かたく とじられている…');await say('じょおうバチと おおカマキリを\nたおすと ひらくらしい',{add:true});hideMsg()});
   else if(SYM[c])run(()=>symPrompt(SYM[c]))}
 function arrive(){
   const c=tileAt(P.map,P.x,P.y);
+  if(P.map==='mori'&&c==='Z'){S.path=[];return run(async()=>{SFX.stairs();await warp('juka',11,14,'right','juka');if(!P.jukaSeen){P.jukaSeen=1;await say('たいじゅの なかに はいった…\nかべの こけが ぼんやり ひかっている');hideMsg()}})}
+  if(P.map==='juka'&&c==='Z'){S.path=[];return run(async()=>{SFX.stairs();await warp('mori',12,2,'down','mori')})}
   if(P.map==='field'&&c==='H'){S.path=[];return run(homeEvent)}
   if(P.map==='field'&&c==='C'){S.path=[];return run(enterCave)}
   if(P.map==='cave'&&c==='D'){S.path=[];return run(()=>warp('field',15,3,'down','field'))}
@@ -1181,7 +1261,7 @@ function arrive(){
   if(c==='*'){const id=STARS[P.map+':'+P.x+','+P.y];if(id&&!P.starGot[id]){S.path=[];return run(async()=>{await giveStar(id);hideMsg()})}}
   if(P.map==='cave'&&!S.sawLight&&!P.cleared&&Math.hypot(P.x-1,P.y-1)<5){S.sawLight=1;S.path=[];return run(async()=>{await say('でぐちの ひかりが みえる！');hideMsg()})}
   if(window.__NOENC)return;if(safe>0){safe--;return}
-  const rate=P.map==='isle'?(c==='i'?1/12:1/16):P.map==='ruin'?1/11:c==='='?1/40:c==='T'?1/9:c===','?1/12:P.map!=='field'?1/10:1/14;
+  const rate=P.map==='mori'?(c==='k'?1/8:c==='p'?1/30:c==='b'?1/40:1/14):P.map==='juka'?1/10:P.map==='isle'?(c==='i'?1/12:1/16):P.map==='ruin'?1/11:c==='='?1/40:c==='T'?1/9:c===','?1/12:P.map!=='field'?1/10:1/14;
   if(rnd()<rate){safe=4;S.path=[];run(()=>battle(pickEnemy()))}
   else if(P.a&&EQ[P.a].regen&&P.hp<P.mhp&&steps%4===0)P.hp=Math.min(P.mhp,P.hp+1)}
 async function fieldMenu(){
@@ -1242,17 +1322,17 @@ async function itemMenu(inBattle){
   else{SFX.up();if(it.k==='atk'){P.atk+=it.v;m=`ちからが ${it.v} あがった！`}else if(it.k==='def'){P.def+=it.v;m=`まもりが ${it.v} あがった！`}else if(it.k==='agi'){P.agi+=it.v;m=`すばやさが ${it.v} あがった！`}else{P.mhp+=it.v;P.hp+=it.v;m=`さいだいHPが ${it.v} あがった！`}}
   showStatus(true);await say(`おぴょは ${it.n}を ${it.k==='aw'||it.k==='mp'?'のんだ':'たべた'}！\n${m}`,{add:inBattle});return true}
 async function symPrompt(key){const D=EN[key];
-  const pre={boss:'おおきな なみが\nどうくつの まえを ふさいでいる！',tako:'ゆでだこだいおうが\nはまべで いびきを かいている…',raineko:'かみなりネコが\nこちらを にらんでいる！ バチバチ…',kage:'おぴょに そっくりな\nくろい かげが たっている…',kujira:'よぞらを のみこむ\nおおきな クジラが いる！！'}[key];
+  const pre={boss:'おおきな なみが\nどうくつの まえを ふさいでいる！',tako:'ゆでだこだいおうが\nはまべで いびきを かいている…',raineko:'かみなりネコが\nこちらを にらんでいる！ バチバチ…',kage:'おぴょに そっくりな\nくろい かげが たっている…',kujira:'よぞらを のみこむ\nおおきな クジラが いる！！',jobachi:'じょおうバチが\nかんむりを きらりと ひからせた！',okama:'おおカマキリが\nしずかに カマを かまえている…',kabuking:'たいじゅの おう カブトだいおうが\nどっしりと みちを ふさいでいる！',omurasaki:'にじいろの はねを ひろげた\nもりの じょおうが まっている…'}[key];
   await say(pre||`${D.n}が いる！\nとても つよそうだ…`,{wait:false});await sleep(300);
   await say('たたかいますか？',{add:true,wait:false});const c=await choose(['はい','いいえ'],{pos:[120,80,52]});if(c!==0){await say('おぴょは すこし はなれた');hideMsg();return}
   const rec=RECLV[key];
   if(rec&&P.lv<rec){await say(`…ほんとうに いいの？\nレベル${rec}くらいは ほしいぴょ`,{wait:false});const c2=await choose(['いく','やめる'],{pos:[120,80,52]});if(c2!==0){hideMsg();return}}
   await battle(key)}
 /* --- うみがめ・しま --- */
-async function turtleEvent(toIsle){SFX.ok();
+async function turtleEvent_v4(toIsle){SFX.ok();
   await say(toIsle?'うみがめが いる。\nせなかに のせてくれる みたいだ':'うみがめが まっている。',{wait:false});
   const c=await choose([toIsle?'しまへ わたる':'はまべへ かえる','やめる'],{pos:[100,64,72]});if(c!==0){hideMsg();return}hideMsg();await voyage(toIsle)}
-async function voyage(toIsle){bgm(null);await tween(350,p=>S.dark=p);showStatus(false);S.mode='cut';S.cut={k:'voyage',t0:tnow(),to:toIsle};bgm('turtle');await tween(350,p=>S.dark=1-p);S.dark=0;
+async function voyage_v4(toIsle){bgm(null);await tween(350,p=>S.dark=p);showStatus(false);S.mode='cut';S.cut={k:'voyage',t0:tnow(),to:toIsle};bgm('turtle');await tween(350,p=>S.dark=1-p);S.dark=0;
   await say(toIsle?'うみがめの せなかに のって\nほしの ふる うみを わたる…':'うみがめの せなかに のって\nいつもの はまべへ もどる…');await sleep(500);
   await tween(350,p=>S.dark=p);
   if(toIsle){P.map='isle';P.x=11;P.y=12;P.dir='up';S.trail=[{x:10,y:12,px:10,py:12,dir:'up'}]}else{P.map='field';P.x=28;P.y=14;P.dir='left';S.trail=[{x:28,y:15,px:28,py:15,dir:'up'}]}
@@ -1270,15 +1350,63 @@ async function shrineEvent(){bgm(null);SFX.ok();
     else if(o==='ゆめの とびら'){await bossRush()}
     else break}
   hideMsg();showStatus(false);bgm('isle')}
-async function npcTalk(){SFX.ok();
+async function npcTalk(){SFX.ok();if(P.map==='mori')return moriTalk();
   if(P.kun>=150&&!P.medal){P.medal=1;P.found.medal=1;await say('しろしば「すごい！\nくんくん マスターだね。\nこれ あげる！」');S.flash=0.6;await sleep(SFX.rare()*600);await say('レアアイテム！\n「めいじんの はなメダル」を もらった！\n（すごい いちげきが でやすくなる）');hideMsg();return}
-  const h=!P.beat.tako?'ひがしの はまに でっかい タコが\nねてるよ。ねぞうが わるいの':!P.beat.neko?'きたの くさはらで ずっと\nかみなりが ゴロゴロ いってる…':(P.oya&&!P.oyaAw)?'ほこらへ いってごらん。\nおやぶんの いしが ひかってたよ':!P.beat.kage?'きたの いせきに おぴょに\nそっくりな かげが いるって…':!P.beat.kujira?'いせきの おくで よぞらが\nたべられてる！ たすけて！':'ほこらの「ゆめの とびら」で\nぬしたちと もういちど あそべるよ';
+  const h=!P.beat.tako?'ひがしの はまに でっかい タコが\nねてるよ。ねぞうが わるいの':!P.beat.neko?'きたの くさはらで ずっと\nかみなりが ゴロゴロ いってる…':(P.oya&&!P.oyaAw)?'ほこらへ いってごらん。\nおやぶんの いしが ひかってたよ':!P.beat.kage?'きたの いせきに おぴょに\nそっくりな かげが いるって…':!P.beat.kujira?'いせきの おくで よぞらが\nたべられてる！ たすけて！':!P.beat.murasaki?'うみがめに たのむと\nむしが たくさんいる「もりの しま」へ\nつれていって くれるよ！':'ほこらの「ゆめの とびら」で\nぬしたちと もういちど あそべるよ';
   await say('しろしば「'+h+'」');
   if(P.stars<7){const g=P.starGot,L2=[];if(!g.s||!g.h)L2.push('しまの くさや すな');if(!g.t||!g.n)L2.push('しまの ぬし');if(!g.r||!g.m)L2.push('いせきの なか');if(!g.k)L2.push('いせきの かげ');await say(`しろしば「かけらは あと ${7-P.stars}こ。\n${L2.slice(0,2).join('や ')}に\nありそう。くんくんしてみて！」`)}
   if(P.beat.tako&&!P.beat.kujira&&rnd()<0.6)await say('しろしば「ぬしが ちからを ためたら\n「ようすをみる」で みがまえてね。\nダメージが はんぶんに なるよ」');
   if(!P.medal)await say(`しろしば「くんくん ${P.kun}かい？\n150かい したら いいもの あげる」`);
   if(!P.aw&&P.beat.tako)await say('しろしば「かくせいの みず？\nそれは いせきの ちからで めざめた\nこにしか つかえないよ」');
   hideMsg()}
+
+/* ===== v5 シナリオ担当：うみがめの 航路・もりの しろしば・最後の ボス・もりの エンディング ===== */
+// うみがめ：いまいる 場所から 行ける ところを えらぶ（もりの しまは クジラを たおすと 解放）
+async function turtleEvent(){SFX.ok();
+  const here=P.map;const opts=[];
+  if(here==='field')opts.push(['isle','しまへ わたる']);
+  if(here==='isle'||here==='mori')opts.push(['field','はまべへ かえる']);
+  if(here==='mori')opts.push(['isle','ほしふる しまへ']);
+  if(here!=='mori'&&MORI_OPEN())opts.push(['mori','もりの しまへ']);
+  opts.push([null,'やめる']);
+  await say(here==='field'?'うみがめが いる。\nせなかに のせてくれる みたいだ':'うみがめが まっている。',{wait:false});
+  const c=await choose(opts.map(o=>o[1]),{pos:[96,64,76]});hideMsg();if(c<0||!opts[c][0])return;await voyage(opts[c][0])}
+async function voyage(dest){if(dest===true)dest='isle';else if(dest===false)dest='field';
+  bgm(null);await tween(350,p=>S.dark=p);showStatus(false);S.mode='cut';S.cut={k:'voyage',t0:tnow(),to:dest!=='field'};bgm('turtle');await tween(350,p=>S.dark=1-p);S.dark=0;
+  await say({isle:'うみがめの せなかに のって\nほしの ふる うみを わたる…',field:'うみがめの せなかに のって\nいつもの はまべへ もどる…',mori:'うみがめの せなかに のって\nみどりの しまへ むかう…\nむしの こえが きこえてきた'}[dest]);await sleep(500);
+  await tween(350,p=>S.dark=p);
+  if(dest==='isle'){P.map='isle';P.x=11;P.y=12;P.dir='up';S.trail=[{x:10,y:12,px:10,py:12,dir:'up'}]}
+  else if(dest==='mori'){P.map='mori';P.x=10;P.y=14;P.dir='up';S.trail=[{x:11,y:14,px:11,py:14,dir:'left'}]}
+  else{P.map='field';P.x=28;P.y=14;P.dir='left';S.trail=[{x:28,y:15,px:28,py:15,dir:'up'}]}
+  S.mode='field';S.cut=null;bgm(dest);save();await tween(350,p=>S.dark=1-p);S.dark=0;
+  if(dest==='isle'&&!P.isleSeen){P.isleSeen=1;save();await say('ほしふる しまに ついた！');await say('よるに なると ほしが ふってくる\nふしぎな しま らしい…');if(P.lv>=30)await say('スキル「ほしふり」が\nつかえるように なった！');await say('まずは しまの まんなかに いる\nしろしばに はなしを きいてみよう！')}
+  if(dest==='mori'&&!P.moriSeen){P.moriSeen=1;save();await say('もりの しまに ついた！');await say('あっちでも こっちでも\nむしたちが ぶんぶん いっている…');if(P.lv<MAXLV)await say('レベルの じょうげんが 70に あがった！\nもっと つよく なれるぞ');await say('もりの なかの しろしばに\nはなしを きいてみよう！')}
+  hideMsg()}
+async function moriTalk(){
+  const b=P.beat;
+  const h=!b.hachi&&!b.kama?'きたの くさむらに じょおうバチ\nにしの もりに おおカマキリが いるよ。\nふたりを たおすと たいじゅが ひらくって':
+    !b.hachi?'のこるは きたの くさむらの\nじょおうバチ！ はりの あらしに\nきをつけてね':
+    !b.kama?'のこるは にしの もりの\nおおカマキリ！ カマを かまえたら\n「ようすをみる」で みがまえて':
+    !b.kabuto?'たいじゅの とびらが ひらいたよ！\nなかには カブトだいおうが いる。\nとっても かたいんだって':
+    !b.murasaki?'たいじゅの てっぺんに\nもりの じょおうが いるって…\nまぼろしの まいに きをつけて':
+    'もりの みんなが よろこんでるよ！\nありがとう おぴょ';
+  await say('しろしば「'+h+'」');
+  if(!b.murasaki&&rnd()<0.6)await say('しろしば「たかい くさむらでは\nむしが よく でてくるよ。\nレベルあげに ちょうど いいかも」');
+  if(!b.murasaki&&rnd()<0.4)await say('しろしば「きんいろカブトや\nにじいろチョウに あえたら\nラッキーだよ！ すぐ にげちゃうけど」');
+  hideMsg()}
+async function murasakiPhase2(e){bgm(null);S.shakeT=1.5;if(SFX.rumble)SFX.rumble();await say('オオムラサキの はねが\nよるの いろに そまっていく…！');
+  await tween(600,p=>S.dark=p*0.8);S.battle.bg='yoru';S.battle.e.img='omurasaki2';await tween(600,p=>S.dark=0.8*(1-p));S.dark=0;e.mul=1.2;
+  if(S.battle.oyaHere)await say('おやぶんが ちからづよく ほえた！');
+  if(P.aw&&S.battle.aw<=0){P.awg=100;SFX.up();await say('もりの ひかりが おぴょを つつむ…\nかくせいゲージが いっぱいに なった！')}
+  bgm('mfinal')}
+async function moriEnding(){
+  await say('オオムラサキは しずかに はねを たたみ\nもりの そらへ まいあがった…');
+  await sleep(400);S.flash=0.8;await sleep(SFX.rare()*600);
+  await say('もりの しまに あさの ひかりが さしこむ。\nむしたちが いっせいに うたいだした！');
+  await say('もりの じょおうを たおした！\nしょうごう「もりの ゆうしゃ」を\nてにいれた！');
+  P.moriClear=1;save();
+  await say('…おぴょ。\nもりも うみも ほしも\nぜんぶ たのしかったぴょ')}
+
 /* --- なかまコード（ともだちの おぴょを よぶ） --- */
 function ckSum(b){let c=0;for(const ch of b)c=(c*31+ch.charCodeAt(0))%997;return c}
 function myCode(name){const n=String(name||'おぴょ').replace(/[\s-]/g,'').slice(0,6)||'おぴょ';const b=P.lv.toString(36).padStart(2,'0')+Math.min(160,ATK()).toString(36).padStart(2,'0')+(P.aw?1:0);return'OPYO-'+n+'-'+b+'-'+(ckSum(n+b)%1296).toString(36)}
@@ -1357,6 +1485,9 @@ function drawBattle(t){
     for(let i=0;i<34;i++){if(Math.sin(t*3+i*1.3)>-0.2)px(g,'#fffbe0',BX+(i*37)%BW,BY+(i*13)%24,1,1)}
     for(let k=0;k<2;k++){const sh=(t*70+k*90)%(BW+60);const sx=BX+BW-sh,sy=BY+2+((t*25+k*11)%18);px(g,'#fff',sx,sy,2,1);px(g,'#9ad8ff',sx+2,sy-1,4,1)}
     px(g,'#0a1440',BX,BY+24,BW,BH-24);for(let i=0;i<10;i++)px(g,'#3a4a90',BX+((i*31+Math.floor(t*8))%BW),BY+28+(i*5)%16,3,1)}
+  else if(bg==='mori'){const sky=['#0f3a24','#16502e','#1e6a3a','#2a8048'];for(let i=0;i<4;i++)px(g,sky[i],BX,BY+i*6,BW,6);for(let i=0;i<6;i++){const a=0.10+0.08*Math.sin(t*1.5+i);g.fillStyle=`rgba(255,250,200,${a})`;g.fillRect(BX+10+i*24,BY,6,BH)}for(let i=0;i<5;i++)px(g,'#3a2412',BX+6+i*30,BY,5,BH-12);px(g,'#2c7a3c',BX,BY+BH-14,BW,14);for(let i=0;i<16;i++)px(g,i%3?'#5ab85a':'#ffd23f',BX+(i*23)%BW,BY+BH-12+(i*7)%10,2,1);for(let i=0;i<4;i++){const lx=BX+((i*41+t*12)%BW),ly=BY+((t*18+i*29)%(BH-14));px(g,'#8ad05a',lx|0,ly|0,2,1)}}
+  else if(bg==='juka'){px(g,'#2a160a',BX,BY,BW,BH);for(let i=0;i<BW;i+=9)px(g,'#3e220e',BX+i,BY,3,BH);for(let i=0;i<18;i++){const a=0.4+0.4*Math.sin(t*2+i);g.fillStyle=`rgba(122,255,154,${a})`;g.fillRect(BX+(i*37)%BW,BY+4+(i*19)%(BH-20),2,1)}px(g,'#6a3e1c',BX,BY+BH-14,BW,14);for(let i=0;i<BW;i+=16)px(g,'#4a2a12',BX+i,BY+BH-14,1,14)}
+  else if(bg==='yoru'){const sky=['#0a0418','#140828','#1e0c3a','#28104a'];for(let i=0;i<4;i++)px(g,sky[i],BX,BY+i*6,BW,6);for(let i=0;i<30;i++){if(Math.sin(t*3+i*1.3)>-0.2)px(g,i%5?'#fffbe0':'#c8b0ff',BX+(i*37)%BW,BY+(i*13)%24,1,1)}px(g,'#120820',BX,BY+24,BW,BH-24);for(let i=0;i<10;i++){const a=0.5+0.5*Math.sin(t*2.4+i*1.7);g.fillStyle=`rgba(255,240,140,${a})`;g.fillRect(BX+((i*31+t*6)%BW),BY+30+(i*7)%(BH-40),1,1)}}
   else if(bg==='isle'){const sky=['#ff9a7a','#ffb890','#ffd2a8','#ffe6c8'];for(let i=0;i<4;i++)px(g,sky[i],BX,BY+i*5,BW,5);px(g,'#2a8ad8',BX,BY+20,BW,12);for(let i=0;i<10;i++)px(g,'#ffe6f0',BX+((i*31+Math.floor(t*12))%BW),BY+22+(i*5)%8,3,1);px(g,'#fff',BX,BY+32,BW,1);px(g,'#f8e4e0',BX,BY+33,BW,BH-33);g.drawImage(T.palm,BX+2,BY+19);g.drawImage(T.palm,BX+BW-18,BY+19)}
   else{const sky=['#3f86e4','#5ea4f0','#86c1f6','#b8def9'];for(let i=0;i<4;i++)px(g,sky[i],BX,BY+i*5,BW,5);
     if(bg==='forest'){px(g,'#5aac3e',BX,BY+20,BW,BH-20);for(let i=0;i<9;i++)g.drawImage(T.tree,BX-4+i*16,BY+10)}
@@ -1364,7 +1495,7 @@ function drawBattle(t){
     else{px(g,'#2a73c8',BX,BY+20,BW,12);for(let i=0;i<10;i++)px(g,'#e9f7ff',BX+((i*31+Math.floor(t*12))%BW),BY+22+(i*5)%8,3,1);px(g,'#fff',BX,BY+32,BW,1);px(g,'#ecd093',BX,BY+33,BW,BH-33)}}
   if(b.aw>0){const a=0.18+0.12*Math.sin(t*8);g.fillStyle=`rgba(255,210,63,${a})`;g.fillRect(BX,BY+BH-10,BW,10)}
   const e=b.e;if(e&&e.alpha>0&&!(e.blink>0&&Math.floor(t*30)%2)){const im=EI[e.img];const sc=Math.min(e.big?4:3,(BH-4)/im.height,(BW-8)/im.width);const w=Math.round(im.width*sc),h=Math.round(im.height*sc);
-    const sh=e.shake>0&&!RM?Math.round(Math.sin(t*90)*3*e.shake):0;const bob=/ball|mist|hotaru|kujira|niji|kage/.test(e.img)?Math.round(Math.sin(t*3)*1.5):0;g.globalAlpha=e.alpha*(e.dodge?0.55+0.25*Math.sin(t*20):1);g.drawImage(im,Math.round(SW/2-w/2+sh),Math.round(BY+BH-3-h+bob),w,h);g.globalAlpha=1;
+    const sh=e.shake>0&&!RM?Math.round(Math.sin(t*90)*3*e.shake):0;const bob=/ball|mist|hotaru|kujira|niji|kage|chou|hachi|tonbo|jobachi|omurasaki/.test(e.img)?Math.round(Math.sin(t*3)*1.5):0;g.globalAlpha=e.alpha*(e.dodge?0.55+0.25*Math.sin(t*20):1);g.drawImage(im,Math.round(SW/2-w/2+sh),Math.round(BY+BH-3-h+bob),w,h);g.globalAlpha=1;
     if(e.sleep>0){g.fillStyle='#fff';g.font='8px monospace';g.fillText('z',SW/2+w/2-6,BY+12+Math.sin(t*3)*2)}}
   if(b.oyaHere){const im=(P.oyaAw?WK.og:WK.o).right[Math.floor(t*3)%2];g.drawImage(im,BX+3,BY+BH-17);if(P.oyaAw&&Math.sin(t*7)>0.3)px(g,'#bfe6ff',BX+3+((t*37)%16|0),BY+BH-19,1,1)}
   if(b.friendHere){const im=WKF.left[Math.floor(t*3+1)%2];g.drawImage(im,BX+BW-19,BY+BH-17);if(b.friendAw&&Math.sin(t*7)>0.3)px(g,'#ffd23f',BX+BW-19+((t*41)%16|0),BY+BH-19,1,1)}
@@ -1383,7 +1514,7 @@ function pop(txt,x,y,c,big){if(S.battle)S.battle.pops.push({txt:String(txt),x,y,
 const AM=()=>S.battle&&S.battle.aw>0?1.6:1;
 const oyaDmg=()=>Math.round((12+P.lv*1.3+RI(0,4))*(P.oyaAw?1.8:1));
 function gauge(n){if(!P.aw||(S.battle&&S.battle.aw>0))return;const b=P.awg;P.awg=Math.max(0,Math.min(100,P.awg+n));if(b<100&&P.awg>=100){SFX.up();if(!P.awTut)S.awTut=1}}
-const BMUS=D=>S.rush?'rush':!D.boss?'battle':D.boss==='kujira'?'final':['tako','neko','kage','mimic'].includes(D.boss)?'sboss':'boss';
+const BMUS=D=>S.rush?'rush':!D.boss?'battle':D.boss==='kujira'?'final':D.boss==='murasaki'?'mfinal':['hachi','kama','kabuto'].includes(D.boss)?'mboss':['tako','neko','kage','mimic'].includes(D.boss)?'sboss':'boss';
 async function bossIntro(D){
   const mus=BMUS(D);
   await tween(350,p=>S.lb=p);if(SFX.rumble)SFX.rumble();S.shakeT=1.2;await sleep(450);
@@ -1394,7 +1525,7 @@ async function bossIntro(D){
 async function battle(key,opt={}){
   const D=EN[key];const boss=!!D.boss;const rush=!!opt.rush;P.fights++;
   bgm(null);SFX.enc();S.busy=true;for(let i=0;i<6;i++){S.flash=0.7;await sleep(60);S.flash=0;await sleep(45)}
-  const bgk=P.map==='b2'?'deep':P.map==='cave'?'cave':P.map==='ruin'?'ruin':P.map==='isle'?'isle':zone();
+  const bgk=P.map==='mori'?'mori':P.map==='juka'?'juka':P.map==='b2'?'deep':P.map==='cave'?'cave':P.map==='ruin'?'ruin':P.map==='isle'?'isle':zone();
   S.battle={bg:bgk,e:{img:D.img,big:boss,alpha:0,shake:0,blink:0,sleep:0,dodge:0},oyaIn:0,pops:[],aw:0,oyaHere:false,friendHere:false,bossBar:false,isBoss:boss};S.mode='battle';
   const e={n:D.n,hp:D.hp+(boss?0:RI(0,2)),mhp:0,atk:D.atk,def:D.def,agi:D.agi,mul:1,dodge:0,phase2:false};
   if(opt.ex)Object.assign(e,opt.ex);e.mhp=e.hp;S.battle.st=e;S.battle.music=BMUS(D);
@@ -1438,6 +1569,7 @@ async function battle(key,opt={}){
       else if(act===5){if(boss){await say(rush?'ゆめの なかでは にげられない！':'にげられない！')}else{const ch=Math.max(0.2,Math.min(0.9,0.55+(P.agi-e.agi)*0.04));await say('おぴょは にげだした！',{wait:false});SFX.run();await sleep(350);if(rnd()<ch){await fadeE();result='run';break}await say('しかし にげられなかった！',{add:true})}}
       if(e.hp<=0){result='win';break}}
     if(key==='kujira'&&!e.phase2&&e.hp<e.mhp*0.5){e.phase2=true;await kujiraPhase2(e)}
+    if(key==='omurasaki'&&!e.phase2&&e.hp<e.mhp*0.5&&e.hp>0){e.phase2=true;await murasakiPhase2(e)}
     if(key==='boss'&&!oyaHere&&(turn>=3||P.hp<P.mhp*0.45)){oyaHere=true;S.battle.oyaHere=true;await oyabunArrives()}
     if(P.friend&&boss&&!S.battle.friendHere&&turn>=2)await friendArrives();
     if(S.battle.friendHere&&e.hp>0){const f=P.friend;await say(`${f.n}の ${f.w?'きんいろ ':''}アタック！`,{wait:false});SFX.bark();await sleep(240);await hitE(e,dmg(Math.min(f.a,ATK()+30),e.def,f.w?1.5:1.1),true);if(e.hp<=0){result='win';break}}
@@ -1486,6 +1618,11 @@ async function battle(key,opt={}){
     if(key==='boss'){await say('おおきな なみは しずかに なった…');P.oya=true;S.trail=[{x:P.x,y:P.y+1,px:P.x,py:P.y+1,dir:'up'}];showStatus(true);await sleep(SFX.join()*500);await say('おやぶんが なかまに くわわった！')}
     if(key==='nushi'){await say('うみの ぬしを たおした！\nしょうごう「うみの ゆうしゃ」を\nてにいれた！');P.nushiT=1;await say('…ひがしの はまべから\nなにかが よんでいる こえが する');P.turtleHint=1}
     if(key==='tako')await say('ゆでだこだいおうは まっかな かおで\nうみへ かえっていった');
+    if(key==='jobachi')await say('じょおうバチは はなばたけへ\nぶーんと とんでいった');
+    if(key==='okama')await say('おおカマキリは カマを おろして\nもりの おくへ きえた');
+    if(key==='okama'||key==='jobachi'){if(P.beat.hachi&&P.beat.kama)await say('…どこかで おおきな とびらが\nひらく おとが した！')}
+    if(key==='kabuking')await say('カブトだいおうは つのを おろして\nみちを あけてくれた');
+    if(key==='omurasaki')await moriEnding();
     if(key==='raineko')await say('かみなりネコは ごろごろ のどを ならして\nどこかへ いった');
     if(key==='kage'){save();await awakenScene();finishBattle();return{r:'win',turn}}
     if(key==='kujira'){save();finishBattle();await trueEnding();return{r:'win',turn}}
@@ -1494,14 +1631,14 @@ async function battle(key,opt={}){
     if(fr){P.friend=null}
     if(rush){await say('おぴょは ゆめから さめた…');P.hp=P.mhp;P.mp=P.mmp;finishBattle();return{r:'lose',turn}}
     await say('おぴょは つかれて\nねむってしまった…');await tween(700,p=>S.dark=p);await sleep(SFX.fall()*1000);
-    const isl=P.map==='isle'||P.map==='ruin';
-    if(isl){P.map='isle';P.x=11;P.y=7;P.dir='up'}else{P.map='field';P.x=17;P.y=20;P.dir='up'}
+    const isl=P.map==='isle'||P.map==='ruin';const mor=P.map==='mori'||P.map==='juka';
+    if(mor){P.map='mori';P.x=13;P.y=9;P.dir='up'}else if(isl){P.map='isle';P.x=11;P.y=7;P.dir='up'}else{P.map='field';P.x=17;P.y=20;P.dir='up'}
     P.hp=P.mhp;P.mp=P.mmp;P.gold=Math.floor(P.gold/2);S.trail=[{x:P.x,y:P.y+1,px:P.x,py:P.y+1,dir:'up'}];S.mode='field';S.battle=null;hideMsg();save();await sleep(300);await tween(600,p=>S.dark=1-p);S.dark=0;showStatus(true);
-    await say(isl?'…ほこらの まえで めを さました。\nコインが はんぶんに なった':'…おうちで めを さました。\nコインが はんぶんに なった');hideMsg();bgm(isl?'isle':'field');S.busy=false;return{r:'lose',turn}}
+    await say(mor?'…もりの しろしばの そばで めを さました。\nコインが はんぶんに なった':isl?'…ほこらの まえで めを さました。\nコインが はんぶんに なった':'…おうちで めを さました。\nコインが はんぶんに なった');hideMsg();bgm(mor?'mori':isl?'isle':'field');S.busy=false;return{r:'lose',turn}}
   finishBattle();return{r:result,turn}}
 function red(d,guard,oyaGuard){if(oyaGuard)d=Math.max(1,Math.ceil(d*0.3));else if(guard)d=Math.max(1,Math.ceil(d/2));if(S.battle&&S.battle.aw>0)d=Math.max(1,Math.ceil(d*0.7));return d}
 function finishBattle(){hideMsg();infoW.hidden=true;S.mode=S.rush?'cut':'field';S.battle=null;showStatus(false);if(!S.rush)bgm(musFor());S.busy=false;safe=5}
-const musFor=()=>({b2:'deep',cave:'cave',isle:'isle',ruin:'ruin'})[P.map]||'field';
+const musFor=()=>({b2:'deep',cave:'cave',isle:'isle',ruin:'ruin',mori:'mori',juka:'juka'})[P.map]||'field';
 async function hitE(e,d,oya,crit){if(d<=0){SFX.miss();await say(`${e.n}に ダメージを あたえられない！`,{add:true});return}
   SFX.hit();S.battle.e.shake=1;S.battle.e.blink=0.4;burst(88,90,12,crit?['#ffd23f','#ffffff','#ff9a3a']:['#ffffff','#ffd23f','#9ad8ff'],crit?110:80,120);e.hp-=d;
   pop(d,88+RI(-14,14),92,crit?'#ffd23f':oya?'#bfe6ff':'#ffffff',crit||d>=200);if(!oya)gauge(crit?14:8);await sleep(240);await say(e.n.length>8?`${e.n}に\n${d}の ダメージ！`:`${e.n}に ${d}の ダメージ！`,{add:true})}
@@ -1544,6 +1681,9 @@ async function useSkill(e,boss,D,ctx={}){
   if(s.k==='hoshi'){await say('おぴょの ほしふり！',{wait:false});await sleep(250);for(let i=0;i<5&&e.hp>0;i++){burst(40+rnd()*96,66,6,['#ffd23f','#fffbe0'],40,160);await hitE(e,dmg(ATK(),e.def,0.72*am))}return}
   if(s.k==='kizuna'){SFX.bark();await sleep(120);SFX.bark();const b=P.hp;P.hp=Math.min(P.mhp,P.hp+Math.round(P.mhp*0.6));const gg=P.aw&&!(S.battle.aw>0)&&P.awg<100;if(gg)P.awg=Math.min(100,P.awg+50);showStatus(true);await say('おぴょと おやぶんの\nきずなの とおぼえ！',{wait:false});await sleep(300);SFX.heal();await say(`HPが ${P.hp-b} かいふくした！${gg?'\nかくせいゲージが ぐんと たまった！':''}`,{add:true});return}
   if(s.k==='zen'){await say('おぴょの ぜんりょくダッシュ！！',{wait:false});S.shakeT=0.6;await sleep(300);await hitE(e,dmg(ATK(),e.def,2.8*am));return}
+  if(s.k==='ibuki'){const b=P.hp;P.hp=P.mhp;const gg=P.aw&&!(S.battle.aw>0)&&P.awg<100;if(gg)P.awg=Math.min(100,P.awg+30);showStatus(true);await say('おぴょの もりの いぶき！',{wait:false});await sleep(300);SFX.heal();await say(`HPが ${P.hp-b} かいふくした！${gg?'\nかくせいゲージも すこし たまった':''}`,{add:true});return}
+  if(s.k==='guru'){await say('おぴょの ぐるぐる まんまる！',{wait:false});await sleep(250);for(let i=0;i<4&&e.hp>0;i++)await hitE(e,dmg(ATK(),e.def,1.0*am));return}
+  if(s.k==='mega'){await say('メガ おぴょ！！',{wait:false});S.shakeT=1;SFX.boom();await sleep(450);await hitE(e,dmg(ATK(),e.def,5*am));return}
   if(s.k==='futari'){bgm(null);msgW.hidden=true;S.dark=0;S.battle.cutin={k:'combo',t0:tnow()};
     for(let i=0;i<10;i++){burst(40,100,8,['#bfe6ff','#ffffff'],80,-30);burst(136,100,8,['#ffd23f','#ffffff'],80,-30);await sleep(55)}
     const Lc=SFX.combo?SFX.combo():0.7;S.shakeT=1.2;await sleep(Math.max(Lc*600,700));
@@ -1580,6 +1720,7 @@ async function titleScreen(){
   S.mode='field';bgm(musFor());S.flash=0.6;
   if(!cont){await say('おぴょは ぼうけんに でます');await say('さがさないで ください ぴょ');await say('じゅうじキー か がめんタップで あるく\nAボタンで コマンド\nBを おしながら あるくと ダッシュ');hideMsg();save()}
   else if(P.cleared&&!P.pg){P.pg=1;await say('どうくつの おくや しまの どこかに\nつよい ぬしたちが いるらしい…');hideMsg()}
+  if(cont&&P.beat.kujira&&!P.moriHint){P.moriHint=1;await say('【あたらしい しま】\nうみがめが「もりの しま」へ\nつれていって くれるらしい…');hideMsg();save()}
   if(cont&&P.beat.nushi&&!P.turtleHint){P.turtleHint=1;await say('【おおがた アップデート】\nひがしの はまべに うみがめが\nきている らしい…');hideMsg();save()}
   S.busy=false;S.idleT=0}
 window.__G={P,S,IN,EN,SK,RUSH,SET,readCode,myCode,tileAt,run,F:{battle,bossRush,shrineEvent,voyage,trueEnding,awakenScene,oyaAwakenScene,npcTalk,turtleEvent,giveStar},warpTo:(m,x,y,d)=>{P.map=m;P.x=x;P.y=y;P.dir=d||'down';S.trail=[{x,y:y+1,px:x,py:y+1,dir:'up'}];bgm(musFor())},press,setPad:d=>setPad(d),battle:k=>run(()=>battle(k)),save,get timeOrigin(){return performance.timeOrigin}};
