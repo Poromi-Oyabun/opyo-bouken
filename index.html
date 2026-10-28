@@ -96,11 +96,11 @@ const SET=Object.assign({text:'fast',walk:'fast'},store.get('opyo3set')||{});
 
 /* ================= audio ================= */
 const REC=!!window.__REC;const ALOG=window.__ALOG=[];
-let AC=null,master=null,noiseBuf=null,muted=false,cur=null,audioOn=REC;
+let AC=null,master=null,noiseBuf=null,muted=false,cur=null,audioOn=REC;const MV=0.8;
 const mf=m=>440*Math.pow(2,(m-69)/12);
 const now=()=>REC?performance.now()/1000:(AC?AC.currentTime:0);
 function initAudio(){if(REC){audioOn=true;return}
-  try{if(AC){AC.resume&&AC.resume();return}AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=muted?0:0.5;master.connect(AC.destination);
+  try{if(AC){AC.resume&&AC.resume();return}AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=muted?0:MV;const cp=AC.createDynamicsCompressor();cp.threshold.value=-4;cp.knee.value=4;cp.ratio.value=12;cp.attack.value=0.003;cp.release.value=0.15;master.connect(cp);cp.connect(AC.destination);musG=AC.createGain();musG.gain.value=musGain();musG.connect(master);
     noiseBuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;audioOn=true;if(S&&S.wantBgm)bgm(S.wantBgm)}catch(e){AC=null}}
 function tone(f,t0,dur,type='square',vol=0.07,f2=null,dest=null){
   if(REC){ALOG.push(['t',+t0.toFixed(4),f,dur,type,vol,f2||0,dest?1:0]);return}
@@ -153,13 +153,53 @@ const TR={
   shop:{bpm:120,v:[{type:'square',vol:0.04,notes:n8('72 76 79 76 74 77 81 77 72 76 79 84 83:2 79:2')},{type:'triangle',vol:0.1,notes:n8('48:2 55:2 50:2 57:2 48:2 55:2 43:2 55:2')}]},
   ending:{bpm:100,v:[{type:'square',vol:0.04,notes:n8('76:3 74 72:2 67:2 69:2 72:2 74:4 76:3 77 79:2 84:2 83:2 79:2 81:4 77:3 76 74:2 72:2 74:2 76:2 72:4 71:2 72:2 74:2 79:2 72:8')},{type:'triangle',vol:0.12,notes:n8('48:4 55:4 53:4 50:4 48:4 52:4 53:4 57:4 50:4 55:4 48:4 57:4 55:4 50:4 48:8')}]}
 };
+/* ===== music6: 生演奏ふう BGM（Flow Music で つくった 曲）=====
+   ・場面に 入ったときに 読みこむ（つぎに 使いそうな 曲は 先に こっそり 読みこむ）
+   ・つなぎ目は あらかじめ 曲ファイルの 中で なめらかに してあり、ループ点は 拍に ぴったり
+   ・フィールドの 曲は せんとうの あと 続きから（そっと フェードイン）
+   ・読みこめない／おそいときは 今までの ピコピコ BGM で 鳴らす */
+const BGMF={"title":[21.218,73.5813125],"field":[55.188,114.2660833],"battle":[21.032,62.9692708],"boss":[26.326,82.1400208],"hero":[0.0,63.6669375],"cave":[60.947,123.5634167],"deep":[55.722,151.7220417],"shop":[44.948,108.8818542],"ending":[101.187,140.4117292],"isle":[23.006,83.0059792],"sboss":[0.0,123.3883958],"final":[53.064,122.8822292],"awaken":[28.671,76.8915625],"true_end":[0.0,153.5578125],"rush":[15.622,106.2885417],"turtle":[0.0,64.6],"mori":[20.8,84.8000417],"juka":[31.945,123.3790625],"mboss":[40.583,128.1944792],"mfinal":[59.182,161.582]};const BGM_V='?v=4fa4a880';
+const MUS={raw:{},rawq:[],buf:{},use:{},dec:{},bad:{},pos:{}};const MUS_MAX_SEC=150,MUS_RESUME=new Set(['field','isle','mori','cave','deep','ruin','juka','shop']);
+const MUS_NEAR={title:['field'],field:['battle','boss','shop','hero','cave','turtle'],cave:['deep','battle','boss','ending'],deep:['battle','boss','ending'],shop:['field','battle'],
+  isle:['battle','sboss','ruin','awaken','final','rush','turtle','true_end'],ruin:['battle','sboss','awaken','final'],mori:['battle','mboss','juka','awaken','turtle'],juka:['battle','mboss','mfinal','awaken']};
+const MUS_VOL=[0.5,1,1.6];let musG=null;
+function musGain(){return 0.28*MUS_VOL[SET.mv==null?1:SET.mv]}
+function musRaw(n){if(MUS.raw[n])return MUS.raw[n];
+  const p=fetch('bgm/'+n+'.mp3'+BGM_V).then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.arrayBuffer()}).catch(e=>{if(MUS.raw[n]===p){delete MUS.raw[n];const i=MUS.rawq.indexOf(n);if(i>=0)MUS.rawq.splice(i,1)}throw e});
+  MUS.raw[n]=p;MUS.rawq.push(n);while(MUS.rawq.length>12){const o=MUS.rawq.shift();if(!(cur&&cur.name===o))delete MUS.raw[o];else MUS.rawq.push(o)}return p}
+function musBuf(n){MUS.use[n]=Date.now();if(MUS.buf[n])return Promise.resolve(MUS.buf[n]);if(MUS.dec[n])return MUS.dec[n];
+  const p=musRaw(n).then(ab=>new Promise((res,rej)=>{const q=AC.decodeAudioData(ab.slice(0),res,rej);if(q&&q.catch)q.catch(()=>{})}))
+    .then(b=>{delete MUS.dec[n];MUS.buf[n]=b;MUS.use[n]=Date.now();musTrim();return b},e=>{delete MUS.dec[n];throw e});
+  MUS.dec[n]=p;return p}
+function musTrim(){let tot=0;for(const k of Object.keys(MUS.buf).sort((a,b)=>MUS.use[b]-MUS.use[a])){tot+=MUS.buf[k].duration;if(tot>MUS_MAX_SEC&&!(cur&&cur.name===k)&&k!=='battle')delete MUS.buf[k]}}
+function musPos(c){const ls=c.ls,le=c.le;let p=c.off+(AC.currentTime-c.t0);if(p>=le)p=ls+(p-ls)%(le-ls);return Math.max(0,p)}
+function musStop(c){c.dead=1;if(!AC)return;const t=AC.currentTime;
+  if(c.src){if(MUS_RESUME.has(c.name))MUS.pos[c.name]={p:musPos(c),at:Date.now()};c.fg.gain.cancelScheduledValues(t);c.fg.gain.setValueAtTime(c.fg.gain.value,t);c.fg.gain.setTargetAtTime(0,t,0.09);const s=c.src,fg=c.fg;setTimeout(()=>{try{s.stop()}catch(e){}try{s.disconnect()}catch(e){}try{fg.disconnect()}catch(e){}},900)}
+  if(c.g){const g=c.g;g.gain.setTargetAtTime(0,t,0.05);setTimeout(()=>{try{g.disconnect()}catch(e){}},900)}c.T=null}
+function musSynth(c){const T=TR[c.name];if(!T||c.T)return;const g=AC.createGain();g.gain.value=1;g.connect(master);c.g=g;c.T=T;c.vs=T.v.map(v=>({v,i:0,t:now()+0.06}))}
+async function musPlay(c){const n=c.name;
+  const slow=setTimeout(()=>{if(cur===c&&!c.src&&!c.dead)musSynth(c)},5000);   // 5秒たっても 来なければ いったん ピコピコで
+  let buf;try{buf=await musBuf(n)}catch(e){clearTimeout(slow);MUS.bad[n]=1;setTimeout(()=>{delete MUS.bad[n]},60000);if(cur===c&&!c.dead)musSynth(c);return}
+  clearTimeout(slow);if(cur!==c||c.dead)return;
+  if(c.g){const g=c.g;g.gain.setTargetAtTime(0,AC.currentTime,0.15);setTimeout(()=>{try{g.disconnect()}catch(e){}},1200);c.g=null;c.T=null}
+  const F=BGMF[n],src=AC.createBufferSource(),fg=AC.createGain();src.buffer=buf;src.loop=true;src.loopStart=F[0];src.loopEnd=Math.min(F[1],buf.duration);
+  src.connect(fg);fg.connect(musG);let off=0;const rp=MUS.pos[n];if(MUS_RESUME.has(n)&&rp&&Date.now()-rp.at<180000)off=Math.min(rp.p,src.loopEnd-0.05);
+  const t=AC.currentTime+0.03;if(off>0){fg.gain.setValueAtTime(0,t);fg.gain.linearRampToValueAtTime(1,t+0.7)}else fg.gain.value=1;
+  src.start(t,off);c.src=src;c.fg=fg;c.t0=t;c.off=off;c.ls=src.loopStart;c.le=src.loopEnd;musPrefetch(n)}
+function musPrefetch(n){const L=(MUS_NEAR[n]||[]).filter(k=>BGMF[k]&&!MUS.bad[k]);let i=0;const nx=()=>{if(i<L.length)musRaw(L[i++]).then(nx,nx)};setTimeout(nx,800);
+  if(BGMF.battle&&MUS_NEAR[n]&&MUS_NEAR[n].includes('battle'))setTimeout(()=>{if(AC)musBuf('battle').catch(()=>{})},2500)}
+function musHeard(n){if(!n||REC)return;const H=store.get('opyo3mus')||[];if(!H.includes(n)){H.push(n);store.set('opyo3mus',H)}}
+if(!REC&&window.fetch&&BGMF.title)musRaw('title').catch(()=>{});
+document.addEventListener('visibilitychange',()=>{if(!AC||REC)return;try{const q=document.hidden?(AC.suspend&&AC.suspend()):(AC.resume&&AC.resume());if(q&&q.catch)q.catch(()=>{})}catch(e){}});
 function bgm(name){
   if(typeof S!=='undefined')S.wantBgm=name;if(!audioOn)return;if(cur&&cur.name===name)return;
   if(REC)ALOG.push(['b',+now().toFixed(4),name||'']);
-  if(cur&&cur.g&&AC){const g=cur.g;g.gain.setTargetAtTime(0,AC.currentTime,0.05);setTimeout(()=>{try{g.disconnect()}catch(e){}},900)}
-  if(!name){cur=null;return}const T=TR[name];let g=null;if(AC){g=AC.createGain();g.gain.value=1;g.connect(master)}
+  if(cur)musStop(cur);
+  if(!name){cur=null;return}musHeard(name);
+  if(!REC&&AC&&musG&&BGMF[name]&&!MUS.bad[name]){cur={name,file:1};musPlay(cur);return}
+  const T=TR[name];let g=null;if(AC){g=AC.createGain();g.gain.value=1;g.connect(master)}
   cur={name,T,g,vs:T.v.map(v=>({v,i:0,t:now()+0.06}))}}
-setInterval(()=>{if(!cur||!audioOn)return;const e8=60/cur.T.bpm/2,ct=now();
+setInterval(()=>{if(!cur||!audioOn||!cur.T)return;const e8=60/cur.T.bpm/2,ct=now();
   for(const vc of cur.vs){if(vc.t<ct-0.1)vc.t=ct+0.04;while(vc.t<ct+(REC?0.12:0.25)){const[m,l]=vc.v.notes[vc.i];if(m)tone(mf(m),vc.t,l*e8*0.88,vc.v.type,vc.v.vol,null,cur.g||1);vc.t+=l*e8;vc.i=(vc.i+1)%vc.v.notes.length}}},50);
 /* ===== music2: ほしふる しま 追加BGM・効果音（すべてオリジナル） ===== */
 const TR2={
@@ -264,7 +304,7 @@ Object.assign(TR,{
 });
 Object.assign(SFX,SFX2);
 const snd=document.getElementById('snd');
-snd.addEventListener('click',()=>{muted=!muted;snd.textContent=muted?'♪OFF':'♪ON';snd.setAttribute('aria-pressed',String(!muted));initAudio();if(master)master.gain.setTargetAtTime(muted?0:0.5,AC.currentTime,0.02)});
+snd.addEventListener('click',()=>{muted=!muted;snd.textContent=muted?'♪OFF':'♪ON';snd.setAttribute('aria-pressed',String(!muted));initAudio();if(master)master.gain.setTargetAtTime(muted?0:MV,AC.currentTime,0.02)});
 
 /* ================= art ================= */
 const cv=document.getElementById('cv'),g=cv.getContext('2d');g.imageSmoothingEnabled=false;const SW=176,TS=16,VIEW=11;
@@ -1305,9 +1345,24 @@ async function zukan(){
   for(let pg=0;pg<pages.length;pg++){info(`<span class="ttl">ずかん ${seen}/${ZK.length}（${pg+1}/${pages.length}）</span>`+pages[pg].map(k=>P.zk[k]?`${EN[k].n}　×${P.zk[k]}`:'？？？？').join('\n')+`\n▶ ${pg<pages.length-1?'つぎへ':'レアアイテムへ'}（A）`,[10,2,156]);msgW.hidden=true;await waitA()}
   const all=[...ITO.filter(k=>IT[k].rare),...Object.keys(EQ).filter(k=>EQ[k].rare)];const got=all.filter(k=>P.found[k]).length;
   for(let i=0;i<all.length;i+=10){info(`<span class="ttl">レアアイテム ${got}/${all.length}</span>`+all.slice(i,i+10).map(k=>P.found[k]?(IT[k]||EQ[k]).n:'？？？？').join('\n')+(i+10<all.length?'\n▶ つぎへ（A）':''),[10,2,156]);await waitA()}infoW.hidden=true}
-async function settings(){while(true){const c=await choose([`もじ：${SET.text==='fast'?'はやい':'ふつう'}`,`あるく：${SET.walk==='fast'?'はやい':'ふつう'}`,`おやぶん：${SET.p2?'2Pが そうさ':'オート'}`,'もどる'],{pos:[52,52,120],title:'せってい'});
+async function settings(){let at=0;while(true){const MVN=['ちいさい','ふつう','おおきい'];const c=await choose([`もじ：${SET.text==='fast'?'はやい':'ふつう'}`,`あるく：${SET.walk==='fast'?'はやい':'ふつう'}`,`おやぶん：${SET.p2?'2Pが そうさ':'オート'}`,`おんがく：${MVN[SET.mv==null?1:SET.mv]}`,'おんがくしつ','もどる'],{pos:[52,40,120],title:'せってい',start:at});at=Math.max(0,c);
   if(c===0)SET.text=SET.text==='fast'?'normal':'fast';else if(c===1)SET.walk=SET.walk==='fast'?'normal':'fast';
-  else if(c===2){SET.p2=!SET.p2;store.set('opyo3set',SET);if(SET.p2){await say('きょうりょく プレイ（1だいで 2にん）\nせんとうで おやぶんの ばんに なったら\nとなりの ひとに わたしてね！');await say('2Pは かみつき・かばう・とおぼえ・ほえる\nを えらべるよ。くろがね おやぶんなら\nひっさつわざも！')}continue}else break;store.set('opyo3set',SET)}}
+  else if(c===2){SET.p2=!SET.p2;store.set('opyo3set',SET);if(SET.p2){await say('きょうりょく プレイ（1だいで 2にん）\nせんとうで おやぶんの ばんに なったら\nとなりの ひとに わたしてね！');await say('2Pは かみつき・かばう・とおぼえ・ほえる\nを えらべるよ。くろがね おやぶんなら\nひっさつわざも！')}continue}
+  else if(c===3){SET.mv=((SET.mv==null?1:SET.mv)+1)%3;if(musG&&AC)musG.gain.setTargetAtTime(musGain(),AC.currentTime,0.05)}
+  else if(c===4){store.set('opyo3set',SET);await musicRoom();continue}else break;store.set('opyo3set',SET)}}
+/* おんがくしつ：いままでに きいた 曲を えらんで きける（きいていない 曲は ？？？） */
+const MUSN={title:'タイトル',field:'はまべ',battle:'せんとう',boss:'ボス',hero:'おやぶん とうじょう',cave:'ひかりの どうくつ',deep:'どうくつの おく',shop:'おみせ',ending:'エンディング',
+  isle:'ほしふる しま',ruin:'ほしの いせき',sboss:'つよい てき',final:'ほしくいクジラ',awaken:'かくせい',true_end:'しんの エンディング',rush:'ゆめの とびら',turtle:'うみがめの こうかい',
+  mori:'もりの しま',juka:'たいじゅの なか',mboss:'もりの ボス',mfinal:'オオムラサキ'};
+async function musicRoom(){const ks=Object.keys(MUSN),PER=6,back=musFor();let pg=0,at=0;
+  while(true){const H=store.get('opyo3mus')||[],items=ks.slice(pg*PER,pg*PER+PER),np=Math.ceil(ks.length/PER);
+    const opts=items.map(k=>H.includes(k)?(cur&&cur.name===k?'♪':'')+MUSN[k]:'？？？'),dis=items.map(k=>!H.includes(k));
+    opts.push(pg<np-1?'つぎの ページ':'さいしょの ページ');dis.push(false);opts.push('もどる');dis.push(false);
+    const c=await choose(opts,{pos:[24,10,128],title:`おんがくしつ ${ks.filter(k=>H.includes(k)).length}/${ks.length}`,disabled:dis,start:at});
+    if(c<0||c===opts.length-1)break;if(c===opts.length-2){pg=(pg+1)%np;at=0;continue}
+    at=c;const k=items[c];if(cur&&cur.name===k)bgm(null);delete MUS.pos[k];bgm(k)}
+  if(!cur||cur.name!==back){bgm(null);bgm(back)}}
+window.__M={settings,BGM_V,get cur(){return cur},get AC(){return AC},get musG(){return musG},bgm,musBuf,musPos,musGain,musicRoom,initAudio,MUS,BGMF,SET,store,get IN(){return IN}};
 async function itemMenu(inBattle){
   const keys=ITO.filter(k=>(P.inv[k]||0)>0&&(!inBattle||['heal','full','mp','fullall','aw'].includes(IT[k].k)));
   if(!keys.length){await say('つかえる どうぐを もっていない');return false}
