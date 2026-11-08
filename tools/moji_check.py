@@ -4,7 +4,7 @@
 # キャンバスに 書いて よいのは 数字や 1文字の 記号（ダメージ・z）だけ。
 import re, sys, pathlib
 src = pathlib.Path(__file__).resolve().parent.parent.joinpath('index.html').read_text(encoding='utf-8')
-ALLOW = {"'z'", 'p.txt'}            # ダメージの 数字・ねむりの z
+ALLOW = {"'z'", 'p.txt', 'String(12-i)'}            # ダメージの 数字・ねむりの z
 bad = []
 for m in re.finditer(r"fillText\(([^,]+),", src):
     arg = m.group(1).strip()
