@@ -13,3 +13,8 @@ BGMは Google Flow（Flow Music）で つくった 生演奏ふうの 曲。き�
 しばいぬチームと ネコだんが すなはまを ぺんきで ぬりあう 3たい3の じんとりゲーム（90びょう）。
 
 あそぶ: https://poromi-oyabun.github.io/opyo-bouken/nuri/
+
+## なおす ときの きまり（再発防止）
+
+- 公開の 前に `python3 tools/textcheck.py index.html`（誤字脱字）と `python3 tools/moji_check.py`（文字の 読みやすさ）を 通す。
+- 日本語の 文章（スタッフロール・せりふ・題名）は キャンバスに 書かず、HTMLの 文字で 出す。キャンバスの 小さい 文字は スマホで 拡大すると にじんで 読めない（2026/11/08「わすれられた まち」の エンディングで 報告あり）。

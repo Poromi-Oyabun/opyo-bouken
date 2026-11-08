@@ -5,7 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta property="og:title" content="おぴょの ぼうけん">
 <meta property="og:description" content="柴犬おぴょと おやぶんの ドット絵RPG。ひかりのどうくつ、そして ほしふる しまへ">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}#roll{position:absolute;left:0;right:0;top:0;height:calc(var(--u)*112);overflow:hidden;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(0,0,0,.72) 0,rgba(0,0,0,.62) 78%,rgba(0,0,0,0) 100%);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 12%,#000 82%,transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,#000 12%,#000 82%,transparent 100%)}
+#roll .in{position:absolute;left:0;right:0;top:0;text-align:center;will-change:transform}
+#roll .ln{display:block;height:calc(var(--u)*14);line-height:calc(var(--u)*14);font-size:calc(var(--u)*9.5);color:#fff;white-space:nowrap;
+  text-shadow:calc(var(--u)*.8) 0 #000,calc(var(--u)*-.8) 0 #000,0 calc(var(--u)*.8) #000,0 calc(var(--u)*-.8) #000}
+#roll .ln.g{color:var(--gold);text-shadow:calc(var(--u)*.8) 0 var(--goldsh),calc(var(--u)*-.8) 0 var(--goldsh),0 calc(var(--u)*.8) var(--goldsh),0 calc(var(--u)*-.8) var(--goldsh)}
+[hidden]{display:none!important}</style>
 <title>おぴょの ぼうけん</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,6 +75,7 @@ body{background:var(--page);color:var(--text);font-family:var(--pix);-webkit-fon
   <div id="screen">
     <canvas id="cv" width="176" height="176" aria-label="ゲーム画面"></canvas>
     <div class="ov" id="titleov" hidden><div class="logo">おぴょの<br>ぼうけん</div><div class="sub">〜 ひかりの どうくつ 〜</div></div>
+    <div id="roll" hidden><div class="in"></div></div>
     <div class="ov" id="endov" hidden><div class="big">おしまい ぴょ</div></div>
     <div class="w" id="status" hidden></div>
     <div class="w" id="info" hidden></div>
@@ -1645,7 +1653,7 @@ async function machiEnding(){S.busy=true;bgm(null);showStatus(false);
   await say('「…この まちは もう さみしくないな」');S.cut.lit=tnow();
   await say('まちの まどに ひとつ また ひとつ\nあかりが ともっていく');await say('どうぶつたちが ひろばに あつまってきた！');hideMsg();
   S.cut.roll=tnow();const dur=CREDITS6.length*1.25+4;await Promise.race([sleep(dur*1000),new Promise(r=>{const iv=setInterval(()=>{if(IN.bHeld){clearInterval(iv);r()}},100)})]);
-  S.cut.roll=null;$('endov').innerHTML='<div class="big">〜 わすれられた まち 〜</div><div class="sub">クリア！</div>';$('endov').hidden=false;await sleep(1800);
+  S.cut.roll=null;rollHide();$('endov').innerHTML='<div class="big">〜 わすれられた まち 〜</div><div class="sub">クリア！</div>';$('endov').hidden=false;await sleep(1800);
   P.beat.lion=true;P.machiClear=1;P.hp=P.mhp;P.mp=P.mmp;P.map='machi';P.x=13;P.y=10;P.dir='down';S.trail=[{x:12,y:10,px:12,py:10,dir:'right'}];save();
   await sleep(SFX.join()*400);await say('しょうごう「まちの ゆうしゃ」を\nてにいれた！');
   const txt=`おぴょの ぼうけん「わすれられた まち」クリア！\nLv${P.lv} しょうごう「まちの ゆうしゃ」\nずかん ${ZK.filter(k=>P.zk[k]).length}/${ZK.length}\nhttps://poromi-oyabun.github.io/opyo-bouken/`;let ok=null;
@@ -1668,7 +1676,7 @@ function drawEndM(t,c){
   const ani=['noraneko','hato','tanuki','saru','nezumi','kaeru','fukurou','kuma'];const ap=c.lit?Math.min(1,(t-c.lit)/3):0;
   for(let i=0;i<ani.length;i++){const im=EI[ani[i]];if(!im||!im.width)continue;const s=0.45,w=Math.round(im.width*s),h=Math.round(im.height*s);const x=Math.round((i<4?6+i*20:SW-26-(i-4)*20)+(i<4?-1:1)*(1-ap)*80),y=c.roll?160:128;g.globalAlpha=ap;g.drawImage(im,x,y-h,w,h);g.globalAlpha=1}
   const A=IMG.smile,O=IMG.oyabun,base=c.roll?172:132;if(A.width)g.drawImage(A,Math.round(66-A.width/2),base-A.height);if(P.oya&&O.width)g.drawImage(O,Math.round(112-O.width/2),base+2-O.height);
-  if(c.roll){const ra=t-c.roll;g.font='8px "DotGothic16",monospace';g.textAlign='center';for(let i=0;i<CREDITS6.length;i++){const y=104-ra*14+i*12;if(y<-10||y>100)continue;const s=CREDITS6[i];g.fillStyle='#000';g.fillText(s,SW/2+1,y+1);g.fillStyle=i<2||s==='親分とぽろみ'||s==='ありがとう ぴょ！'?'#ffd23f':'#ffffff';g.fillText(s,SW/2,y)}g.textAlign='left'}}
+  if(c.roll)rollUpdate(CREDITS6,t-c.roll);else rollHide()}
 function drawBG6(bg,t){
   if(bg==='machi'){const sky=['#6aa0d8','#8ab8e0','#b0d0e8','#d8e4e8'];for(let i=0;i<4;i++)px(g,sky[i],BX,BY+i*6,BW,6);
     const sil=[[0,10,16],[14,6,12],[26,14,14],[44,4,10],[54,12,18],[74,8,14],[90,2,8],[100,10,16],[116,6,12]];for(const[x,y,w]of sil){px(g,'#8a8a96',BX+x,BY+y,w,26-y);for(let wy=y+3;wy<22;wy+=5)px(g,'#5a5a6a',BX+x+3,BY+wy,2,2)}
@@ -1728,7 +1736,7 @@ const CREDITS=['〜 おぴょの ぼうけん 〜','ほしふる しま','','し
 async function trueEnding(){S.busy=true;bgm(null);showStatus(false);await tween(600,p=>S.dark=p);S.mode='cut';S.cut={k:'end2',t0:tnow()};S.sparkle=true;await tween(800,p=>S.dark=1-p);S.dark=0;bgm('true_end');
   await say('ほしくいクジラは おおきく ないて\nそらへ およいで いった…');S.cut.fall=tnow();await say('たべられていた ほしたちが\nいっせいに よぞらへ かえっていく！');await say('しまに また ほしが ふりはじめた');hideMsg();
   S.cut.roll=tnow();const dur=CREDITS.length*1.25+4;await Promise.race([sleep(dur*1000),new Promise(r=>{const iv=setInterval(()=>{if(IN.bHeld){clearInterval(iv);r()}},100)})]);
-  S.cut.roll=null;$('endov').innerHTML='<div class="big">〜 ほしふる しま 〜</div><div class="sub">しんの エンディング</div>';$('endov').hidden=false;await sleep(1800);
+  S.cut.roll=null;rollHide();$('endov').innerHTML='<div class="big">〜 ほしふる しま 〜</div><div class="sub">しんの エンディング</div>';$('endov').hidden=false;await sleep(1800);
   P.beat.kujira=true;P.trueClear=true;P.trueT=1;P.hp=P.mhp;P.mp=P.mmp;P.map='isle';P.x=11;P.y=7;P.dir='up';S.trail=[{x:10,y:7,px:10,py:7,dir:'up'}];save();
   await sleep(SFX.join()*400);await say('しょうごう「ほしの ゆうしゃ」を\nてにいれた！');await say('ほこらに「ゆめの とびら」が\nあらわれた！');
   const txt=`おぴょの ぼうけん しんエンディング とうたつ！\nLv${P.lv} しょうごう「ほしの ゆうしゃ」\nずかん ${ZK.filter(k=>P.zk[k]).length}/${ZK.length}\nhttps://poromi-oyabun.github.io/opyo-bouken/`;let ok=null;
@@ -1754,10 +1762,16 @@ function drawCut(t){const c=S.cut;if(!c)return;const a=t-c.t0;if(c.k==='endM')re
     if(c.fall){for(let i=0;i<18;i++){const u=((t-c.fall)*0.35+i/18)%1;const x=(i*41)%SW+u*30,y=u*96;px(g,'#ffd23f',x|0,y|0,1,1);px(g,'#fffbe0',(x-2)|0,(y-2)|0,1,1)}}
     px(g,'#f8e4e0',0,96,SW,80);for(let i=0;i<24;i++)px(g,'#e8c8c0',(i*47)%SW,100+(i*13)%72,2,1);
     const A=IMG.smile,B=IMG.oyabun,base=c.roll?172:116;if(A.width)g.drawImage(A,Math.round(50-A.width/2),base-A.height);if(B.width)g.drawImage(B,Math.round(126-B.width/2),base+2-B.height);
-    if(c.roll){const ra=t-c.roll;g.font='8px "DotGothic16",monospace';g.textAlign='center';for(let i=0;i<CREDITS.length;i++){const y=104-ra*14+i*12;if(y<-10||y>100)continue;const s=CREDITS[i];g.fillStyle='#000';g.fillText(s,SW/2+1,y+1);g.fillStyle=i<2||s==='親分とぽろみ'||s==='ありがとう ぴょ！'?'#ffd23f':'#ffffff';g.fillText(s,SW/2,y)}g.textAlign='left'}return}}
+    if(c.roll)rollUpdate(CREDITS,t-c.roll);else rollHide();return}}
 
 const BX=24,BY=64,BW=128,BH=50;
 const tnow=()=>performance.now()/1000;
+// スタッフロール：キャンバスの 小さい 文字は 拡大で にじむため、画面の 上に HTMLの くっきりした 文字で 流す（暗い 帯で 背景と 分ける）
+let rollList=null;
+function rollUpdate(list,ra){const el=$('roll'),inn=el.firstElementChild;
+  if(rollList!==list){rollList=list;inn.innerHTML=list.map((s,i)=>`<span class="ln${i<2||s==='親分とぽろみ'||s==='ありがとう ぴょ！'?' g':''}">${s||'&nbsp;'}</span>`).join('')}
+  el.hidden=false;const u=el.clientHeight/112,y=Math.max(112-ra*16.3,49-14*(list.length-1));inn.style.transform=`translateY(${y*u}px)`}  // さいごの「ありがとう ぴょ！」は 帯の まんなかで 止める
+function rollHide(){const el=$('roll');if(el){el.hidden=true;rollList=null}}
 function drawBattle(t){
   const b=S.battle;g.fillStyle='#000';g.fillRect(0,0,SW,SW);g.save();g.beginPath();g.rect(BX,BY,BW,BH);g.clip();
   const bg=b.bg;
