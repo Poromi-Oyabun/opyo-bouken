@@ -2872,7 +2872,10 @@ function v9Start(cont){if(FX.on())FX.iris={t0:tnow(),dur:0.75};else S.flash=0.6;
   const w=$('wrap');w.addEventListener('contextmenu',e=>e.preventDefault());for(const ev of['gesturestart','gesturechange','dblclick'])w.addEventListener(ev,e=>e.preventDefault());
   /* タップで あるく ときに、おした ばしょへ わっかを 出す */
   cv.addEventListener('pointerdown',e=>{if(S.mode!=='field'||S.busy||IN.choice||IN.res||IN.typing)return;const r=cv.getBoundingClientRect();const el=fxEl(fxL,'rp',null,420);el.style.left=((e.clientX-r.left)/r.width*100)+'%';el.style.top=((e.clientY-r.top)/r.height*100)+'%'});
-  if(PV){const s=document.querySelectorAll('.bar span')[1];if(s)s.textContent+='（かくにんばん）'}})();
+  /* iPhone の 音：ゆびを はなした しゅんかん（touchend・click）で 音の じゅんびを する。タイトルの 演出ちゅうに 画面を さわると、おした しゅんかん（pointerdown）に 音の 土台が 作られて、iPhone では 止まった ままに なる ことが あった（2026-11-10 高原さんの 報告：確認版だけ 音が 出ない） */
+  const unlock=()=>{try{initAudio();if(AC&&AC.state!=='running'&&AC.resume){const q=AC.resume();if(q&&q.catch)q.catch(()=>{})}}catch(e){}};
+  for(const ev of['touchend','pointerup','click','keydown'])addEventListener(ev,unlock,{capture:true,passive:true});
+  if(PV){const s=document.querySelectorAll('.bar span')[1];if(s)s.textContent+='（かくにんばん 2）'}})();
 /* まれに さいしょの 1コマで t が t0 より わずかに 前に なり、えんの 半径が マイナスに なるのを ふせぐ */
 const _dCi7=drawCutin7;drawCutin7=function(t,ci){return _dCi7(Math.max(t,ci.t0||0),ci)};
 /* テスト用の 出入口（__G.FX.t） */
