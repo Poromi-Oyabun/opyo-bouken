@@ -1109,7 +1109,7 @@ function newGame(){Object.assign(P,{v:3,lv:1,hp:18,mhp:18,mp:4,mmp:4,atk:7,def:4
 newGame();
 const ATK=()=>P.atk+(P.w?EQ[P.w].v:0),DEF=()=>P.def+(P.a?EQ[P.a].v:0);
 function save(){store.set('opyo3',P)}
-function load(){const s=store.get('opyo3');if(!s||s.v!==3)return false;newGame();Object.assign(P,s);MAXLV=P.juraSeen?150:99;return true}
+function load(){const s=store.get('opyo3');if(!s||s.v!==3)return false;newGame();Object.assign(P,s);MAXLV=P.h8Seen?160:P.juraSeen?150:99;return true}
 const S={mode:'title',walk:null,shakeT:0,red:0,flash:0,dark:0,battle:null,parts:[],light:0,trail:[],path:[],wantBgm:null};
 
 
@@ -1127,7 +1127,7 @@ function tileAt(map,x,y){
   if(map==='mori'){if(c==='B'&&P.beat.hachi)c='k';if(c==='M'&&P.beat.kama)c='g';if(c==='Z'&&!(P.beat.hachi&&P.beat.kama))c='z'}
   if(map==='juka'){if(c==='A'&&P.beat.kabuto)c='_';if(c==='F'&&P.beat.murasaki)c='l'}
   if(MACHI_MAPS.has(map))c=machiTile(map,c);
-  if(map==='machi'&&c==='u'&&P.uzuSeen&&!P.juraSeen)c='υ';
+  if(map==='machi'&&c==='u'&&P.uzuSeen&&(!P.juraSeen||P.h8Clear))c='υ';
   if(JURA_MAPS.has(map))c=juraTile(map,c);
   return c}
 const SOLID=new Set(['~','^','S','W','#','K','R','N','X','P','Y','G','O','Q','V','J','n','m','B','M','A','F','z','y','x','t','w','j','3','%','q','v','u','0','2','4','5','6','7','8','9','!','@','$']);
@@ -2159,6 +2159,7 @@ async function battle(key,opt={}){if(typeof ph7==='function')ph7();
   if(key==='kage')await say('かげおぴょ「…………」\nこちらと おなじ うごきを している！');
   if(key==='kujira')await say('ほしくいクジラは よぞらの ほしを\nむしゃむしゃ たべている！');
   if(key==='kagedon')await say('ときのまおうの かげ「……………」\nとてつもない ちからを かんじる…！');
+  if(D.boss==='kuro')await kuroStart(e);
   if(key==='inseki'){S.battle.count=8;S.shakeT=1.5;await say('おおきすぎて ぜんたいが みえない！\nしょうとつまで あと 8 ターン！\nいんせきを きりさけ！！')}
   let primed=false,guard=false,turn=0,oyaHere=P.oya,result=null,charged=false,blind=0,oyaSp=false,combo=false;S.battle.oyaHere=oyaHere;
   const surprise=!boss&&rnd()<0.07;
@@ -2200,6 +2201,7 @@ async function battle(key,opt={}){if(typeof ph7==='function')ph7();
     if(key==='omurasaki'&&!e.phase2&&e.hp<e.mhp*0.5&&e.hp>0){e.phase2=true;await murasakiPhase2(e)}
     if((key==='lion'||key==='tora')&&!e.phase2&&e.hp<e.mhp*0.5&&e.hp>0){e.phase2=true;await machiPhase2(key,e)}
     if(key==='trex'&&!e.phase2&&e.hp<e.mhp*0.5&&e.hp>0){e.phase2=true;await trexPhase2(e)}
+    if(key==='kurono'&&!e.phase2&&e.hp<e.mhp*0.5&&e.hp>0){e.phase2=true;await kuroPhase2(e)}
     if(key==='boss'&&!oyaHere&&(turn>=3||P.hp<P.mhp*0.45)){oyaHere=true;S.battle.oyaHere=true;await oyabunArrives()}
     if(P.friend&&boss&&!S.battle.friendHere&&turn>=2)await friendArrives();
     if(S.battle.friendHere&&e.hp>0){const f=P.friend;await say(`${f.n}の ${f.w?'きんいろ ':''}アタック！`,{wait:false});SFX.bark();await sleep(240);await hitE(e,dmg(Math.min(f.a,ATK()+30),e.def,f.w?1.5:1.1),true);if(e.hp<=0){result='win';break}}
@@ -2211,7 +2213,8 @@ async function battle(key,opt={}){if(typeof ph7==='function')ph7();
     if(P.a&&EQ[P.a].regen&&P.hp<P.mhp){P.hp=Math.min(P.mhp,P.hp+EQ[P.a].regen);showStatus(true)}
     // てきの ばん
     if(D.gold&&rnd()<(D.flee||0.45)){await say(`${e.n}は ころがって にげていった！`);await fadeE();result='flee';break}
-    if(stunE){await say(`${e.n}は すくんで うごけない！`)}
+    if(e.frozen>0){e.frozen--;await say(e.frozen>0?`${e.n}の じかんは とまっている…\n（あと ${e.frozen}ターン）`:`${e.n}の じかんは とまっている…\nつぎの ターンから うごきだす！`)}
+    else if(stunE){await say(`${e.n}は すくんで うごけない！`)}
     else if(S.battle.e.sleep>0){S.battle.e.sleep--;await say(S.battle.e.sleep>0?`${e.n}は ぐうぐう ねむっている`:`${e.n}は めを さました！`)}
     else if(D.heal&&e.hp<e.mhp*0.5&&rnd()<0.3){const h=Math.round(e.mhp*0.2);e.hp=Math.min(e.mhp,e.hp+h);SFX.heal();await say(`${e.n}は ひなたぼっこ！\n${h} かいふくした`)}
     else if(charged){charged=false;await say(`${e.n}の いちばん つよい こうげき！！`,{wait:false});if(D.salt)SFX.wave();if(D.boss==='neko'&&SFX.thunder){SFX.thunder();S.flash=1}await sleep(400);let d=dmg(e.atk*e.mul,DEF(),1.7);d=red(d,guard,oyaGuard);if(D.salt)P.salt++;await hurt(d)}
@@ -2226,6 +2229,7 @@ async function battle(key,opt={}){if(typeof ph7==='function')ph7();
       else if(k===-4){const h=Math.round(e.mhp*0.1);e.hp=Math.min(e.mhp,e.hp+h);SFX.heal();await say(`${e.n}の\n${A[0]}\n${h} かいふくした`)}
       else if(k===-5){e.dodge=2;S.battle.e.dodge=1;await say(`${e.n}の\n${A[0]}\nすがたが ぶれて みえる！`)}
       else if(k===-6){const m=Math.min(P.mp,6);P.mp-=m;showStatus(true);if(SFX.rumble)SFX.rumble();await say(`${e.n}は\n${A[0]}`)}
+      else if(k===-8){await kuroRewind(e)}
       else if(k===-7){await say(`${e.n}の\n${A[0]}`,{wait:false});await sleep(260);await hurt(red(dmg(e.atk*e.mul,DEF(),1.1),guard,oyaGuard));if(P.aw&&S.battle.aw<=0){P.awg=Math.max(0,P.awg-15);showStatus(true)}}}
     if(key==='inseki'&&(await insekiTick(e))==='win'){result='win';break}
     if(D.slip&&P.hp<=0){P.hp=1;result='slip';break}
@@ -2265,6 +2269,7 @@ async function battle(key,opt={}){if(typeof ph7==='function')ph7();
     if(key==='lion'){save();finishBattle();await machiEnding();return{r:'win',turn}}
     if(key==='trex'){save();finishBattle();await meteorSeq();return{r:'win',turn}}
     if(key==='inseki'){save();finishBattle();await juraClearSeq();return{r:'win',turn}}
+    if(key==='kurono'){save();finishBattle();await ending8();return{r:'win',turn}}
     if(key==='kujira'){save();finishBattle();await trueEnding();return{r:'win',turn}}
     save()}
   else if(result==='lose'){bgm(null);
@@ -2272,9 +2277,9 @@ async function battle(key,opt={}){if(typeof ph7==='function')ph7();
     if(rush){await say('おぴょは ゆめから さめた…');P.hp=P.mhp;P.mp=P.mmp;finishBattle();return{r:'lose',turn}}
     await say('おぴょは つかれて\nねむってしまった…');await tween(700,p=>S.dark=p);await sleep(SFX.fall()*1000);
     const isl=P.map==='isle'||P.map==='ruin';const mor=P.map==='mori'||P.map==='juka';const mac=MACHI_MAPS.has(P.map);const jur=JURA_MAPS.has(P.map);
-    if(jur){P.map='jura';P.x=15;P.y=20;P.dir='up'}else if(mac){P.map='machi';P.x=10;P.y=10;P.dir='left'}else if(mor){P.map='mori';P.x=13;P.y=9;P.dir='up'}else if(isl){P.map='isle';P.x=11;P.y=7;P.dir='up'}else{P.map='field';P.x=17;P.y=20;P.dir='up'}
+    const hz=P.map==='hazama';if(hz){P.map='hazama';P.x=5;P.y=25;P.dir='up'}else if(jur){P.map='jura';P.x=15;P.y=20;P.dir='up'}else if(mac){P.map='machi';P.x=10;P.y=10;P.dir='left'}else if(mor){P.map='mori';P.x=13;P.y=9;P.dir='up'}else if(isl){P.map='isle';P.x=11;P.y=7;P.dir='up'}else{P.map='field';P.x=17;P.y=20;P.dir='up'}
     P.hp=P.mhp;P.mp=P.mmp;P.gold=Math.floor(P.gold/2);S.trail=[{x:P.x,y:P.y+1,px:P.x,py:P.y+1,dir:'up'}];S.mode='field';S.battle=null;hideMsg();save();await sleep(300);await tween(600,p=>S.dark=1-p);S.dark=0;showStatus(true);
-    await say(jur?'…トリコの そばで めを さました。\nコインが はんぶんに なった':mac?'…まちの しろしばの そばで めを さました。\nコインが はんぶんに なった':mor?'…もりの しろしばの そばで めを さました。\nコインが はんぶんに なった':isl?'…ほこらの まえで めを さました。\nコインが はんぶんに なった':'…おうちで めを さました。\nコインが はんぶんに なった');hideMsg();bgm(musFor());S.busy=false;return{r:'lose',turn}}
+    await say(hz?'…ときの いずみの そばで めを さました。\nコインが はんぶんに なった':jur?'…トリコの そばで めを さました。\nコインが はんぶんに なった':mac?'…まちの しろしばの そばで めを さました。\nコインが はんぶんに なった':mor?'…もりの しろしばの そばで めを さました。\nコインが はんぶんに なった':isl?'…ほこらの まえで めを さました。\nコインが はんぶんに なった':'…おうちで めを さました。\nコインが はんぶんに なった');hideMsg();bgm(musFor());S.busy=false;return{r:'lose',turn}}
   finishBattle();return{r:result,turn}}
 function red(d,guard,oyaGuard){if(oyaGuard)d=Math.max(1,Math.ceil(d*0.3));else if(guard)d=Math.max(1,Math.ceil(d/2));if(S.battle&&S.battle.aw>0)d=Math.max(1,Math.ceil(d*0.7));return d}
 function finishBattle(){hideMsg();infoW.hidden=true;S.mode=S.rush?'cut':'field';S.battle=null;showStatus(false);if(!S.rush)bgm(musFor());S.busy=false;safe=5}
@@ -2361,7 +2366,7 @@ async function ending(){
 /* ================= title ================= */
 async function titleScreen(){
   S.mode='title';S.busy=true;S.light=0;S.sparkle=true;$('titleov').hidden=false;hideMsg();showStatus(false);bgm('title');
-  const sv=store.get('opyo3');const has=!!(sv&&sv.v===3);$('titleov').querySelector('.sub').textContent=(sv&&sv.juraClear)?'〜 きょうりゅうの じだい 〜':(sv&&sv.machiClear)?'〜 わすれられた まち 〜':(sv&&sv.trueClear)?'〜 ほしふる しま 〜':'〜 ひかりの どうくつ 〜';
+  const sv=store.get('opyo3');const has=!!(sv&&sv.v===3);$('titleov').querySelector('.sub').textContent=(sv&&sv.h8Clear)?'〜 じくうの はざま 〜':(sv&&sv.juraClear)?'〜 きょうりゅうの じだい 〜':(sv&&sv.machiClear)?'〜 わすれられた まち 〜':(sv&&sv.trueClear)?'〜 ほしふる しま 〜':'〜 ひかりの どうくつ 〜';
   const c=await choose(has?['つづきから','はじめから']:['はじめから'],{pos:[52,90,72],cancel:false});
   initAudio();$('titleov').hidden=true;S.sparkle=false;
   if(has&&c===1){S.mode='title';await say('きろくを けして\nはじめから あそびますか？',{wait:false});const c2=await choose(['はい','いいえ'],{pos:[120,80,52],cancel:false});hideMsg();if(c2!==0){return titleScreen()}}
@@ -2370,12 +2375,268 @@ async function titleScreen(){
   S.mode='field';bgm(musFor());S.flash=0.6;
   if(!cont){await say('おぴょは ぼうけんに でます');await say('さがさないで ください ぴょ');await say('じゅうじキー か がめんタップで あるく\nAボタンで コマンド\nBを おしながら あるくと ダッシュ');hideMsg();save()}
   else if(P.cleared&&!P.pg){P.pg=1;await say('どうくつの おくや しまの どこかに\nつよい ぬしたちが いるらしい…');hideMsg()}
+  if(cont&&P.juraClear&&!P.h8Seen&&!P.h8Hint){P.h8Hint=1;await say('【あたらしい ぼうけん】\nジュラきの がけの うえの\n「じくうの はざま」に はいれるように なった！');hideMsg();save()}
   if(cont&&P.beat.murasaki&&!P.machiHint){P.machiHint=1;await say('【あたらしい ぼうけん】\nうみがめが「わすれられた まち」へ\nつれていって くれるらしい…');hideMsg();save()}
   if(cont&&P.beat.lion&&!P.machiClear){P.machiClear=1;await say('しょうごう「まちの ゆうしゃ」を\nてにいれた！');hideMsg();save()}
   if(cont&&P.beat.kujira&&!P.moriHint){P.moriHint=1;await say('【あたらしい しま】\nうみがめが「もりの しま」へ\nつれていって くれるらしい…');hideMsg();save()}
   if(cont&&P.beat.nushi&&!P.turtleHint){P.turtleHint=1;await say('【おおがた アップデート】\nひがしの はまべに うみがめが\nきている らしい…');hideMsg();save()}
   S.busy=false;S.idleT=0}
+/* ===== v8 シナリオ担当：じくうの はざま（とけいの はりの なぞとき・ときの ばんにん 3にん・ときのまおう クロノドン・とけいとうの エンディング） ===== */
+const MAPS8={"hazama":["yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy", "yyyyyyyyyyyy.......yyyyyyyyyyyy", "yyyyyyyyyyy....ω....yyyyyyyyyyy", "yyyyyyyyyyy.,.......yyyyyyyyyyy", "yyyyyyyyyyy.......,.yyyyyyyyyyy", "yyyyyyyyyyy.........yyyyyyyyyyy", "yyyyyyyyyyyyyyyψyyyyyyyyyyyyyyy", "yyyyyyyyyyyyyyyψyyyyyyyyyyyyyyy", "yyyyyyyyyyyyyyyψyyyyyyyyyyyyyyy", "yyyyyyyyyyyyyyyψyyyyyyyyyyyyyyy", "yy...yyyyyyyyyyψyyyyyyyyyy...yy", "y.X...yyyyyy.......yyyyyy..,..y", "y.,...yyyyy..Σ....,.yyyyy.....y", "y.....yyyyy.........yyyyy.....y", "y.ε...ςςςςς....Ω....φφφφφ...η.y", "y.....yyyyy.,.......yyyyy.....y", "y...,.yyyyy.........yyyyy...,.y", "y.....yyyyy........yyyyyy...X.y", "yy...yyyyyyHyyyχyyyyyyyyyy...yy", "yyyyyyyyyyyHyyyχyyyyyyyyyyyyyyy", "yyy.....yyyHyyyχyyyyyyyyyyyyyyy", "yy.π...θ.yyHyyyχyyyyyyyyyyyyyyy", "yy.......yyHyy...yyyyyyyyyyyyyy", "yy.......hhhy.....yyyyyyyyyyyyy", "yy.......yyyy.,...yyyyyyyyyyyyy", "yy.......yyyy...,.yyyyyyyyyyyyy", "yy.......yyyy..ζX.yyyyyyyyyyyyy", "yyy..ι..yyyyyy...yyyyyyyyyyyyyy", "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"]};
+const HAZAMA=MAPS8.hazama;GM.hazama=()=>HAZAMA;JURA_MAPS.add('hazama');
+for(let L=152;L<=161;L++)EXPT[L]=Math.round(2*Math.pow(L-1,2.5)+4*(L-1));
+// 曲：もらっている 曲（bgm/yobi）を ループ化して つかう
+Object.assign(BGMF,{h8:[46.9972,93.4603],h8boss:[32.9259,73.7234],h8final:[43.3284,84.5671],h8ban:[5.2245,49.4353],h8end:[41.7959,105.7901],h8roll:[46.6953,92.1136]});
+for(const[k,v]of[['h8','ruin'],['h8boss','mboss'],['h8final','final'],['h8ban','final'],['h8end','true_end'],['h8roll','ending']])if(!TR[k]&&TR[v])TR[k]=TR[v];
+Object.assign(MUSN,{h8:'じくうの はざま',h8boss:'ときの ばんにん',h8final:'ときのまおう クロノドン',h8ban:'さいごの たたかい',h8end:'うごきだす とけいとう',h8roll:'じくうの はざま スタッフロール'});
+Object.assign(MUS_NEAR,{h8:['battle','h8boss','h8final','shop'],h8boss:['h8','battle'],h8final:['h8ban','h8end'],h8ban:['h8end','h8roll'],h8end:['h8roll']});MUS_RESUME.add('h8');
+BGM7.hazama='h8';
+['Ω','ω','ε','ζ','η','δ','γ','ξ','θ','Σ'].forEach(c=>SOLID.add(c));
+Object.assign(SYM,{'ω':'kurono','ε':'bnK','ζ':'bnT','η':'bnA'});
+Object.assign(RECLV,{bnK:150,bnT:152,bnA:154,kurono:158});
+Object.assign(CHESTS,{"hazama:2,11":["it","niku",3],"hazama:28,17":["g",80000],"hazama:16,26":["it","awd",2]});
+Object.assign(EQ,{
+  jikuvest:{n:'じくう ベスト',s:'a',v:176,price:60000},
+  kinoumant:{n:'きのうの マント',s:'a',v:182,regen:42,rare:1},
+  kyouyoroi:{n:'きょうの よろい',s:'a',v:190,regen:46,rare:1},
+  ashitaarmor:{n:'あしたの よろい',s:'a',v:198,regen:50,rare:1}});
+const E8=(n,img,hp,atk,def,agi,exp,g,acts,rare,more)=>Object.assign({n,img,hp,atk,def,agi,exp,g,acts,rare},more||{});
+Object.assign(EN,{
+  tokebat:E8('とけいコウモリ','tokebat',1800,300,262,120,4300,900,[['はりの つばさで きりつけた！',1],['チクタク チクタク ないている',0]],['milk',1/3]),
+  sunago:E8('すなっこ ゴーレム','sunago',2200,296,300,30,4600,950,[['すなの げんこつ！',1],['すなを まきあげた！\nまえが みえない',-1]],['cheese',1/10]),
+  yugarap:E8('ゆがみ ラプトル','yugarap',1700,306,250,130,4400,900,[['すばやく 2かい ひっかいた！',2],['からだが ぐにゃりと ゆがんだ',0]],['jerky',1/10]),
+  jikupute:E8('じくう プテラ','jikupute',1800,302,256,120,4400,900,[['うずの なかから きゅうこうか！',1],['じくうの すきまを とんでいる',-5]],['sasami',1/10]),
+  kakoneko:E8('きのうの ノラネコ','kakoneko',1600,296,248,140,4200,1100,[['きのうの ぶんまで ひっかいた！',2],['おやつを ねらって じっと みている',0]],['snack',1/2],{steal:1}),
+  miraihachi:E8('あしたの ハチ','miraihachi',1700,310,252,140,4500,950,[['みらいから チクリ！',1],['ぶーんと すがたを けした',-5]],['gsnack',1/12]),
+  tokitama:E8('ときの たまご','tokitama',40,95,940,120,34000,7000,[['ころころ たいあたり！',1],['チクタク と ひかっている',0]],['awd',.5],{gold:1,flee:.38}),
+  bnK:E8('きのうの ばんにん','bnK',26000,330,280,90,52000,30000,[['きのうの きずを よびもどす まほう！！',-2],['じかんを もどして きずを なおした',-4],['とけいの つえで たたいた！',1],['あおい ほしが ふりそそいだ！',-3],['つえの とけいが ぎゃくむきに まわっている…',0]],null,{boss:'bnK',big:1,drop:'kinoumant',bg7:'hazama'}),
+  bnT:E8('きょうの ばんにん','bnT',28000,336,290,90,54000,32000,[['いまを とめる まほう！\nやるきが すいとられる',-6],['まぶしい ひかりの たま！！',-2],['とけいの つえで たたいた！',1],['きいろい ほしが ふりそそいだ！',-3],['つえの とけいが ぴたりと とまっている…',0]],null,{boss:'bnT',big:1,drop:'kyouyoroi',bg7:'hazama'}),
+  bnA:E8('あしたの ばんにん','bnA',30000,342,296,110,56000,34000,[['あしたへ きえる まほう！',-5],['みらいの いかずち！！',-2],['とけいの つえで たたいた！',1],['ももいろの ほしが ふりそそいだ！',-3],['つえの とけいが はやまわりしている…',0]],null,{boss:'bnA',big:1,drop:'ashitaarmor',bg7:'hazama'}),
+  kurono:E8('ときのまおう クロノドン','kurono',60000,350,320,100,120000,80000,[['とけいの はりの つばさで なぎはらった！',-3],['じかんを ゆがめる ひかり！！',-2],['おおきな キバで かみついた！',1],['じかんを まきもどそうと している…！',-8],['じめんを ふみならした！\nとけいの はりが ふるえる！',-7],['とけいの はりを ぐるぐる まわしている…',0]],null,{boss:'kuro',big:1,bg7:'kurono'})
+});
+ZK.push('tokebat','sunago','yugarap','jikupute','kakoneko','miraihachi','tokitama','bnK','bnT','bnA','kurono');
+Object.assign(BTITLE,{bnK:'きのうの ばんにん',bnT:'きょうの ばんにん',bnA:'あしたの ばんにん',kuro:'ときのまおう'});
+Object.assign(B7MUS,{bnK:'h8boss',bnT:'h8boss',bnA:'h8boss',kuro:'h8final'});
+const SUNA8=()=>['bnK','bnT','bnA'].filter(k=>P.beat[k]).length;
+const HAND8=()=>P.h8hand==null?6:P.h8hand;
+// 絵：いまある 絵の 色ちがい（よみこめたら いれかえる）
+function ph8(){if(ph8.done)return;let all=true;const ok=im=>im&&im.width>0&&im.height>0;
+  const L={bnK:['bannin','#3a7aff',.4],bnT:['bannin','#ffc020',.34],bnA:['bannin','#ff5ab8',.38],kurono2:['kurono','#ff2a10',.36],tokebat:['jikubat','#9a6aff',.32],sunago:['golem','#ffd890',.3],yugarap:['raptor','#a050ff',.42],jikupute:['putera','#5a6aff',.42],kakoneko:['noraneko','#4aa8ff',.36],miraihachi:['jobachi','#ff6ac0',.36],tokitama:['kintama','#c0a0ff',.36]};
+  for(const k in L){const[s,c,a]=L[k];if(EI[k]&&EI[k].h8)continue;
+    if(ok(EI[s])){const t=tint(EI[s],c,a);t.hd=EI[s].hd;t.h8=1;EI[k]=t}else{all=false;if(!EI[k])EI[k]=EI[s]||mk(1,1)}}
+  ph8.done=all}
+try{ph8()}catch(e){}
+/* --- タイル --- */
+;(()=>{const tc=tileCanvas;
+  T.hvoid=tc(x=>{px(x,'#140828',0,0,16,16);px(x,'#1c0c36',0,8,16,8);px(x,'#c8b0ff',3,4,1,1);px(x,'#fffbe0',12,11,1,1);px(x,'#6a4ac0',9,2,1,1)});
+  T.hfloor=tc(x=>{px(x,'#6a5a8a',0,0,16,16);px(x,'#5a4a7a',0,7,16,1);px(x,'#5a4a7a',7,0,1,7);px(x,'#5a4a7a',12,8,1,8);px(x,'#8a7aaa',2,2,3,1);px(x,'#8a7aaa',9,10,2,1);px(x,'#4a3a68',0,15,16,1)});
+  T.hfloor2=tc(x=>{x.drawImage(T.hfloor,0,0);px(x,'#2a6aa0',4,6,3,5);px(x,'#a0e0ff',5,5,1,5);px(x,'#2a6aa0',10,9,2,4);px(x,'#e0f6ff',10,8,1,3)});
+  T.hbridge=tc(x=>{x.drawImage(T.hvoid,0,0);px(x,'#8a6a20',0,2,16,12);px(x,'#d8b048',0,3,16,10);px(x,'#ffe080',0,7,16,2);for(let i=1;i<16;i+=5)px(x,'#8a6a20',i,4,1,8)});
+  T.hbridgeV=tc(x=>{x.drawImage(T.hvoid,0,0);px(x,'#8a6a20',2,0,12,16);px(x,'#d8b048',3,0,10,16);px(x,'#ffe080',7,0,2,16);for(let i=1;i<16;i+=5)px(x,'#8a6a20',4,i,8,1)});
+  T.hstone=tc(x=>{x.drawImage(T.hfloor,0,0);px(x,'#2a2438',3,4,10,11);px(x,'#8a8496',4,3,8,11);px(x,'#a8a2b4',5,4,4,2);px(x,'#4a4458',6,8,4,1);px(x,'#4a4458',6,10,4,1);px(x,'#4a4458',6,12,3,1)});
+  T.hspring=tc(x=>{x.drawImage(T.hfloor,0,0);px(x,'#2a4a8a',2,4,12,9);px(x,'#4ab0ff',3,5,10,7);px(x,'#9ad8ff',5,6,4,1);px(x,'#ffffff',10,9,1,1)});
+  T.hshop=tc(x=>{x.drawImage(T.hfloor,0,0);px(x,'#3a1a5a',3,8,10,8);px(x,'#120624',6,11,4,5);for(let r=0;r<6;r++)px(x,r%2?'#ffd23f':'#8a4ae0',2+r,2+r,12-2*r,1);px(x,'#8a4ae0',1,7,14,2)});
+})();
+function hzTile(c){
+  if(c==='ψ')return HAND8()===12?'H':'y';if(c==='φ')return HAND8()===3?'h':'y';if(c==='χ')return HAND8()===6?'H':'y';if(c==='ς')return HAND8()===9?'h':'y';
+  if(c==='ε'&&P.beat.bnK)return'δ';if(c==='ζ'&&P.beat.bnT)return'γ';if(c==='η'&&P.beat.bnA)return'ξ';if(c==='ω'&&P.beat.kuro)return'.';return c}
+function hzImg(c){return{'.':T.hfloor,',':T.hfloor2,h:T.hbridge,H:T.hbridgeV,'Σ':T.hstone,'π':T.hspring,'θ':T.hshop,'ι':T.uzu,X:T.hfloor,'Ω':T.hfloor,'ω':T.hfloor,'ε':T.hfloor,'ζ':T.hfloor,'η':T.hfloor,'δ':T.hfloor,'γ':T.hfloor,'ξ':T.hfloor}[c]||T.hvoid}
+const hzRegion=()=>P.x<=8&&P.y>=19?'in':P.x<=5?'w':P.x>=25?'e':P.y>=22?'s':P.y<=5?'n':'c';
+/* --- 第7章の しくみに つなぐ（ジュラきと おなじ JURA_MAPS の なかま） --- */
+const _jTile=juraTile;juraTile=function(map,c){return map==='hazama'?hzTile(c):_jTile(map,c)};
+const _jImg=juraImg;juraImg=function(m,c){return m==='hazama'?hzImg(c):_jImg(m,c)};
+const _jEnemy=juraEnemy;juraEnemy=function(){if(P.map!=='hazama')return _jEnemy();const pick=L=>L[Math.floor(rnd()*L.length)];
+  if(rnd()<1/55)return'tokitama';
+  return pick({w:['kakoneko','tokebat','sunago','yugarap'],e:['miraihachi','jikupute','tokebat','sunago'],s:['yugarap','jikupute','kakoneko','sunago'],n:['tokebat','miraihachi','yugarap','jikupute']}[hzRegion()]||['tokebat','sunago','kakoneko','jikupute','miraihachi','yugarap'])};
+const _jRate=juraRate;juraRate=function(c){if(P.map!=='hazama')return _jRate(c);if(hzRegion()==='in')return 0;return c===','?1/9:c==='h'||c==='H'?1/30:1/16};
+const _bg7=bg7;bg7=function(){return P.map==='hazama'?'hazama':_bg7()};
+const _jBump=juraBump;juraBump=function(c,x,y){
+  if(P.map==='machi'&&c==='υ'&&P.juraClear){run(uzuTravel8);return true}
+  if(P.map==='jura'&&c==='ρ'){run(hazamaEnter);return true}
+  if(P.map==='hazama'){
+    if(c==='Ω'){run(clockEvent);return true}
+    if(c==='Σ'){run(async()=>{await say('いしに なにか ほってある…');await say('「きのうは 9じ　あしたは 3じ\nきょうは 6じの さきに いる」');await say('「すなどけいが 3つ そろえば\nはりは 12じを さす」',{add:false});hideMsg()});return true}
+    if(c==='θ'){run(shop8);return true}
+    if(c==='ε'||c==='ζ'||c==='η'){run(()=>banninMeet(c==='ε'?'bnK':c==='ζ'?'bnT':'bnA'));return true}
+    if(c==='δ'||c==='γ'||c==='ξ'){run(()=>banninTalk(c==='δ'?'bnK':c==='γ'?'bnT':'bnA'));return true}
+    if(c==='ω'){run(kuroMeet);return true}
+    if(c==='y'&&'ψφχς'.includes((HAZAMA[y]||'')[x]||'')){if(!S.voidT||performance.now()-S.voidT>2500){S.voidT=performance.now();run(async()=>{await say('はしが ない…\nまんなかの とけいで\nはりを うごかそう');hideMsg()})}return true}
+    return false}
+  return _jBump(c,x,y)};
+const _jArrive=juraArrive;juraArrive=function(c){
+  if(P.map!=='hazama')return _jArrive(c);
+  if(c==='π'){S.path=[];run(async()=>{SFX.heal();S.flash=0.5;P.hp=P.mhp;P.mp=P.mmp;save();showStatus(true);await say('ときの いずみに はいった。\nからだが ふわっと かるく なった！');await say('HPと やるきが ぜんぶ もどった！\n（きろくしました）',{add:true});hideMsg()});return true}
+  if(c==='ι'){S.path=[];run(async()=>{await say('ジュラきへ もどりますか？',{wait:false});const k=await choose(['もどる','やめる'],{pos:[120,80,52]});hideMsg();
+    if(k===0){SFX.stairs();await warp('jura',14,4,'down',BGM7.jura)}else await warp('hazama',5,25,'up',BGM7.hazama)});return true}
+  return false};
+const _dW7=drawWorld7;drawWorld7=function(t){_dW7(t);if(P.map==='hazama')drawWorld8(t)};
+const _dBG7=drawBG7;drawBG7=function(bg,t){return drawBG8(bg,t)||_dBG7(bg,t)};
+const _dC7=drawCut7;drawCut7=function(t,c){return drawCut8(t,c)||_dC7(t,c)};
+const _jWin=juraWin;juraWin=async function(key){await _jWin(key);if(key==='bnK'||key==='bnT'||key==='bnA')await sunaGet(key)};
+/* --- はざまへ はいる --- */
+async function hazamaEnter(){
+  await say('そらの われめ…\n「じくうの はざま」が ひらいている',{wait:false});await sleep(200);
+  await say('はいりますか？',{add:true,wait:false});const k=await choose(['はい','いいえ'],{pos:[120,80,52]});if(k!==0){await say('おぴょは すこし はなれた');hideMsg();return}
+  if(P.h8Seen){S.flash=0.6;hideMsg();await warp('hazama',5,25,'up',BGM7.hazama);return}
+  bgm(null);S.shakeT=1.2;if(SFX.rumble)SFX.rumble();await say('われめに とびこむと\nからだが ふわりと うきあがった…！');
+  await tween(500,p=>S.dark=p);S.mode='cut';S.cut={k:'j7slip',t0:tnow()};await tween(500,p=>S.dark=1-p);S.dark=0;bgm(BGM7.uzu);
+  await say('とけいの はりが ぐるぐると\nまえへ うしろへ まわっている…');hideMsg();await sleep(1000);
+  await tween(500,p=>S.dark=p);P.h8Seen=1;P.h8hand=6;MAXLV=Math.max(MAXLV,160);P.map='hazama';P.x=5;P.y=25;P.dir='up';S.trail=[{x:5,y:26,px:5,py:26,dir:'up'}];
+  S.mode='field';S.cut=null;bgm(musFor());save();await tween(500,p=>S.dark=1-p);S.dark=0;
+  $('endov').innerHTML='<div class="big">じくうの はざま</div><div class="sub">ときの まじわる ところ</div>';$('endov').hidden=false;await sleep(2400);$('endov').hidden=true;$('endov').innerHTML='<div class="big">おしまい ぴょ</div>';
+  await say('…ここは どこだろう？');await say('まっくらな そらに\nしまが ぷかぷか うかんでいる…');await say('どこからか チクタク… と\nとけいの おとが きこえる');
+  S.shakeT=0.6;await say('ひくい こえ「…よく きたな。\nいちばん おくの しまで まっているぞ」');
+  await say('おやぶん「おぴょ、まずは\nまんなかの しまへ いってみよう」');
+  if(P.lv<160)await say('レベルの じょうげんが 160に あがった！');
+  await say('（ここの いずみに はいると\nHPと やるきが ぜんぶ もどるよ）');hideMsg()}
+async function uzuTravel8(){
+  await say('ふんすいに ちいさな じくうの うずが\nのこっている…',{wait:false});await sleep(200);
+  const k=await choose(['ジュラきへ','じくうの はざまへ','やめる'],{pos:[100,60,72]});hideMsg();
+  if(k===0){SFX.stairs();await warp('jura',14,4,'down',BGM7.jura)}else if(k===1){SFX.stairs();await warp('hazama',5,25,'up',BGM7.hazama)}}
+/* --- まんなかの とけい（はりで はしを うごかす なぞとき） --- */
+const HAND_DIR={12:'きた（うえ）',3:'ひがし（みぎ）',6:'みなみ（した）',9:'にし（ひだり）'};
+async function clockEvent(){
+  if(!P.clockSeen){P.clockSeen=1;await say('まんなかに おおきな とけいが ある。');await say('…この はりは！\nまちの とけいとうの はりだ！');
+    await say('おやぶん「とけいとうが とまったのは\nはりを ここへ もってこられたからか…」');await say('はりを うごかすと\nうかぶ しまへの はしが のびるらしい')}
+  while(true){await say(`とけいの はりは いま ${HAND8()}じを さしている。\nはりを うごかしますか？`,{wait:false});
+    const k=await choose(['12じ','3じ','6じ','9じ','やめる'],{pos:[76,40,96],title:'とけいの はり'});
+    if(k<0||k===4)break;const h=[12,3,6,9][k];
+    if(h===HAND8()){await say(`はりは もう ${h}じを さしている`);continue}
+    if(h===12&&SUNA8()<3){SFX.no();await say('はりが ぴくりとも うごかない…');await say(`ときの すなどけいが 3つ いるらしい。\n（いま ${SUNA8()}こ）`,{add:true});continue}
+    P.h8hand=h;save();S.shakeT=0.8;if(SFX.rumble)SFX.rumble();await sleep(300);SFX.ok();
+    await say(`カチッ！ はりが ${h}じを さした！\n${HAND_DIR[h]}の はしが のびた！`);break}
+  hideMsg()}
+/* --- ときの ばんにん --- */
+const BAN8={bnK:{n:'きのうの ばんにん',col:'あおい',lines:['…きのうへ… もどれ…\nおまえの じかんを まきもどしてやる…'],wake:'はっ…！ わたしは なにを…。\nクロノドンに あやつられていたのか',give:'きのうの すなどけい',talk:['きのうの ことは かえられない。\nでも きのうが あるから きょうが ある','クロノドンは じかんを まきもどす。\nすなどけいが あれば ふせげるよ']},
+  bnT:{n:'きょうの ばんにん',col:'きいろい',lines:['…いまを とめる…\nずっと… とめておく…'],wake:'…ああ、めが さめた。\nありがとう ちいさな いぬよ',give:'きょうの すなどけい',talk:['いまを たいせつに。\nきょうの おぴょは きのうより つよい','クロノドンの じかんは\nすなどけいの ひかりで とめられる']},
+  bnA:{n:'あしたの ばんにん',col:'ももいろの',lines:['…あしたは こない…\nわたしが けしてしまう…'],wake:'…わたしは あしたを まもる ばんにん。\nこんどこそ まもってみせる',give:'あしたの すなどけい',talk:['あしたは きっと いい ひに なる。\nそう しんじる ちからが ある','12じに はりを あわせれば\nクロノドンの しまへ いけるよ']}};
+async function banninMeet(key){const B=BAN8[key];
+  await say(`${B.col} ローブの ときの ばんにんが いる…\nめが あやしく ひかっている`);await say(`${B.n}「${B.lines[0]}」`,{wait:false});await sleep(200);
+  await say('たたかいますか？',{add:true,wait:false});const k=await choose(['はい','いいえ'],{pos:[120,80,52]});if(k!==0){await say('おぴょは すこし はなれた');hideMsg();return}
+  const rec=RECLV[key];if(rec&&P.lv<rec){await say(`…ほんとうに いいの？\nレベル${rec}くらいは ほしいぴょ`,{wait:false});const c2=await choose(['いく','やめる'],{pos:[120,80,52]});if(c2!==0){hideMsg();return}}
+  await battle(key)}
+async function sunaGet(key){const B=BAN8[key];
+  await say(`${B.n}「${B.wake}」`);await say(`${B.n}「おわびに これを…。\nクロノドンと たたかう ちからに なる」`);
+  S.flash=1;await sleep(SFX.rare()*600);await say(`「${B.give}」を てにいれた！`);
+  const n=SUNA8();if(n<3)await say(`（ときの すなどけい ${n}/3）`);
+  else{S.shakeT=0.8;await say('ときの すなどけいが 3つ そろった！');await say('まんなかの とけいの はりが\n12じまで うごくように なった！')}}
+async function banninTalk(key){const B=BAN8[key];
+  if(P.beat.kuro){await say(`${B.n}「ありがとう、おぴょ。おやぶん。\nときは また ながれはじめたよ」`);hideMsg();return}
+  await say(`${B.n}「${B.talk[Math.floor(rnd()*B.talk.length)]}」`);hideMsg()}
+/* --- ときのまおう クロノドン --- */
+async function kuroMeet(){
+  if(!P.kuroMet){P.kuroMet=1;S.shakeT=1;if(SFX.rumble)SFX.rumble();
+    await say('おおきな とけいの はりの まえに\nときのまおう クロノドンが いる…！');
+    await say('クロノドン「…きたか、ちいさな いぬたち。\nジュラきでは よくも\nわたしの いんせきを…」');
+    await say('クロノドン「わたしは じかんを\nすきに うごかせる。\nおまえたちの まちの とけいも\nわたしが とめてやったのだ」');
+    await say('おやぶん「まちの じかんを\nかえしてもらうぞ！」');await say('おぴょ「おぴょ！！」')}
+  else await say('ときのまおう クロノドンが\nこちらを みおろしている…');
+  await say('たたかいますか？',{add:true,wait:false});const k=await choose(['はい','いいえ'],{pos:[120,80,52]});if(k!==0){await say('おぴょは すこし はなれた');hideMsg();return}
+  if(P.lv<RECLV.kurono){await say(`…ほんとうに いいの？\nレベル${RECLV.kurono}くらいは ほしいぴょ`,{wait:false});const c2=await choose(['いく','やめる'],{pos:[120,80,52]});if(c2!==0){hideMsg();return}}
+  await battle('kurono')}
+async function kuroStart(e){S.battle.suna=3;await sleep(300);
+  S.flash=1;SFX.rare();await say('3つの ときの すなどけいが\nいっせいに ひかりだした！');
+  e.frozen=2;await say('クロノドンの じかんが とまった！\n（2ターン うごけない）')}
+async function kuroRewind(e){const b=S.battle;await say(`${e.n}は\nじかんを まきもどそうとした！`,{wait:false});await sleep(400);
+  if(b.suna>0){const nm=['あした','きょう','きのう'][b.suna-1];b.suna--;S.flash=0.8;SFX.rare();
+    await say(`${nm}の すなどけいが ひかって\nまきもどしを ふせいだ！`,{add:true});if(!b.suna)await say('すなどけいの ひかりが\nぜんぶ つかわれた…',{add:true});return}
+  const h=Math.round(e.mhp*0.06);e.hp=Math.min(e.mhp,e.hp+h);SFX.heal();await say(`じかんが まきもどった！\n${e.n}の きずが ${h} なおった`,{add:true})}
+async function kuroPhase2(e){bgm(null);S.shakeT=1.6;if(SFX.rumble)SFX.rumble();
+  await say('クロノドン「…まだだ。\nじかんは わたしの ものだ！！」');
+  await tween(600,p=>S.dark=p*0.8);S.battle.bg='kurono2';S.battle.e.img='kurono2';await tween(600,p=>S.dark=0.8*(1-p));S.dark=0;e.mul=1.25;
+  await say('クロノドンの からだが\nまっかに もえあがった！');
+  S.flash=1;await say('そのとき 3にんの ばんにんの\nこえが ひびいた！');await say('「おぴょ！ おやぶん！\nわたしたちの ちからを！」');
+  const b0=P.hp;P.hp=Math.min(P.mhp,P.hp+Math.round(P.mhp*0.5));P.mp=Math.min(P.mmp,P.mp+Math.round(P.mmp*0.5));showStatus(true);SFX.heal();
+  await say(`HPが ${P.hp-b0} かいふくした！\nやるきも もどった！`);e.frozen=1;await say('クロノドンの じかんが\nまた すこし とまった！');
+  if(P.aw&&S.battle.aw<=0){P.awg=100;SFX.up();await say('かくせいゲージが いっぱいに なった！')}
+  bgm('h8ban')}
+/* --- エンディング：とけいとうが ふたたび うごきだす --- */
+const CREDITS8=['〜 おぴょの ぼうけん 〜','じくうの はざま','','しゅつえん','おぴょ（ぽろみ）','','とくべつしゅつえん','おやぶん','（くろがね おやぶん）','','ときの ばんにん','きのう　きょう　あした','','ときのまおう','クロノドン','','きょうりゅうたち','トリコ　ブラキオサウルス','','まちの どうぶつたち','','なかま','しろしば　うみがめ','','せいさく','親分とぽろみ','','そして','あそんでくれた きみ','','ありがとう ぴょ！'];
+async function ending8(){S.busy=true;bgm(null);showStatus(false);
+  await say('クロノドンは よろめいた…');await say('クロノドン「…ばかな。\nちいさな いぬたちに\nときを うごかされるとは…」');
+  await tween(500,p=>S.dark=p);S.mode='cut';S.cut={k:'h8break',t0:tnow()};await tween(500,p=>S.dark=1-p);S.dark=0;S.shakeT=2;if(SFX.rumble)SFX.rumble();
+  await say('クロノドンの からだが\nはぐるまに なって くずれていく…！');S.cut.ban=tnow();bgm('h8end');
+  await say('3にんの ときの ばんにんが あらわれた');
+  await say('きのうの ばんにん「ありがとう、おぴょ。おやぶん」');await say('きょうの ばんにん「これで ときは\nまた ながれだす」');
+  await say('あしたの ばんにん「この はりを\nまちへ かえしてあげて」');S.cut.rise=tnow();
+  await say('とけいとうの はりが\nひかりに なって とんでいく…');hideMsg();await sleep(800);
+  await tween(600,p=>S.dark=p);S.cut={k:'h8end',t0:tnow()};S.sparkle=true;await tween(800,p=>S.dark=1-p);S.dark=0;
+  await say('…まちの ひろば。');S.cut.ret=tnow();await say('とまっていた とけいとうに\nひかる はりが もどってきた！');
+  S.cut.move=tnow();SFX.rare();await say('カチ…　コチ…　カチ…　コチ…');S.shakeT=0.4;
+  await say('とけいとうが\nふたたび うごきだした！！');S.cut.ani=tnow();await say('まちの どうぶつたちが\nひろばに あつまってきた！');
+  await say('おやぶん「…おわったな、おぴょ」');await say('おぴょ「おぴょ！」');hideMsg();
+  bgm('h8roll');S.cut.roll=tnow();const dur=CREDITS8.length*1.25+4;await Promise.race([sleep(dur*1000),new Promise(r=>{const iv=setInterval(()=>{if(IN.bHeld){clearInterval(iv);r()}},100)})]);
+  S.cut.roll=null;rollHide();$('endov').innerHTML='<div class="big">〜 じくうの はざま 〜</div><div class="sub">クリア！</div>';$('endov').hidden=false;await sleep(1800);
+  P.beat.kuro=true;P.h8Clear=1;P.oya=true;P.hp=P.mhp;P.mp=P.mmp;P.map='machi';P.x=13;P.y=10;P.dir='down';S.trail=[{x:12,y:10,px:12,py:10,dir:'right'}];save();
+  await sleep(SFX.join()*400);await say('しょうごう「ときの ゆうしゃ」を\nてにいれた！');
+  const txt=`おぴょの ぼうけん「じくうの はざま」クリア！\nLv${P.lv} しょうごう「ときの ゆうしゃ」\nずかん ${ZK.filter(k=>P.zk[k]).length}/${ZK.length}\nhttps://poromi-oyabun.github.io/opyo-bouken/`;let ok=null;
+  const c=await choose(['つづける','きろくを コピー'],{pos:[96,64,76],cancel:false,sync:{1:()=>{try{const p=navigator.clipboard&&navigator.clipboard.writeText(txt);ok=p?p.then(()=>true,()=>false):Promise.resolve(false)}catch(e){ok=Promise.resolve(false)}}}});
+  if(c===1){const d=await(ok||Promise.resolve(false));await say(d?'コピーしました\nThreadsに はりつけて つかえます':txt.split('\n').slice(0,2).join('\n'))}
+  hideMsg();$('endov').hidden=true;$('endov').innerHTML='<div class="big">おしまい ぴょ</div>';await tween(500,p=>S.dark=p);S.sparkle=false;S.mode='field';S.cut=null;bgm(musFor());await tween(500,p=>S.dark=1-p);S.dark=0;
+  await say('ふんすいには ちいさな\nじくうの うずが のこっている…');await say('（うずから ジュラきや\nじくうの はざまへ いけるよ）',{add:true});hideMsg();S.busy=false}
+/* --- おみせ --- */
+const SHOP8=[['it','niku'],['it','steak'],['it','milk'],['eq','jikuvest']];
+async function shop8(){bgm('shop');
+  await say('ふしぎな ネコ「いらっしゃい。\nここは じかんの すきまの おみせだよ」');
+  while(true){showStatus(false);await say(`なにを かう？（コイン ${P.gold}）`,{wait:false});
+    const c=await choose(SHOP8.map(([t,k])=>{const d=t==='it'?IT[k]:EQ[k];const own=t==='eq'&&(P.w===k||P.a===k);return`${d.n}${own?'＊':''} ${d.price}`}),{pos:[36,2,136],title:'じかんの すきまの おみせ'});
+    if(c<0)break;const[t,k]=SHOP8[c];const d=t==='it'?IT[k]:EQ[k];
+    if(P.gold<d.price){SFX.no();await say('コインが たりない…');continue}
+    if(t==='it'){if((P.inv[k]||0)>=9){await say('もう もちきれない');continue}P.gold-=d.price;P.inv[k]=(P.inv[k]||0)+1;SFX.coin();await say(`${d.n}を かった！`)}
+    else{if(P.w===k||P.a===k){await say('もう そうびしている');continue}const cur=d.s==='w'?P.w:P.a;if(cur&&EQ[cur].v>=d.v){await say('いまの そうびの ほうが つよいよ');continue}P.gold-=d.price;SFX.coin();await equip(k,false)}}
+  save();hideMsg();bgm(musFor())}
+/* --- えがく --- */
+function hzScr(tx,ty){const[cx,cy]=camPos();return[tx*TS-Math.round((cx-5)*TS),ty*TS-Math.round((cy-5)*TS)]}
+function clockFace(cx,cy,r,hAng,mAng,glow){
+  if(glow>0){g.fillStyle=`rgba(255,220,120,${0.25*glow})`;g.beginPath();g.arc(cx,cy,r+4,0,7);g.fill()}
+  g.fillStyle='#8a6a20';g.beginPath();g.arc(cx,cy,r+1.5,0,7);g.fill();g.fillStyle='#f4ecd0';g.beginPath();g.arc(cx,cy,r,0,7);g.fill();
+  for(let i=0;i<12;i++){const a=i/12*Math.PI*2;const big=i%3===0;px(g,big?'#5a3a10':'#a08a60',Math.round(cx+Math.sin(a)*(r-2))-(big?1:0),Math.round(cy-Math.cos(a)*(r-2))-(big?1:0),big?2:1,big?2:1)}
+  const hand=(a,l,w,col)=>{g.strokeStyle=col;g.lineWidth=w;g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.sin(a)*l,cy-Math.cos(a)*l);g.stroke()};
+  if(mAng!=null)hand(mAng,r*0.85,1,'#3a2a10');if(hAng!=null)hand(hAng,r*0.6,2,'#c89020');px(g,'#3a2a10',Math.round(cx)-1,Math.round(cy)-1,2,2)}
+function drawWorld8(t){ph8();
+  for(let i=0;i<6;i++){const lx=(i*61+t*5)%SW,ly=(i*43+t*3)%SW;if(Math.sin(t*2+i)>0.2)px(g,i%2?'#c8b0ff':'#fffbe0',lx|0,ly|0,1,1)}
+  // まんなかの とけい（はりの むき＝はしの むき）
+  const[sx,sy]=hzScr(15,14);const PI2=Math.PI*2,tgt=(HAND8()%12)/12*PI2;if(S.clockA==null)S.clockA=tgt;
+  const d=((tgt-S.clockA)%PI2+PI2)%PI2;S.clockA=d<0.06?tgt:(S.clockA+Math.max(0.06,d*0.12))%PI2;
+  clockFace(sx+8,sy+8,12,S.clockA,S.clockA,0.6+0.4*Math.sin(t*3));
+  // めを さました ばんにん
+  for(const[k,x,y]of[['bnK',2,14],['bnT',15,26],['bnA',28,14]]){if(!P.beat[k])continue;const im=EI[k];if(!im||!im.width)continue;const[bx,by]=hzScr(x,y);const sc=Math.min(20/im.width,20/im.height),w=im.width*sc,h=im.height*sc;g.drawImage(im,bx+8-w/2,by+15-h+Math.sin(t*2+x)*1.5,w,h)}}
+function drawBG8(bg,t){
+  if(bg==='hazama'){const sky=['#0a0418','#1a0a34','#2a1450','#3a1e66'];for(let i=0;i<4;i++)px(g,sky[i],BX,BY+i*7,BW,7);
+    for(let i=0;i<26;i++)if(Math.sin(t*2.5+i*1.3)>-0.3)px(g,i%5?'#fffbe0':'#c8b0ff',BX+(i*37)%BW,BY+(i*13)%30,1,1);
+    for(const[gx,gy,r,s]of[[20,12,9,0.5],[108,10,7,-0.8]]){g.strokeStyle='rgba(216,176,72,0.55)';g.lineWidth=1;g.beginPath();g.arc(BX+gx,BY+gy,r,0,7);g.stroke();const a=t*s;g.beginPath();g.moveTo(BX+gx,BY+gy);g.lineTo(BX+gx+Math.sin(a)*r*0.8,BY+gy-Math.cos(a)*r*0.8);g.stroke()}
+    px(g,'#5a4a7a',BX,BY+BH-12,BW,12);px(g,'#6a5a8a',BX,BY+BH-12,BW,2);for(let i=0;i<BW;i+=16)px(g,'#4a3a68',BX+i,BY+BH-10,1,10);return true}
+  if(bg==='kurono'||bg==='kurono2'){const red=bg==='kurono2';px(g,red?'#2a0606':'#0a0418',BX,BY,BW,BH);
+    clockFace(BX+BW/2,BY+22,34,-t*0.9,-t*6,red?0.2:0.5);g.fillStyle=red?'rgba(120,10,10,0.55)':'rgba(10,4,24,0.55)';g.fillRect(BX,BY,BW,BH);
+    for(let i=0;i<14;i++){const a=0.4+0.4*Math.sin(t*3+i);g.fillStyle=red?`rgba(255,90,40,${a})`:`rgba(200,160,255,${a})`;g.fillRect(BX+(i*37)%BW,BY+((t*12+i*13)%BH),1,2)}
+    px(g,red?'#3a1010':'#2a1e44',BX,BY+BH-10,BW,10);return true}
+  return false}
+function drawCut8(t,c){const a=t-c.t0;
+  if(c.k==='h8break'){px(g,'#0a0418',0,0,SW,SW);for(let r=120;r>6;r-=8){g.strokeStyle=r%16?'#3a1a70':'#6a4ab0';g.lineWidth=2;g.beginPath();g.arc(SW/2,70,r,t*(r%16?0.3:-0.4),t*(r%16?0.3:-0.4)+4.8);g.stroke()}
+    const im=EI.kurono;if(im&&im.width){const k=Math.min(1,a/4),sc=1.8*(1-k*0.7);g.globalAlpha=Math.max(0,1-k);g.drawImage(im,SW/2-im.width*sc/2+Math.sin(t*40)*2*(1-k),66-im.height*sc/2,im.width*sc,im.height*sc);g.globalAlpha=1}
+    for(let i=0;i<14;i++){const u=((a*0.3+i/14)%1);const x=SW/2+Math.cos(i*2.1)*u*90,y=66+Math.sin(i*1.7)*u*60+u*u*30;g.strokeStyle='#d8b048';g.lineWidth=1;g.beginPath();g.arc(x,y,2+(i%3),0,7);g.stroke()}
+    if(c.ban){const k=Math.min(1,(t-c.ban)/1.5);for(const[key,x]of[['bnK',36],['bnT',88],['bnA',140]]){const b=EI[key];if(!b||!b.width)continue;const sc=0.9;g.globalAlpha=k;g.drawImage(b,x-b.width*sc/2,150-b.height*sc+Math.sin(t*2+x)*2,b.width*sc,b.height*sc);g.globalAlpha=1}}
+    if(c.rise){const u=Math.min(1,(t-c.rise)/2.5);const y=110-u*130;g.fillStyle='rgba(255,230,140,0.35)';g.beginPath();g.arc(SW/2,y,10,0,7);g.fill();g.strokeStyle='#ffe080';g.lineWidth=2;g.beginPath();g.moveTo(SW/2-2,y+6);g.lineTo(SW/2-2,y-6);g.moveTo(SW/2+2,y+4);g.lineTo(SW/2+2,y-9);g.stroke()}
+    const A=IMG.smile,O=IMG.oyabun;if(A.width)g.drawImage(A,Math.round(60-A.width/2),176-A.height);if(O.width)g.drawImage(O,Math.round(118-O.width/2),178-O.height);return true}
+  if(c.k==='h8end'){const sky=['#4a8ad8','#6aa4e4','#8abcec','#acd2f0','#cce4f4','#e4f0f4'];for(let i=0;i<6;i++)px(g,sky[i],0,i*16,SW,16);
+    for(let i=0;i<4;i++){const x=((i*57+t*4)%(SW+40))-20;g.fillStyle='rgba(255,255,255,0.85)';g.beginPath();g.arc(x,14+i*9,6,0,7);g.arc(x+7,12+i*9,7,0,7);g.arc(x+14,14+i*9,5,0,7);g.fill()}
+    const B=[[0,58,30],[28,66,24],[50,52,22],[104,60,26],[128,70,20],[146,56,30]];
+    for(const[x,y,w]of B){px(g,'#b8a890',x,y,w,100-y);px(g,'#8a7a64',x,y,w,2);for(let wy=y+6;wy<96;wy+=9)for(let wx=x+3;wx<x+w-3;wx+=7)px(g,'#5a6a8a',wx,wy,3,4)}
+    // とけいとう
+    px(g,'#9a8a74',70,30,36,70);px(g,'#7a6a56',70,30,2,70);px(g,'#7a6a56',104,30,2,70);g.fillStyle='#6a3a2a';g.beginPath();g.moveTo(66,31);g.lineTo(88,8);g.lineTo(110,31);g.fill();px(g,'#4a2a1e',66,30,44,2);
+    px(g,'#5a4a3a',82,82,12,18);px(g,'#3a2a20',84,84,8,16);
+    let hA=null,mA=null,glow=0;if(c.ret){const k=Math.min(1,(t-c.ret)/1.6);glow=1-k*0.6;const mv=c.move?(t-c.move):0;hA=(10/12)*Math.PI*2+mv*0.25;mA=mv*3;
+      if(k<1){g.fillStyle=`rgba(255,230,140,${0.5*(1-k)})`;g.beginPath();g.arc(88,52-30*(1-k),12,0,7);g.fill()}}
+    clockFace(88,52,13,hA,mA,glow);
+    px(g,'#8a8478',0,100,SW,76);for(let i=0;i<20;i++)px(g,'#9a948a',(i*47)%SW,104+(i*13)%68,3,1);
+    const ani=['noraneko','hato','tanuki','saru','nezumi','kaeru','fukurou','kuma'];const ap=c.ani?Math.min(1,(t-c.ani)/3):0;
+    for(let i=0;i<ani.length;i++){const im=EI[ani[i]];if(!im||!im.width)continue;const s=0.45,w=Math.round(im.width*s),h=Math.round(im.height*s);const x=Math.round((i<4?6+i*20:SW-26-(i-4)*20)+(i<4?-1:1)*(1-ap)*80),y=c.roll?160:134;g.globalAlpha=ap;g.drawImage(im,x,y-h,w,h);g.globalAlpha=1}
+    const A=IMG.smile,O=IMG.oyabun,base=c.roll?172:140;if(A.width)g.drawImage(A,Math.round(66-A.width/2),base-A.height);if(O.width)g.drawImage(O,Math.round(112-O.width/2),base+2-O.height);
+    if(c.roll)rollUpdate(CREDITS8,t-c.roll);else rollHide();return true}
+  return false}
+
 window.__G={P,S,IN,EN,SK,RUSH,SET,readCode,myCode,tileAt,run,F:{battle,uzuEnter,uzuAppear,juraTalk,juraShop,slipSeq,meteorSeq,juraClearSeq,machiEnding,machiShop,machiTalk,bossRush,shrineEvent,voyage,trueEnding,awakenScene,oyaAwakenScene,npcTalk,turtleEvent,giveStar},warpTo:(m,x,y,d)=>{P.map=m;P.x=x;P.y=y;P.dir=d||'down';S.trail=[{x,y:y+1,px:x,py:y+1,dir:'up'}];bgm(musFor())},press,setPad:d=>setPad(d),battle:k=>run(()=>battle(k)),save,get timeOrigin(){return performance.timeOrigin}};
+Object.assign(window.__G.F,{hazamaEnter,clockEvent,banninMeet,sunaGet,kuroMeet,ending8,shop8,uzuTravel8});
 const start=()=>titleScreen();
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start);else start();
 })();
