@@ -43,6 +43,7 @@
   - ひかえめ（SET.fx==='low'）と 視差効果を へらす 端末（RM）では FX.on() が false。もとの 関数（_bossIntro など）へ もどるので、新しい 演出を 足す ときも この わかれ道を 通す
   - 名前を 出す のは ゲームの 中に もう ある 名前だけ（章の ばんごうは ふらない）
   - iPhone の 音は「ゆびを はなした しゅんかん（touchend・click）」で じゅんびする（v9 ⑥ の unlock）。pointerdown だけで AudioContext を 作ると iPhone で 止まった ままに なる ことが ある。11-10 に 確認版だけ 音が 出ない 報告 → unlock を 追加。**iPhone 実機の 音は こちらでは 試せないので、高原さんの 確認が いる**
+  - さいしょの 1かいだけ「タッチして スタート」（v9Title の touchGate）。ブラウザは さわるまで 音を 出せないので、ここで さわって もらい タイトルの 曲と いっしょに 演出を はじめる（11-10 高原さん：オープニングの 音楽が ない）。エンディングから タイトルへ もどった ときは 出ない。テストの __FAST では とばす
   - push の あとは Pages の 公開処理（Actions の pages build and deployment）が success に なったかを かならず 見る（11-10 に 時間切れで 失敗 → 404。空の コミットで やりなおした）
 - テスト（/home/claude/work に 作った もの。なければ おなじ 形で 作りなおす）
   - `python3 -m http.server 8765` を リポジトリで うごかし、playwright（/opt/npm-tools/node_modules）で preview/index.html を ひらく

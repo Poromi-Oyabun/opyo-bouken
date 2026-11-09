@@ -2674,6 +2674,7 @@ body{overscroll-behavior:none}.wrap{-webkit-touch-callout:none}
 @keyframes pcA{0%{opacity:0}12%{opacity:1}80%{opacity:1}100%{opacity:0}}
 @keyframes pcN{0%{letter-spacing:.6em}30%,100%{letter-spacing:.06em}}
 @keyframes pcL{0%{width:0}30%,100%{width:calc(var(--u)*128)}}
+.tp{position:absolute;left:0;right:0;top:calc(var(--u)*40);text-align:center;font-size:calc(var(--u)*12);color:#fff;animation:bl 1.1s steps(2,end) infinite;text-shadow:calc(var(--u)*1) 0 #000,calc(var(--u)*-1) 0 #000,0 calc(var(--u)*1) #000,0 calc(var(--u)*-1) #000,0 calc(var(--u)*2.5) rgba(0,0,0,.5)}
 .vg{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,30,60,0) 45%,rgba(255,30,60,.55) 100%);animation:vgA .55s ease-out forwards}
 .vg.vgb{background:radial-gradient(circle,rgba(255,30,60,0) 30%,rgba(255,30,60,.8) 100%)}
 @keyframes vgA{0%{opacity:1}100%{opacity:0}}
@@ -2849,8 +2850,12 @@ const _drawTitle=drawTitle;drawTitle=function(t){if(RM)return _drawTitle(t);cons
   const O=IMG.oyabun;if(oya&&O.width&&a>0.8){const k2=eoB(cl01((a-0.8)/0.5)),br=1+0.015*Math.sin(t*2+1),h=Math.round(O.height*br);g.fillStyle='rgba(0,0,0,.18)';g.fillRect(127,SW-7,40,3);g.drawImage(O,Math.round(147-O.width/2+(1-k2)*70),SW-4-h,O.width,h)}};
 function relogo(){const ov=$('titleov'),lg=ov.querySelector('.logo');if(!lg.dataset.v9){lg.dataset.v9=1;let i=0;lg.innerHTML=['おぴょの','ぼうけん'].map(w=>[...w].map(ch=>`<span class="lgo" style="--i:${i}"><span class="lgi" style="--i:${i++}">${ch}</span></span>`).join('')).join('<br>')}
   ov.classList.remove('go');void ov.offsetWidth;ov.classList.add('go')}
-async function v9Title(sv){FX.title=tnow();FX.tsv=sv||{};FX.sky=null;FX.lastMap=null;FX.lastReg=null;relogo();
-  if(!FX.booted){FX.booted=1;S.dark=1;tween(800,p=>S.dark=1-p)}
+/* さいしょの 1かいだけ「タッチして スタート」。ブラウザは さわるまで 音を 出せないので、ここで さわって もらって タイトルの 曲と いっしょに 演出を はじめる（2026-11-10 高原さん：オープニングの 音楽が ない） */
+function touchGate(){return new Promise(r=>{const evs=['pointerup','touchend','keydown'];let done=0;const h=()=>{if(done)return;done=1;evs.forEach(e=>removeEventListener(e,h,true));IN.res=null;r()};evs.forEach(e=>addEventListener(e,h,true));waitA().then(h)})}
+async function v9Title(sv){FX.tsv=sv||{};FX.sky=null;FX.lastMap=null;FX.lastReg=null;
+  if(!FX.booted){FX.booted=1;S.dark=1;tween(800,p=>S.dark=1-p);
+    if(!audioOn&&!window.__FAST){const ov=$('titleov');FX.title=1e12;ov.hidden=true;const el=fxEl(fxT,'tp','タッチして スタート');await touchGate();el.remove();ov.hidden=false}}
+  FX.title=tnow();relogo();
   if(FX.on()){await Promise.race([sleep(1300),waitA()]);IN.res=null}}
 
 /* ---------- ⑤ はじまり・ばしょの なまえ ---------- */
@@ -2875,7 +2880,7 @@ function v9Start(cont){if(FX.on())FX.iris={t0:tnow(),dur:0.75};else S.flash=0.6;
   /* iPhone の 音：ゆびを はなした しゅんかん（touchend・click）で 音の じゅんびを する。タイトルの 演出ちゅうに 画面を さわると、おした しゅんかん（pointerdown）に 音の 土台が 作られて、iPhone では 止まった ままに なる ことが あった（2026-11-10 高原さんの 報告：確認版だけ 音が 出ない） */
   const unlock=()=>{try{initAudio();if(AC&&AC.state!=='running'&&AC.resume){const q=AC.resume();if(q&&q.catch)q.catch(()=>{})}}catch(e){}};
   for(const ev of['touchend','pointerup','click','keydown'])addEventListener(ev,unlock,{capture:true,passive:true});
-  if(PV){const s=document.querySelectorAll('.bar span')[1];if(s)s.textContent+='（かくにんばん 2）'}})();
+  if(PV){const s=document.querySelectorAll('.bar span')[1];if(s)s.textContent+='（かくにんばん 3）'}})();
 /* まれに さいしょの 1コマで t が t0 より わずかに 前に なり、えんの 半径が マイナスに なるのを ふせぐ */
 const _dCi7=drawCutin7;drawCutin7=function(t,ci){return _dCi7(Math.max(t,ci.t0||0),ci)};
 /* テスト用の 出入口（__G.FX.t） */
