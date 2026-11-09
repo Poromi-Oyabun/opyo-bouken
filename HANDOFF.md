@@ -1,6 +1,7 @@
 # 引き継ぎ書：おぴょの ぼうけん（ゲーム専用チャットへ）
 
-## いまの状態（2026-11-09）
+## いまの状態（2026-11-10）
+- **確認版が preview/ に ある（下の「確認版（preview）と v9 えんしゅつ」を 先に 読む）。本番は 11-09 の まま**
 - 公開URL：https://poromi-oyabun.github.io/opyo-bouken/ （GitHub：Poromi-Oyabun/opyo-bouken、main に push すると Pages に反映）
 - 第1〜8章まで公開ずみ。index.html 1ファイル（約90万字）＋ bgm/*.mp3。
 - 第7章「きょうりゅうの じだい」：まちクリア後 → じくうの うず → ジュラき → ボス6たい → ちょうきょだい いんせき → しんの エクスカリバー → 「つづく」
@@ -20,6 +21,34 @@
 - 曲（bgm/yobi の もらった 曲を tools/bgm_loop.py で ループ化）：h8=Puppy_Steps（はざま）、h8boss=Heroic_Alt（ばんにん）、h8final=Heroic（クロノドン）、h8ban=nihongo_titleVariation（クロノドン 2だんかいめ）、h8end=Sunny_Shiba_Stroll（エンディング）、h8roll=nihongo_title（スタッフロール）
 - 新しい P の 項目（ないときも 動く）：h8Seen・h8hand・clockSeen・kuroMet・h8Clear・h8Hint、P.beat.bnK/bnT/bnA/kuro
 - つぎに やるなら：クリアごの おまけ（はざまの つよい てき・ずかん うめ）など
+
+## 確認版（preview）と v9 えんしゅつ（2026-11-10・Fable が 作成。つづきは Opus でも できる）
+- いまの 状態：**本番の index.html は さわっていない**。なおした 版は preview/index.html に ある
+  - 確認用URL：https://poromi-oyabun.github.io/opyo-bouken/preview/ （高原さんが スマホで あそんで OK を 出したら 本番へ）
+  - 本番へ 反映する とき：`cp preview/index.html index.html` だけ。ファイルの 中で `/preview/` かどうかを 見分けて いるので（PV）、書きかえは いらない
+  - PV の ときだけ：セーブの キーに `pv` を つける（opyo3pv・opyo3setpv・opyo3muspv。はじめて ひらいた ときに 本番の きろくを コピー。本番の きろくは 読むだけで 書かない）、曲は `../bgm/` から 読む、下の バーに「（かくにんばん）」
+  - 本番へ 反映したら preview/ は のこしても よい（つぎの 確認にも つかえる）。つぎに preview を 作る ときは `cp index.html preview/index.html` から
+- コードは index.html の「/* ===== v9 えんしゅつ担当：」の かたまり（__G の すぐ 上）。v8 と おなじく `const _x=x; x=function…` で 上がき。前の コードへ 入れた 手は 6か所だけ：
+  1. `store`（PV・SK9・BGMDIR）　2. `fetch(BGMDIR+…)`　3. `battle()` の ピカピカ6回 → `await encFx(boss)`
+  4. `titleScreen()` に `await v9Title(sv)` と `v9Start(cont)`　5. `settings()` に「えんしゅつ：はで／ひかえめ」（SET.fx）　6. 下の せつめい文
+- なにを 足したか
+  - たたかい：あたった しゅんかんの 時間どめ（hitStop）・てきが 白く ひかる・きりつけの 絵（つめ／かいしん×／かみつき／とっしん／まんまる／ひかりの はしら／とおぼえ／ほし。スキルごとの わりあては SLK）・ダメージの 数字は HTML で はずむ（pop）・やるき 20 いじょうの スキルは カットイン（その たたかいで 2かいめからは 0.5びょう。A で とばせる）・ボス登場は かげ → いなずま → なまえが ドン（bossIntro）・とどめは てきが つぶに なって くずれる（fadeE。にげた／あきた ときは もとの まま）・レベルアップの はしらと 文字・ダメージを うけた ときの 赤い ふち・HP 25% いかで ステータスまどが 赤く 点めつ・きんいろの あいだ オーラ
+  - エンカウント：ピカピカ 6回を やめて、ズーム＋うずまきブロック（encFx）。子どもの 目に やさしく
+  - タイトル：いまの 時刻で 空が かわる（4:30〜7 あさやけ／7〜16:30 ひる／16:30〜19 ゆうやけ／よる は 星と ながれ星と 月）。ロゴが 1文字ずつ おちてくる。おぴょが ぴょこっと 出てくる。おやぶんが なかまなら となりに すわる（sv.oya）
+  - はじまり：まるく ひらく（iris）・ばしょの なまえ（PLACE9：どうくつ・ほしふる しま・もりの しま・わすれられた まち・きょうりゅうの じだい・じくうの はざま。ちいきが かわった ときだけ REG9）
+  - 操作（ボタンの 位置・おしかたは そのまま）：A・B・メッセージまどの ながおしで 文章の はやおくり（えらぶ 画面では 止まる）・じゅうじキーと A/B の「おせる はんい」だけ 見えない 形で ひろげた・ながおしメニュー／ピンチ／ダブルタップの 拡大を ふせぐ・タップ移動の わっか・Android は ボタンと こうげきで ブルッ（iPhone は しくみが なく 鳴らない）
+- まもる こと（v9 で 学んだ こと）
+  - 演出で ゲームの 数字と rnd() の 順番を かえない（演出の らんすうは Math.random）
+  - frame0 に わたす 時間を ずらさない。カットシーンは t（rAF）と tnow() を まぜて つかって いるので、ずらすと こわれる。時間どめは「かきかえを 休む」方式
+  - ひかえめ（SET.fx==='low'）と 視差効果を へらす 端末（RM）では FX.on() が false。もとの 関数（_bossIntro など）へ もどるので、新しい 演出を 足す ときも この わかれ道を 通す
+  - 名前を 出す のは ゲームの 中に もう ある 名前だけ（章の ばんごうは ふらない）
+- テスト（/home/claude/work に 作った もの。なければ おなじ 形で 作りなおす）
+  - `python3 -m http.server 8765` を リポジトリで うごかし、playwright（/opt/npm-tools/node_modules）で preview/index.html を ひらく
+  - 通し：`window.__FAST=1` で EN の 117たい ぜんぶと たたかう（__G.F.battle(k)）、__G.F の イベント 12こ、つづきから／はじめから／ながおし／せってい → コンソールエラー 0（2026-11-10）
+  - 見た目：`window.__HOUR=5.6` などで タイトルの 時間帯を きりかえ。`__G.FX.t`（hurt・levelUp・cutIn・placeCard・encFx・hitE）で 演出だけ 出せる
+  - 公開の まえ：`python3 tools/textcheck.py preview/index.html`、`python3 tools/moji_check.py preview/index.html`（moji_check は ファイルを 指定できるように した）
+- 気づいたが さわって いない こと（高原さんに 聞いてから）：og:description が「ドット絵RPG」の まま（きまりでは「ゲーム」と よぶ）
+- つぎに やるなら：フィールドの 演出（天気・足あと・マップ切りかえ）は まだ 手つかず。高原さんの「良／直し／ボツ」を 聞いてから
 
 ## きろく（セーブ）
 - コマンドに「きろく」（saveCmd）。ほかに、フィールドで 6ぽ あるくごと・アプリを とじる／ほかの アプリへ うつるとき（visibilitychange・pagehide）に じどうで きろく。たたかいちゅう・えんしゅつちゅうは きろくしない

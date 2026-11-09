@@ -3,7 +3,8 @@
 # 日本語の 文章（スタッフロール・せりふ など）は HTMLの 文字（--u 単位）で 出すこと。
 # キャンバスに 書いて よいのは 数字や 1文字の 記号（ダメージ・z）だけ。
 import re, sys, pathlib
-src = pathlib.Path(__file__).resolve().parent.parent.joinpath('index.html').read_text(encoding='utf-8')
+# 使い方: python3 tools/moji_check.py [しらべる html]（なにも つけないと index.html。確認版は preview/index.html）
+src = (pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(__file__).resolve().parent.parent.joinpath('index.html')).read_text(encoding='utf-8')
 ALLOW = {"'z'", 'p.txt', 'String(12-i)'}            # ダメージの 数字・ねむりの z
 bad = []
 for m in re.finditer(r"fillText\(([^,]+),", src):
