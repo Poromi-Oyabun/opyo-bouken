@@ -21,6 +21,9 @@
 - 新しい P の 項目（ないときも 動く）：h8Seen・h8hand・clockSeen・kuroMet・h8Clear・h8Hint、P.beat.bnK/bnT/bnA/kuro
 - つぎに やるなら：クリアごの おまけ（はざまの つよい てき・ずかん うめ）など
 
+## きろく（セーブ）
+- コマンドに「きろく」（saveCmd）。ほかに、フィールドで 6ぽ あるくごと・アプリを とじる／ほかの アプリへ うつるとき（visibilitychange・pagehide）に じどうで きろく。たたかいちゅう・えんしゅつちゅうは きろくしない
+
 ## まもる きまり
 - 公開の まえに：python3 tools/textcheck.py index.html（誤字脱字）、python3 tools/moji_check.py（文章は キャンバスに かかない）
 - 日本語の 文章は くっきりした HTML の 文字で 出す（2026-11-08 エンディングの 文字が にじむ 報告で 再発防止）

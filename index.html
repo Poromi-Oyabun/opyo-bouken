@@ -1367,7 +1367,7 @@ function bumpEvent(c,x,y){if(juraBump(c,x,y))return;if(machiBump(c,x,y))return;
   else if(c==='n')run(npcTalk);
   else if(c==='z')run(async()=>{SFX.no();await say('おおきな きの とびらは\nつるで かたく とじられている…');await say('じょおうバチと おおカマキリを\nたおすと ひらくらしい',{add:true});hideMsg()});
   else if(SYM[c])run(()=>symPrompt(SYM[c]))}
-function arrive(){
+function arrive(){if(steps%6===0&&S.mode==='field')save();
   const c=tileAt(P.map,P.x,P.y);
   if(juraArrive(c))return;
   if(machiArrive(c))return;
@@ -1388,9 +1388,13 @@ function arrive(){
   if(rnd()<rate){safe=4;S.path=[];run(()=>battle(pickEnemy()))}
   else if(P.a&&EQ[P.a].regen&&P.hp<P.mhp&&steps%4===0)P.hp=Math.min(P.mhp,P.hp+1)}
 async function fieldMenu(){
-  run(async()=>{showStatus(true);const c=await choose(['スキル','どうぐ','つよさ','ずかん','くんくん','しらべる','なかま','せってい','とじる'],{pos:[70,4,102],title:'コマンド',cols:2});
-    if(c===0)await skillField();else if(c===1)await itemMenu(false);else if(c===2)await strength();else if(c===3)await zukan();else if(c===4)await fieldSniff();else if(c===5)await search();else if(c===6)await nakamaMenu();else if(c===7)await settings();
+  run(async()=>{showStatus(true);const c=await choose(['スキル','どうぐ','つよさ','ずかん','くんくん','しらべる','なかま','せってい','きろく','とじる'],{pos:[70,4,102],title:'コマンド',cols:2});
+    if(c===0)await skillField();else if(c===1)await itemMenu(false);else if(c===2)await strength();else if(c===3)await zukan();else if(c===4)await fieldSniff();else if(c===5)await search();else if(c===6)await nakamaMenu();else if(c===7)await settings();else if(c===8)await saveCmd();
     hideMsg();infoW.hidden=true;showStatus(false)})}
+async function saveCmd(){save();SFX.ok();await say('ここまでの ぼうけんを\nきろくしました！');await say('つぎは「つづきから」で\nこの ばしょから はじまるよ',{add:true});hideMsg()}
+// とちゅうで とじても つづきから あそべるように（あるくたび・とじるとき）
+const autoSave=()=>{try{if(P&&P.v===3&&S.mode==='field')save()}catch(e){}};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)autoSave()});addEventListener('pagehide',autoSave);
 function learned(){return SK.filter(s=>P.lv>=s.lv&&(!s.oya||P.oya)&&(!s.isle||P.isleSeen)&&(!s.ex||P.excal))}
 function holeKey(x,y){return P.map==='field'?x+','+y:P.map+':'+x+','+y}
 function nearestHole(){let best=null;const add=(m,xy,k)=>{if(m!==P.map)return;const[x,y]=xy.split(',').map(Number);const d=Math.hypot(x-P.x,y-P.y);if(!best||d<best.d)best={x,y,d,k}};
