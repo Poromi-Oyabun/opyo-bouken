@@ -2285,9 +2285,9 @@ async function battle(key,opt={}){if(typeof ph7==='function')ph7();
     if(rush){await say('おぴょは ゆめから さめた…');P.hp=P.mhp;P.mp=P.mmp;finishBattle();return{r:'lose',turn}}
     await say('おぴょは つかれて\nねむってしまった…');await tween(700,p=>S.dark=p);await sleep(SFX.fall()*1000);
     const isl=P.map==='isle'||P.map==='ruin';const mor=P.map==='mori'||P.map==='juka';const mac=MACHI_MAPS.has(P.map);const jur=JURA_MAPS.has(P.map);
-    const hz=P.map==='hazama';if(hz){P.map='hazama';P.x=5;P.y=25;P.dir='up'}else if(jur){P.map='jura';P.x=15;P.y=20;P.dir='up'}else if(mac){P.map='machi';P.x=10;P.y=10;P.dir='left'}else if(mor){P.map='mori';P.x=13;P.y=9;P.dir='up'}else if(isl){P.map='isle';P.x=11;P.y=7;P.dir='up'}else{P.map='field';P.x=17;P.y=20;P.dir='up'}
-    P.hp=P.mhp;P.mp=P.mmp;P.gold=Math.floor(P.gold/2);S.trail=[{x:P.x,y:P.y+1,px:P.x,py:P.y+1,dir:'up'}];S.mode='field';S.battle=null;hideMsg();save();await sleep(300);await tween(600,p=>S.dark=1-p);S.dark=0;showStatus(true);
-    await say(hz?'…ときの いずみの そばで めを さました。\nコインが はんぶんに なった':jur?'…トリコの そばで めを さました。\nコインが はんぶんに なった':mac?'…まちの しろしばの そばで めを さました。\nコインが はんぶんに なった':mor?'…もりの しろしばの そばで めを さました。\nコインが はんぶんに なった':isl?'…ほこらの まえで めを さました。\nコインが はんぶんに なった':'…おうちで めを さました。\nコインが はんぶんに なった');hideMsg();bgm(musFor());S.busy=false;return{r:'lose',turn}}
+    const lib=LIB9.has(P.map),hz=P.map==='hazama';if(lib){P.map='tosho';P.x=6;P.y=5;P.dir='up'}else if(hz){P.map='hazama';P.x=5;P.y=25;P.dir='up'}else if(jur){P.map='jura';P.x=15;P.y=20;P.dir='up'}else if(mac){P.map='machi';P.x=10;P.y=10;P.dir='left'}else if(mor){P.map='mori';P.x=13;P.y=9;P.dir='up'}else if(isl){P.map='isle';P.x=11;P.y=7;P.dir='up'}else{P.map='field';P.x=17;P.y=20;P.dir='up'}
+    P.hp=P.mhp;P.mp=P.mmp;if(!lib)P.gold=Math.floor(P.gold/2);S.trail=[{x:P.x,y:P.y+1,px:P.x,py:P.y+1,dir:'up'}];S.mode='field';S.battle=null;hideMsg();save();await sleep(300);await tween(600,p=>S.dark=1-p);S.dark=0;showStatus(true);
+    await say(lib?'…としょかんで めを さました。\nホー はかせが もうふを\nかけて くれて いた':hz?'…ときの いずみの そばで めを さました。\nコインが はんぶんに なった':jur?'…トリコの そばで めを さました。\nコインが はんぶんに なった':mac?'…まちの しろしばの そばで めを さました。\nコインが はんぶんに なった':mor?'…もりの しろしばの そばで めを さました。\nコインが はんぶんに なった':isl?'…ほこらの まえで めを さました。\nコインが はんぶんに なった':'…おうちで めを さました。\nコインが はんぶんに なった');hideMsg();bgm(musFor());S.busy=false;return{r:'lose',turn}}
   finishBattle();return{r:result,turn}}
 function red(d,guard,oyaGuard){if(oyaGuard)d=Math.max(1,Math.ceil(d*0.3));else if(guard)d=Math.max(1,Math.ceil(d/2));if(S.battle&&S.battle.aw>0)d=Math.max(1,Math.ceil(d*0.7));return d}
 function finishBattle(){hideMsg();infoW.hidden=true;S.mode=S.rush?'cut':'field';S.battle=null;showStatus(false);if(!S.rush)bgm(musFor());S.busy=false;safe=5}
@@ -2881,7 +2881,7 @@ function v9Start(cont){if(FX.on())FX.iris={t0:tnow(),dur:0.75};else S.flash=0.6;
   /* iPhone の 音：ゆびを はなした しゅんかん（touchend・click）で 音の じゅんびを する。タイトルの 演出ちゅうに 画面を さわると、おした しゅんかん（pointerdown）に 音の 土台が 作られて、iPhone では 止まった ままに なる ことが あった（2026-11-10 高原さんの 報告：確認版だけ 音が 出ない） */
   const unlock=()=>{try{initAudio();if(AC&&AC.state!=='running'&&AC.resume){const q=AC.resume();if(q&&q.catch)q.catch(()=>{})}}catch(e){}};
   for(const ev of['touchend','pointerup','click','keydown'])addEventListener(ev,unlock,{capture:true,passive:true});
-  if(PV){const s=document.querySelectorAll('.bar span')[1];if(s)s.textContent+='（かくにんばん 4）'}})();
+  if(PV){const s=document.querySelectorAll('.bar span')[1];if(s)s.textContent+='（かくにんばん 5）'}})();
 /* まれに さいしょの 1コマで t が t0 より わずかに 前に なり、えんの 半径が マイナスに なるのを ふせぐ */
 const _dCi7=drawCutin7;drawCutin7=function(t,ci){return _dCi7(Math.max(t,ci.t0||0),ci)};
 /* テスト用の 出入口（__G.FX.t） */
@@ -3018,9 +3018,285 @@ const _drawBattle10=drawBattle;drawBattle=function(t){_drawBattle10(t);const b=S
 const _fin10=finishBattle;finishBattle=function(){FX.ea=null;FX.eaK=null;FX.ring=null;FX.zip=null;FX.chg=0;FX.tm.armed=false;FX.tm.mul=1;fxL.querySelectorAll('.hn,.ht').forEach(x=>x.remove());return _fin10()};
 FX.t.rush=()=>{FX.sp=100};FX.t.ea=k=>{FX.eaK=k};
 /* ===== v10 ここまで ===== */
+/* ===== v11 ちえの としょかん：第2部（STORY.md）。第9章「かぞえる ほん」（2026-11-11） =====
+   ・全体の 構成は STORY.md。3つの 約束：①まちがいで 止めない ②用語より 先に 体験 ③深さは 自分で えらぶ（ちえの ノート）
+   ・マップは tosho（としょかん）と kazoe（かぞえの むら）。第8章と おなじく JURA_MAPS の なかまに して、jura〜 の 関数を 上がきして つないでいる（LIB9 が この 部の マップ）
+   ・本の 中の てきは つよさを プレイヤーに そろえる（EN の lv9:1 → battle の 上がきで scale9）。だれでも、いつでも はいれる
+   ・セーブの 新しい 項目（ないときも 動く）：P.c9（第9章の 進み）・P.note（ひらいた ノート）・P.koha（コハクが おぼえた こと）・P.shiori
+   ・章を 足す とき：BOOKS9 に 本、MAPS9 に マップ、NOTES9 に ノート、〜9 の イベントを おなじ 形で */
+const LIB9=new Set(['tosho','kazoe']);
+const MAPS9={tosho:[
+"ホホホホホホホホホホホホホ",
+"ホ.ロ.ロ.ブ.ロ.ロ.ホ",
+"ホ...........ホ",
+"ホ.ロ.ロ.ハ.ロ.ロ.ホ",
+"ホ...........ホ",
+"ホノ....ラ....ロホ",
+"ホ.....ラ.....ホ",
+"ホホホホホホデホホホホホホ"],
+kazoe:["ミミミミミミミミミミミミミミミミミミミミミミミミ", "ミモモモモモミ,,,,ス,ス,ス,,,,,,,ミ", "ミモモコモモミ,,,ス..ワ..ス,ヒヒヒヒヤミ", "ミモモモモモミ,,,ス.....ス......ミ", "ミモモモモモミ,,,,ス...ス,,,,,,,ミ", "ミモモモモモモ,,,,,,.,,,,,,,,,ミ", "ミミミミミ,,,,,,.,ド,,,,,,,,,ミ", "ミ,ド,,,,,イ,,オ,,イ,,,,,,,,ミ", "ミ,,,,,,,,......,,,,,,,,ミ", "ミ,,,サ,,,,......,..ア,,,,ミ", "ミ,ペペペ,,,,イ,.,,,イ,...,,,ミ", "ミ,,,,,,,,,,.,,,,,,,,,,,ミ", "ミ,,,,,,,,,,.ク,,,,,,,ド,,ミ", "ミ,,,,,,,,,,カ,,,,,,,,,,,ミ", "ミ,,,,,,,,,,,,,,,,,,,,,,ミ", "~~~~~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~", "ミミミミミミミミミミミミミミミミミミミミミミミミ"]};
+for(const k in MAPS9){const M=MAPS9[k];GM[k]=()=>M;JURA_MAPS.add(k)}
+BGM7.tosho='shop';BGM7.kazoe='isle';
+['ホ','ロ','ブ','ハ','ノ','ミ','イ','サ','ア','オ','ク','コ','ヒ','ヤ','ワ','ス','ペ','Λ'].forEach(c=>SOLID.add(c));
+Object.assign(REG9,{tosho:'L',kazoe:'k9'});
+/* 本の ならび（ch＝章。できた 本だけ go に 入口の 関数を 入れる） */
+const BOOKS9=[{ch:9,n:'かぞえる ほん',at:'6,1'},{ch:10,n:'はかる ほん',at:'2,1'},{ch:11,n:'いきものの ほん',at:'4,1'},{ch:12,n:'めいれいの ほん',at:'8,1'},{ch:13,n:'くらしの ほん',at:'10,1'},{ch:14,n:'つたえる ほん',at:'2,3'},{ch:15,n:'たしかめる ほん',at:'4,3'},{ch:16,n:'まなぶ きかいの ほん',at:'8,3'},{ch:17,n:'はたらく まちの ほん',at:'10,3'},{ch:18,n:'さいごの ほん',at:'11,5'}];
+const C9=()=>P.c9||(P.c9={}),KOHA=()=>P.koha||(P.koha={}),NOTE=()=>P.note||(P.note={});
+/* --- 絵：いまある 絵の 色ちがいと、コードで かいた タイル --- */
+function ph9(){if(ph9.done)return;const ok=im=>im&&im.width>0;let all=true;
+  const L={moya9:['mist','#ffffff',.62],wbat9:['bat','#e8f0ff',.55],moyan:['mist','#b48cff',.5]};
+  for(const k in L){const[s,c,a]=L[k];if(EI[k]&&EI[k].c9)continue;if(ok(EI[s])){const t=tint(EI[s],c,a);t.hd=EI[s].hd;t.c9=1;EI[k]=t}else{all=false;if(!EI[k])EI[k]=EI[s]||mk(1,1)}}ph9.done=all}
+try{ph9()}catch(e){}
+const WKP9=walker(Object.assign({},PP,{o:'#c9a26a',d:'#a07840',C:'#c9a26a',b:'#c9a26a'}));   // りょうけん
+const WKK9=walker(Object.assign({},PP,{o:'#eaf6ff',d:'#9ad8ff',C:'#eaf6ff',b:'#eaf6ff',k:'#2a4a7a',w:'#ffffff',c:'#ffffff',m:'#ffffff',l:'#ffffff',p:'#6ae0ff',n:'#2a4a7a',e:'#1a6ad8'}));   // コハク
+;(()=>{const tc=tileCanvas;
+  T.lfloor=tc(x=>{px(x,'#8a5a34',0,0,16,16);px(x,'#7a4c2a',0,7,16,1);px(x,'#7a4c2a',0,15,16,1);px(x,'#7a4c2a',5,0,1,7);px(x,'#7a4c2a',11,8,1,7);px(x,'#9c6a40',1,2,3,1);px(x,'#9c6a40',7,10,3,1)});
+  T.lshelf=tc(x=>{px(x,'#3a2414',0,0,16,16);px(x,'#5a3a20',1,1,14,6);px(x,'#5a3a20',1,9,14,6);const C=['#c84a4a','#4a8ac8','#e8c040','#5aac5a','#a05ac8','#e88a3a'];for(let i=0;i<6;i++){px(x,C[i],2+i*2,2,2,5);px(x,C[(i+3)%6],2+i*2,10,2,5);px(x,'#fff6d0',2+i*2,3,2,1);px(x,'#fff6d0',2+i*2,11,2,1)}});
+  T.lrug=tc(x=>{x.drawImage(T.lfloor,0,0);px(x,'#8a2a3a',1,0,14,16);px(x,'#c84a5a',3,0,10,16);px(x,'#ffd23f',7,2,2,2);px(x,'#ffd23f',7,10,2,2)});
+  T.lped=tc(x=>{x.drawImage(T.lfloor,0,0);px(x,'#4a3a5a',4,9,8,6);px(x,'#6a5a7a',3,8,10,2);px(x,'#2a6ad8',4,3,8,5);px(x,'#fff6d0',5,4,6,3);px(x,'#ffd23f',7,3,2,5)});
+  T.lpedL=tc(x=>{x.drawImage(T.lfloor,0,0);px(x,'#4a3a5a',4,9,8,6);px(x,'#6a5a7a',3,8,10,2);px(x,'#8a8a96',4,3,8,5);px(x,'#c8c8d0',5,4,6,3)});
+  T.lpedW=tc(x=>{x.drawImage(T.lfloor,0,0);px(x,'#4a3a5a',4,9,8,6);px(x,'#6a5a7a',3,8,10,2);px(x,'#d8d8e0',4,3,8,5);px(x,'#ffffff',5,4,6,3)});
+  T.lnote=tc(x=>{x.drawImage(T.lfloor,0,0);px(x,'#5a3a20',3,6,10,9);px(x,'#7a5230',2,5,12,2);px(x,'#fff6d0',4,2,8,4);px(x,'#8a8a96',5,3,6,1);px(x,'#8a8a96',5,5,4,1)});
+  T.ldoor=tc(x=>{px(x,'#1a1020',0,0,16,16);px(x,'#ffe9a0',3,0,10,16);px(x,'#fff6d0',5,0,6,16)});
+  T.ldark=tc(x=>{px(x,'#120a14',0,0,16,16)});
+  T.kfog=tc(x=>{x.drawImage(T.grass,0,0);px(x,'#2f7a34',0,0,16,16);px(x,'#3a8a3e',2,3,4,2);px(x,'#3a8a3e',9,10,5,2);px(x,'#e8f0f4',1,7,6,1);px(x,'#e8f0f4',8,4,6,1);px(x,'#e8f0f4',5,13,7,1)});
+  T.kfogC=tc(x=>{x.drawImage(T.grass,0,0);px(x,'#3f923f',0,0,16,16);px(x,'#56ac4a',2,3,4,2);px(x,'#56ac4a',9,10,5,2);px(x,'#ffe86a',4,8,1,1);px(x,'#ffffff',11,5,1,1)});
+  T.khouse=tc(x=>{x.drawImage(T.grass,0,0);for(let r=0;r<11;r++){const w=4+r;px(x,r%2?'#b8904e':'#a07a3c',8-w/2|0,2+r,w,1)}px(x,'#6a4a20',7,1,2,2);px(x,'#2a1a0c',6,9,4,5);px(x,'#8a6a34',1,13,14,2)});
+  T.kstone=tc(x=>{x.drawImage(T.grass,0,0);px(x,'#4a4654',4,3,8,12);px(x,'#8a8696',5,2,6,12);px(x,'#b0acbc',6,3,2,6);px(x,'#2a2632',4,14,9,1)});
+  T.kdirt=tc(x=>fillN(x,'#c9a878',[['#b89464',0.08],['#d8bc90',0.08]],9));
+  T.ktorch=tc(x=>{x.drawImage(T.kdirt,0,0);px(x,'#5a3a20',7,6,2,9);px(x,'#3a2414',5,5,6,2);px(x,'#8a8696',4,13,8,2)});
+  T.ksign=tc(x=>{x.drawImage(T.kdirt,0,0);px(x,'#4a4654',3,5,10,10);px(x,'#8a8696',4,4,8,10);for(const[a,b]of[[5,6],[7,6],[9,6],[5,9],[7,9],[9,9]])px(x,'#2a2632',a,b,1,1)});
+  T.kacorn=tc(x=>{x.drawImage(T.grass,0,0);for(const[a,b]of[[4,9],[8,8],[11,10],[6,11],[9,12]]){px(x,'#8a5a2a',a,b,3,3);px(x,'#5a3a1a',a,b-1,3,1);px(x,'#c89858',a+1,b+1,1,1)}});
+  T.kfence=tc(x=>{x.drawImage(T.grass,0,0);px(x,'#7a5230',1,5,14,2);px(x,'#7a5230',1,10,14,2);for(const a of[2,7,12])px(x,'#9c6a40',a,3,2,11)});
+  T.kbook=tc(x=>{x.drawImage(T.kdirt,0,0);px(x,'#2a6ad8',3,5,10,8);px(x,'#fff6d0',4,6,8,6);px(x,'#ffd23f',7,5,2,8);px(x,'#8a8a96',5,8,2,1);px(x,'#8a8a96',10,8,2,1)});
+  T.kcircle=tc(x=>{x.drawImage(T.kdirt,0,0);px(x,'#b89464',2,2,12,12);px(x,'#d8bc90',4,4,8,8)});
+  T.lbookF=tc(x=>{x.drawImage(T.sand,0,0);px(x,'#3a2414',2,2,12,13);px(x,'#5a3a20',3,3,10,5);px(x,'#5a3a20',3,9,10,5);const C=['#c84a4a','#4a8ac8','#e8c040','#5aac5a','#a05ac8'];for(let i=0;i<5;i++){px(x,C[i],3+i*2,4,2,4);px(x,C[(i+2)%5],3+i*2,10,2,4)}});
+})();
+/* --- さいしょの はまべに 入口の ほんだなを おく（おうちの 2つ 左） --- */
+FIELD[19]=FIELD[19].slice(0,15)+'Λ'+FIELD[19].slice(16);
+const _tImg9=tileImg;tileImg=function(c){return c==='Λ'&&P.map==='field'?T.lbookF:_tImg9(c)};
+const _bump9=bumpEvent;bumpEvent=function(c,x,y){if(P.map==='field'&&c==='Λ'){run(libEnter);return}return _bump9(c,x,y)};
+/* --- タイルの 見え方 --- */
+function lib9Tile(map,c){const q=C9();
+  if(map==='kazoe'){if(c==='コ'&&(!q.dogs||q.pup))return'モ';if(c==='ワ'&&q.clear)return'マ';return c}
+  return c}
+function lib9Img(m,c,x,y){
+  if(m==='tosho')return{'.':T.lfloor,'ホ':T.lshelf,'ラ':T.lrug,'ブ':T.lped,'ロ':T.lpedL,'ハ':T.lfloor,'ノ':T.lnote,'デ':T.ldoor}[c]||T.ldark;
+  const fogOn=!C9().clear;
+  return{',':T.grass,'.':T.kdirt,'ミ':T.tree,'モ':fogOn?T.kfog:T.kfogC,'イ':T.khouse,'ス':T.kstone,'ヒ':T.ktorch,'ヤ':T.ksign,'ド':T.kacorn,'ペ':T.kfence,'カ':T.kbook,'マ':T.kcircle,'ワ':T.kcircle,'サ':T.grass,'ア':T.kdirt,'オ':T.kdirt,'ク':T.grass,'コ':fogOn?T.kfog:T.kfogC,'#':T.tree}[c]||T.grass}
+const _jT9=juraTile;juraTile=function(map,c){return LIB9.has(map)?lib9Tile(map,c):_jT9(map,c)};
+const _jI9=juraImg;juraImg=function(m,c){return LIB9.has(m)?lib9Img(m,c):_jI9(m,c)};
+const _jE9=juraEnemy;juraEnemy=function(){if(!LIB9.has(P.map))return _jE9();return rnd()<0.6?'moya9':'wbat9'};
+const _jR9=juraRate;juraRate=function(c){if(!LIB9.has(P.map))return _jR9(c);if(P.map!=='kazoe'||C9().clear)return 0;return c==='モ'||c==='コ'?1/7:0};
+const _bg9=bg7;bg7=function(){return LIB9.has(P.map)?'kazoe':_bg9()};
+const _dBG9=drawBG7;drawBG7=function(bg,t){if(bg!=='kazoe')return _dBG9(bg,t);
+  const sky=['#7ab4e4','#9cc8ea','#bcdcf0','#dcecf4'];for(let i=0;i<4;i++)px(g,sky[i],BX,BY+i*6,BW,6);
+  g.fillStyle='#3f923f';g.beginPath();g.moveTo(BX,BY+26);g.lineTo(BX+30,BY+12);g.lineTo(BX+62,BY+26);g.fill();g.fillStyle='#4aa040';g.beginPath();g.moveTo(BX+50,BY+26);g.lineTo(BX+92,BY+9);g.lineTo(BX+BW,BY+24);g.lineTo(BX+BW,BY+26);g.fill();
+  px(g,'#5aac3e',BX,BY+24,BW,BH-24);for(let i=0;i<14;i++)px(g,'#46923a',BX+(i*23)%BW,BY+28+(i*7)%20,3,1);
+  for(const sx of[14,104]){px(g,'#4a4654',BX+sx,BY+16,7,12);px(g,'#8a8696',BX+sx+1,BY+15,5,12)}
+  if(!C9().clear)for(let i=0;i<7;i++){g.fillStyle='rgba(255,255,255,.28)';g.fillRect(BX+((i*41+t*(6+i))%(BW+30))-30,BY+6+i*6,34,3)}return true};
+/* --- つよさを そろえる（本の 中の てきは プレイヤーに あわせる） --- */
+const E9=(n,img,acts,more)=>Object.assign({n,img,hp:10,atk:5,def:1,agi:5,exp:1,g:1,acts,lv9:1},more||{});
+Object.assign(EN,{
+  moya9:E9('ワスレもや','moya9',[['しろい もやで つつみこんだ！',1],['もやもや ただよっている',0]]),
+  wbat9:E9('わすれコウモリ','wbat9',[['ばさばさと ぶつかってきた！',1],['なにを しに きたか わすれている',0]]),
+  moyan:E9('かずくい モヤン','moyan',[['もやの うでで なぎはらった！',1],['ちからを ためている…！',-10]],{boss:'moyan',big:1,cyc:[0,0,1]})});
+Object.assign(BTITLE,{moyan:'かずを たべる もや'});Object.assign(B7MUS,{moyan:'mboss'});
+function scale9(D){const A=Math.max(4,ATK()),def=Math.round(A*0.3),per=Math.max(1,A-def/2);
+  const need=Math.max(20,(EXPT[P.lv+1]||0)-(EXPT[P.lv]||0));D.exp=P.lv>=MAXLV?0:Math.max(1,Math.round(need*(D.boss?0.5:0.05)));D.g=P.lv*(D.boss?40:4);
+  return{hp:Math.max(8,Math.round(per*(D.boss?13:3.2))),atk:Math.max(3,Math.round(P.mhp*(D.boss?0.075:0.06)+DEF()/2)),def,agi:Math.max(3,Math.round(P.agi*0.7))}}
+const _battle9=battle;battle=function(key,opt){const D=EN[key];if(D&&D.lv9){try{ph9()}catch(e){}opt=Object.assign({},opt);opt.ex=Object.assign(scale9(D),opt.ex||{})}return _battle9(key,opt)};
+const _pick9=pickAct10;pickAct10=function(D,boss){if(D.cyc&&S.battle&&S.battle.st){const e=S.battle.st,a=D.acts[D.cyc[(e.cn||0)%D.cyc.length]];e.cn=(e.cn||0)+1;return a}return _pick9(D,boss)};
+const _red9=red;red=function(d,guard,oyaGuard){if(S.battle&&S.battle.st&&S.battle.st.n===EN.moyan.n&&FX.eaK==='big'){const k=KOHA();if(guard||oyaGuard)k.g9=(k.g9||0)+1;else k.h9=(k.h9||0)+1}return _red9(d,guard,oyaGuard)};
+
+/* --- ちえの ノート（★しょうがくせい／★★ちゅうがくせい／★★★こうこうせい／しごと） --- */
+const NOTES9={
+ n1:{t:'かぞえる とは ならべる こと',p:[
+  'いしを 1こ、いぬを 1ぴき。\nペアを つくって ならべると、\nかずを しらなくても\n「たりない」「あまった」が わかる。\nかぞえる ことの はじまりは これ。',
+  '2つの集まりを 1つずつ対応させて、\nあまりが出なければ「同じ数」。\nこれを「1対1対応」という。\n数字は、この対応を楽にするために\n生まれた道具。',
+  '1対1対応は、無限にも使える。\n自然数 1,2,3… と 偶数 2,4,6… は\nn と 2n を対応させると あまりが出ない。\nつまり「同じ個数」。\n集合論では これを 濃度が等しい という。',
+  'おみせの ざいこを かぞえる ひと、\nにもつを たしかめる ひと、\nデータを あつかう エンジニア。\n「ぬけや だぶりが ないか」を\nならべて たしかめている。']},
+ n2:{t:'10の たば',p:[
+  'ばらばらだと かぞえにくい。\n10こ あつめて 1たばに すると、\n「たば 2つと ばら 3こ」で 23。\nりょうての ゆびが 10ぽん だから\n10ずつ まとめた、と いわれている。',
+  '23 は 2×10＋3。\n左の数字ほど 大きなまとまりを表す。\nこれが「位取り」。10ずつなら 10進法。\n時計は 60ずつまとめる 60進法で、\n60秒＝1分、60分＝1時間。',
+  'n進法では、数は\na×n×n＋b×n＋c … の形で書ける。\n位が1つ上がるごとに n倍になるので、\n少ない桁で大きな数を表せる。\n桁数は 数の大きさの対数に ほぼ比例する。',
+  'おかねを あつかう かいけいの ひと、\nざいりょうを はかる りょうりにん、\nせっけいを する エンジニア。\nおおきな かずを まちがえずに\nあつかうのに つかう。']},
+ n3:{t:'なにも ない しるし「0」',p:[
+  'たばが 2つ、ばらが なし。\n「2」と かくと 2こと まちがえる。\nなにも ない ばしょに\n「0」の しるしを おくと、\n「20」と ただしく つたわる。',
+  '0には 2つの役目がある。\n①位が空いていることを示す記号。\n②「何もない」という数そのもの。\n0を数として計算に使う考えは、\n古代インドで まとまったと されている。',
+  '0は 足し算の「単位元」。\nどんな数 a でも a＋0＝a。\n0で割ることだけは できない。\na÷0＝x とすると x×0＝a となり、\na が 0 でないかぎり 成り立たないから。',
+  'プログラマーは「0ばんめ」から\nかぞえる ことが おおい。\nおんどけいの 0ど、ちずの たかさ 0。\n0は「ここが きじゅん」の\nしるしとしても はたらいている。']},
+ n4:{t:'のろしと 2しんほう',p:[
+  'のろしは「ついている」か「きえている」。\n8・4・2・1の のろしを くみあわせると、\n0から 15までの どの かずも おくれる。\n11は 8と 2と 1。',
+  '「ある・ない」の 2通りだけで\n数を表すのが 2進法。\n11 は 2進法で 1011。\n位は 右から 1,2,4,8…と 2倍ずつ増える。\nコンピュータも この方法を使っている。',
+  'のろし 1本が運べる情報が 1ビット。\nn本あれば 2のn乗 通りを区別できる。\n4本で 16通り、8本で 256通り。\n文字も 画像も 音も、最後は\n0と1の列に 置きかえられている。',
+  'つうしんの エンジニア、プログラマー、\nスマホや ゲームを つくる ひと。\nみんなが おくる しゃしんも\nメッセージも、のろしと おなじ\nしくみで とどいている。']},
+ n5:{t:'かずの はじまり',p:[
+  'もじが ない むかしから、\nひとは ほねや きに きずを つけたり、\nいしを ならべたり して かぞえた。\nえものを わける、きせつを しる。\nくらしの「こまった」が かずを うんだ。',
+  '日本の縄文時代は 1万年以上つづいた。\n青森県の 三内丸山遺跡のような\n大きな集落では、遠くの土地の\nヒスイや 黒曜石が 見つかっている。\n物を交換するには、数える力が欠かせない。',
+  '数学は「必要」から育った。\n交易は 数と計算を、\n暦づくりは 天体の観測と周期を、\n土地の分配は 測量と図形を 発達させた。\n学問の多くは 暮らしの問題から始まる。',
+  'こうこがくしゃは、\nつちの なかの いしや ほねから\nむかしの くらしを よみとく。\nれきしを しらべる ことは、\nひとの くふうを しる こと。']}};
+const NOTE_LV=['★ しょうがくせい','★★ ちゅうがくせい','★★★ こうこうせい','この ちえを つかう しごと'];
+async function noteGet(k){const N=NOTE();if(N[k])return;N[k]=1;SFX.item();await say(`ちえの ノートに\n「${NOTES9[k].t}」が かきこまれた！`);}
+async function noteRead(k){const n=NOTES9[k];for(let i=0;i<n.p.length;i++){info(`<span class="ttl">${n.t}</span><div style="color:var(--gold);font-size:calc(var(--u)*7.5)">${NOTE_LV[i]}</div>${n.p[i]}\n▶ ${i<n.p.length-1?'つぎへ':'とじる'}（A）`,[6,6,164]);msgW.hidden=true;await waitA()}infoW.hidden=true;NOTE()[k]=2}
+async function notes9(){const ks=Object.keys(NOTES9),N=NOTE();if(!ks.some(k=>N[k])){await say('ちえの ノートだ。\nまだ なにも かかれていない');hideMsg();return}
+  let at=0;while(true){hideMsg();const c=await choose(ks.map(k=>N[k]?NOTES9[k].t:'？？？？').concat(['とじる']),{pos:[10,20,156],title:'ちえの ノート',start:at});if(c<0||c===ks.length)break;at=c;if(!N[ks[c]]){SFX.no();continue}await noteRead(ks[c])}
+  await say('★は みんな むけ。\n★★と ★★★は もっと しりたい ひとへ。\nよまなくても ぼうけんは すすめるよ');hideMsg()}
+
+/* --- としょかん --- */
+async function card9(big,sub){$('endov').innerHTML=`<div class="big">${big}</div><div class="sub">${sub}</div>`;$('endov').hidden=false;await sleep(2400);$('endov').hidden=true;$('endov').innerHTML='<div class="big">おしまい ぴょ</div>'}
+async function libEnter(){const q=C9();
+  if(P.lv<3){await say('ふるい ほんだなが ある。\nほんが ぎっしり ならんでいる…');await say('ひっぱっても びくとも しない。\n（レベル3に なったら ひらきそうだ）',{add:true});hideMsg();return}
+  if(!q.seen){await say('ふるい ほんだなが ある。\n…きのうまで こんな もの あったかな？');SFX.card();S.flash=0.5;await say('ほんの あいだから\nやわらかい ひかりが もれている…！');
+    await say('はいって みますか？',{add:true,wait:false})}else await say('ちえの としょかんへ はいりますか？',{wait:false});
+  const k=await choose(['はいる','やめる'],{pos:[120,80,52]});hideMsg();if(k!==0)return;
+  SFX.stairs();await warp('tosho',6,6,'up',BGM7.tosho);
+  if(!q.seen){q.seen=1;await card9('ちえの としょかん','せかいの ちえが ねむる ところ');
+    await say('たかい たなに ほんが ぎっしり。\nしずかで、かみの におい…');await say('おくで フクロウが\nこちらを みている');hideMsg();save()}}
+async function owlTalk(){const q=C9();SFX.ok();
+  if(!q.koha){await say('フクロウ「ホー。よく きたね。\nわたしは ここの ばんにん、ホー はかせ」');await say('ホー はかせ「ここには せかいじゅうの\n『ちえ』が ほんに なって ねむっておる」');
+    await say('ホー はかせ「ところが しろい もや…\n『ワスレ』が ページを たべて しまった」');await say('ホー はかせ「ほんの なかの せかいでは\nみんなが だいじな ことを\nわすれはじめて おるのじゃ」');
+    await say('ホー はかせ「おぴょ。ほんの なかへ はいって\nこまっている みんなを\nたすけて くれんかね」');
+    SFX.rare();S.flash=0.6;await say('たなの かげから\nまっしろな こいぬが とびだした！');await say('こいぬ「ぼくは コハク。\nまだ なにも しらない ロボットだよ」');await say('コハク「おぴょの する ことを みて\nひとつずつ おぼえるね。\nあたまに のせて くれる？」');
+    q.koha=1;SFX.join();await say('コハクが なかまに くわわった！\n（おぴょの あたまの うえに いるよ）');
+    await say('ホー はかせ「まずは いちばん おくの\nあおい ほん…『かぞえる ほん』じゃ」');hideMsg();save();return}
+  if(q.clear){await say('ホー はかせ「かぞえる ほんに\nページが もどった。ありがとう」');await say('ホー はかせ「つぎの ほんは『はかる ほん』。\nまだ ページが まっしろじゃが…\nもうすぐ ひらくじゃろう」');await say('ホー はかせ「わしは こたえを おしえん。\nどうしてだと おもう？ と きくだけじゃ。ホー」');hideMsg();return}
+  await say('ホー はかせ「かぞえる ほんの むらでは\nみんなが『かず』を わすれて おる」');await say('ホー はかせ「こまっている ものの\nはなしを よく きく ことじゃ。ホー」');hideMsg()}
+async function bookEvent(x,y){const b=BOOKS9.find(o=>o.at===x+','+y);if(!b)return;const q=C9();
+  if(b.ch!==9){await say(`『${b.n}』\nひらいて みたが…\nページが まっしろだ`);await say(b.ch===18?'ホー はかせ「それは さいごの ほん。\nいつか きみが ひらく ほんじゃ」':'（まだ はいれない。つぎの おはなしを まってね）',{add:true});hideMsg();return}
+  if(!q.koha){await say('あおい ほんが ひかっている。\n…さきに フクロウと はなして みよう');hideMsg();return}
+  await say(`『かぞえる ほん』\nほんの なかへ とびこみますか？`,{wait:false});const k=await choose(['とびこむ','やめる'],{pos:[120,80,52]});hideMsg();if(k!==0)return;
+  SFX.stairs();S.flash=0.8;await warp('kazoe',11,12,'up',BGM7.kazoe);
+  if(!q.in){q.in=1;await card9('かぞえる ほん','かずの はじまり');
+    await say('ひろい そら、かやぶきの いえ。\nずっと むかしの むらだ');await say('でも しろい もやが ただよって\nむらの ひとは ぼんやり している…');await say('コハク「みんな、なにかを\nわすれちゃった みたい」');await say('（あしもとの ほんに のると\nとしょかんへ もどれるよ）');hideMsg();save()}}
+/* --- かぞえの むら：はなし --- */
+const TV9=[8,4,2,1],TSUM9=()=>TV9.reduce((s,v,i)=>s+((C9().tb||0)>>i&1?v:0),0);
+async function elderTalk(){const q=C9();SFX.ok();
+  if(q.clear){await say('タヌキの おさ「かずが もどった！\nこれで みんなに おなじだけ わけられる」');await say('タヌキの おさ「かずは だれかを\nだいじに する ための ちえじゃな」');hideMsg();return}
+  if(!q.met){q.met=1;await say('タヌキの おさ「たびの いぬかね。\nすまんが この むらは いま…」');await say('タヌキの おさ「みんな『かず』を わすれて しもうた。\nえものが たりとるのかも わからん」');
+    await say('タヌキの おさ「にしの かりうどと\nひがしの あきんどが こまっとる。\nはなしを きいて やって おくれ」');hideMsg();save();return}
+  const L=[];if(!q.pup)L.push('にしの かりうどが いぬの ことで\nこまって おるよ');if(!q.trade)L.push('ひがしの あきんどが どんぐりを\nほしがって おったぞ');
+  if(q.pup&&q.trade&&!q.torch)L.push('きたの おかに のろしが ある。\nとなりの むらに たすけを\nよべるかも しれん');if(q.torch)L.push('きたの いしの わに\nもやが あつまって おる…\nきを つけてな');
+  await say('タヌキの おさ「'+L[0]+'」');hideMsg()}
+async function frogTalk(){SFX.ok();await say('カエル「ケロ。ゆびを つかうと\nかぞえやすいって きいたケロ」');await say('カエル「ひとは りょうてで 10ぽん。\nだから 10ずつ まとめるんだケロ」');
+  await say('コハク「おぴょの まえあしは\nじめんに つく ゆびが 4ほんずつ。\nいぬの くにでは 8ずつ かもね！」');hideMsg()}
+/* --- しかけ1：いぬが たりない？（ならべて くらべる） --- */
+async function dogsGame(){const q=C9();SFX.ok();
+  if(q.pup){await say('サルの かりうど「いしと いぬが ぴったり！\nもう かずを わすれても あんしんじゃ」');hideMsg();return}
+  if(q.dogs){await say('サルの かりうど「いしが 1こ あまっとる。\nまだ もどらん こが おるんじゃ…\nにしの もりを みて きて くれんか」');hideMsg();return}
+  await say('サルの かりうど「うーむ、こまった。\nりょうけんが ぜんぶ もどったか\nわからんのじゃ」');await say('サルの かりうど「あさ いぬを だす とき、\n1ぴきに 1こ、いしを つぼに いれた。\nでも かぞえかたを わすれて しもうた」');
+  await say('コハク「いぬが 1ぴき もどったら\nいしを 1こ そとに だす…\nって やって みたら？」');
+  S.q9={st:7,out:0,dogs:0,run:0};
+  for(let i=0;i<6;i++){S.q9.run=tnow();SFX.bark();await sleep(650);S.q9.dogs++;S.q9.run=0;
+    await say('いぬが 1ぴき もどって きた！',{wait:false});await choose(['いしを 1こ だす'],{pos:[66,84,104],cancel:false});S.q9.st--;S.q9.out++;SFX.coin();await sleep(180)}
+  await say('…もう いぬは もどって こない');await sleep(300);SFX.no();S.shakeT=0.4;await say('つぼの なかに\nいしが 1こ のこっている！');
+  await say('おぴょは きづいた。\nのこった いし ＝ まだ もどらない いぬ！');await say('コハク「すごい！ かずを しらなくても\nならべれば わかるんだ！」');
+  S.q9=null;q.dogs=1;await noteGet('n1');
+  await say('サルの かりうど「なんと…！\nちびが にしの もりへ はいったままじゃ。\nもやが こくて わしでは さがせん…」');hideMsg();save()}
+async function pupEvent(){const q=C9();await say('もやの なかから\nきゅーん… と なきごえが する！',{wait:false});await sleep(500);
+  await say('しろい もやが こいぬを\nつつんで はなさない！',{add:true});hideMsg();
+  const r=await battle('moya9',{ex:{}});if(!r||r.r!=='win')return;
+  q.pup=1;SFX.join();await say('こいぬを たすけだした！\nしっぽを ぶんぶん ふっている');await say('こいぬは むらへ はしって いった。\nつぼの いしと いぬが ぴったり そろった！');
+  await say('コハク「いしは 7こ、いぬも 7ひき。\nおなじ かずって こういう ことか」');hideMsg();save()}
+/* --- しかけ2：10の たば（まとめて かぞえる・なにも ない しるし） --- */
+const ACORN9={'2,7':10,'13,6':10,'20,12':3};
+async function acornGet(x,y){const q=C9(),k=x+','+y;q.ac=q.ac||[];if(q.ac.includes(k))return;q.ac.push(k);q.don=(q.don||0)+ACORN9[k];SFX.item();
+  await say(`どんぐりを ひろった！\n（ぜんぶで ${q.don}こ）`);if(q.ac.length===3)await say('コハク「たくさん あつまったね。\nかぞえるの たいへんそう…」');hideMsg();save()}
+async function tradeEvent(){const q=C9();SFX.ok();
+  if(q.trade){await say('ハリネズミの あきんど「たばと ばら、\nそれに なにも ない しるし。\nこれで あきないが できるわい」');hideMsg();return}
+  await say('ハリネズミの あきんど「さかなが ほしいのかい？\nどんぐりと とりかえじゃよ」');
+  if((q.ac||[]).length<3){await say(`ハリネズミの あきんど「でも それっぽっちじゃ たりん。\nむらの あちこちに おちとるぞ」\n（どんぐりの やま あと ${3-(q.ac||[]).length}つ）`);hideMsg();return}
+  await say('ハリネズミの あきんど「さかな 1ぴきは\nりょうてで もてる だけ…\n10この どんぐりと とりかえじゃ」');await say('どんぐりは 23こ。\nどうやって かぞえよう？',{wait:false});
+  const c=await choose(['10こずつ ひもで しばる','5こずつ やまに する','1こずつ ならべる'],{pos:[40,60,130],cancel:false});const K=KOHA();if(K.b9==null)K.b9=c;
+  if(c===0)await say('10こずつ しばって みた。\nたばが 2つ、ばらが 3こ できた！');
+  else if(c===1){await say('5この やまが 4つと、ばらが 3こ。');await say('5の やま 2つで りょうての ぶん。\nまとめると… たばが 2つ、ばらが 3こ！',{add:true})}
+  else{await say('1こずつ ずらーっと ならべた。\n…ながい！ とちゅうで わからなく なる');await say('りょうてで もてる ぶんずつ まとめると…\nたばが 2つ、ばらが 3こ！',{add:true})}
+  SFX.ok();await say('ハリネズミの あきんど「たば 2つで さかな 2ひき！\nばらの 3こは きのみと とりかえよう」');q.fish=2;await noteGet('n2');
+  await say('ハリネズミの あきんど「わすれんように いしに しるそう。\nひだりに たばの かず、みぎに ばらの かず」');await say('さっきは「2｜3」。\nいまは たばが 2つ、ばらは なし。\nどう かく？',{wait:false});
+  const z=await choose(['「2」とだけ かく','「2」と からっぽの しるしを かく'],{pos:[30,64,140],cancel:false});if(K.z9==null)K.z9=z;
+  if(z===0){await say('「2」と かいた。');await say('ハリネズミの あきんど「うーむ。これだと\nばらが 2こ、と よみまちがえそうじゃ」',{add:true});await say('おぴょは みぎがわに\nにくきゅうの あとを ぽん！と つけた')}
+  else await say('おぴょは みぎがわに\nにくきゅうの あとを ぽん！と つけた');
+  SFX.rare();S.flash=0.5;await say('「2｜●」…たばが 2つ、ばらは なにも なし。\nこれなら まちがえない！');await say('コハク「なにも ないって ことを\nしるしで かくんだ。おもしろい！」');
+  q.trade=1;await noteGet('n3');
+  await say('ハリネズミの あきんど「じゃが さかなは あと 2ひき だけ。\nむらの みんなは 13にん。\nあと 11ぴき たりんのう…」');await say('ハリネズミの あきんど「かわしもの むらには\nさかなが たくさん あるんじゃが、\nこえが とどかんでなぁ」');hideMsg();save()}
+/* --- しかけ3：のろしの あんごう（ついている・きえている） --- */
+async function torchEvent(x){const q=C9(),i=x-18;
+  if(q.torch){await say('のろしが しずかに もえている');hideMsg();return}
+  if(!q.trade){await say('ふとい まるたの のろしだ。\n（いまは つかいみちが わからない）');hideMsg();return}
+  q.tb=(q.tb||0)^(1<<i);const on=q.tb>>i&1;KOHA().t9=(KOHA().t9||0)+1;if(on)SFX.star();else SFX.blip();
+  const s=TSUM9();await say(`●が ${TV9[i]}この いしの のろしに\nひを ${on?'つけた':'けした'}。\nついている ●は あわせて ${s}こ`,{wait:false});await sleep(500);
+  if(s!==11){hideMsg();return}
+  SFX.rare();S.flash=0.7;S.shakeT=0.5;await say('8と 2と 1…あわせて 11！\nけむりが たかく のぼって いく！');await say('…かわしもの そらに\nへんじの けむりが あがった！');
+  await say('しばらく すると かわを\nいかだが のぼって きた。\nさかなが 11ぴき！');await say('コハク「ついてる・きえてる だけで\nかずを おくれるんだね！」');
+  q.torch=1;await noteGet('n4');S.shakeT=1;if(SFX.rumble)SFX.rumble();
+  await say('…そのとき、むらの もやが\nきたの いしの わへ\nすいこまれて いった！');await say('コハク「いしの わに\nなにか いる…！」');hideMsg();save()}
+async function signEvent(){const q=C9();await say('いしに ●が ほってある。\nひだりの のろしから\n8こ・4こ・2こ・1こ');
+  if(q.trade&&!q.torch)await say(`コハク「さかなは あと 11ぴき。\nついている ●を あわせて\n11に できるかな？」\n（いま ${TSUM9()}こ）`);
+  else if(!q.trade)await say('のろしで とおくへ\nしらせを おくって いたらしい');hideMsg()}
+/* --- ボス：かずくい モヤン（3かいに 1かい ためる。かぞえれば よめる） --- */
+async function moyanEvent(){const q=C9();
+  if(!q.torch){await say('おおきな いしが わに なって たっている。\nまんなかに うすい もやが ゆれている…');await say('（むらの こまりごとを たすけてから\nまた こよう）',{add:true});hideMsg();return}
+  await say('もやが あつまって\nおおきな かげに なった！');await say('モヤン「かずなんて めんどくさい…\nぜんぶ わすれて しまえば\nらくに なれるぞ…」');
+  await say('コハク「おぴょ、モヤンの うごきを\nかぞえて みよう。\nきまりが あるかも！」',{wait:false});const k=await choose(['たたかう','やめる'],{pos:[120,80,52]});hideMsg();if(k!==0)return;
+  const r=await battle('moyan');if(!r||r.r!=='win')return;await clear9()}
+async function clear9(){const q=C9(),K=KOHA();q.clear=1;bgm(null);S.flash=1;await sleep(SFX.rare()*600);
+  await say('モヤンは ちいさな もやに なって\nそらへ ほどけて いった…');await say('モヤン「…かぞえるって、\nみんなに おなじだけ わける ため\nだったのか…」');
+  bgm('true_end');await say('もやが はれて、むらに ひが さした。\nみんなが さかなを 1ぴきずつ\nうけとって いる！');await noteGet('n5');
+  await card9('かぞえる ほん','ページが もどった！');
+  await say('コハク「ぼく、きょう みた ことを\nおぼえたよ。きいてね」');
+  await say('コハク「いしと いぬを ならべたら\nかずを しらなくても わかった」');
+  await say(K.b9===0?'コハク「どんぐりは さいしょから\n10ずつ しばったね。はやかった！」':K.b9===1?'コハク「どんぐりは 5ずつ やまに してから\n10に まとめたね。\nちいさく わけるのも いい てだ」':'コハク「どんぐりは 1こずつ ならべて みて、\nたいへんだって わかってから まとめたね。\nやって みるのが だいじなんだ」');
+  await say((K.t9||0)<=4?'コハク「のろしは ほとんど まよわずに\n11を つくったね！」':`コハク「のろしは ${K.t9}かい ためして\n11を みつけたね。\nためすのは いい やりかただと おもう」`);
+  await say((K.g9||0)>0?'コハク「モヤンが ためた あと、\nちゃんと みを まもってた。\nかぞえて いたんだね」':'コハク「モヤンは 3かいに 1かい ためてた。\nつぎは かぞえて まもって みよう」');
+  await say('コハク「ぼくは おぴょの やりかたを みて\nかしこく なるんだ。\nだから いっしょに いてね」');
+  P.shiori=(P.shiori||0)+1;P.gold+=P.lv*100;SFX.item();await say(`「ちえの しおり」を てにいれた！\nコインを ${P.lv*100}まい もらった！`);
+  await say('（としょかんの ノートに\nもっと くわしい はなしが あるよ。\nよみたい ひとだけ どうぞ）');hideMsg();save();
+  await warp('tosho',6,4,'up',BGM7.tosho);await say('ホー はかせ「ホー！ ページが もどった。\nよく やって くれた」');await say('ホー はかせ「つぎは『はかる ほん』じゃ。\nながさを わすれた くにが まっておる。\n…また おいで」');hideMsg()}
+/* --- ぶつかった とき・のった とき --- */
+const _jB9=juraBump;juraBump=function(c,x,y){
+  if(P.map==='tosho'){if(c==='ハ'){run(owlTalk);return true}if(c==='ブ'||c==='ロ'){run(()=>bookEvent(x,y));return true}if(c==='ノ'){run(notes9);return true}return false}
+  if(P.map==='kazoe'){
+    if(c==='オ'){run(elderTalk);return true}if(c==='ク'){run(frogTalk);return true}if(c==='サ'||c==='ペ'){run(dogsGame);return true}if(c==='ア'){run(tradeEvent);return true}
+    if(c==='コ'){run(pupEvent);return true}if(c==='ヒ'){run(()=>torchEvent(x));return true}if(c==='ヤ'){run(signEvent);return true}if(c==='ワ'){run(moyanEvent);return true}
+    if(c==='ス'){run(async()=>{await say('おおきな いしが たっている。\nなつの いちばん ひが ながい ひ、\nいしの あいだに ゆうひが しずむらしい');hideMsg()});return true}
+    if(c==='イ'){run(async()=>{await say('じめんを ほって はしらを たてた いえだ。\nなかは すずしい');hideMsg()});return true}
+    return false}
+  return _jB9(c,x,y)};
+const _jA9=juraArrive;juraArrive=function(c){
+  if(!LIB9.has(P.map))return _jA9(c);
+  if(P.map==='tosho'&&c==='デ'){S.path=[];run(async()=>{SFX.stairs();await warp('field',15,20,'down','field')});return true}
+  if(P.map==='kazoe'){
+    if(c==='ド'&&!(C9().ac||[]).includes(P.x+','+P.y)){S.path=[];run(()=>acornGet(P.x,P.y));return true}
+    if(c==='カ'){S.path=[];run(async()=>{await say('としょかんへ もどりますか？',{wait:false});const k=await choose(['もどる','やめる'],{pos:[120,80,52]});hideMsg();if(k===0){SFX.stairs();await warp('tosho',6,2,'down',BGM7.tosho)}else{P.y-=1;P.dir='up'}});return true}}
+  return false};
+/* --- 絵：すんでいる ひと・のろし・コハク・いしの しかけ --- */
+function npc9(key,tx,ty,t,sz=18){const im=EI[key];if(!im||!im.width)return;const[sx,sy]=hzScr(tx,ty);if(sx<-20||sx>SW||sy<-20||sy>SW)return;const sc=Math.min(sz/im.width,sz/im.height),w=Math.round(im.width*sc),h=Math.round(im.height*sc*(1+0.04*Math.sin(t*3+tx)));g.drawImage(im,sx+8-(w>>1),sy+15-h,w,h)}
+function drawWorld9(t){try{ph9()}catch(e){}const q=C9();
+  if(P.map==='tosho'){npc9('fukurou',6,3,t,20);const[bx,by]=hzScr(6,1);const a=0.4+0.4*Math.sin(t*3);g.fillStyle=`rgba(120,190,255,${a*0.5})`;g.fillRect(bx+2,by,12,9);
+    for(const b of BOOKS9){if(b.ch===18){const[x,y]=b.at.split(',').map(Number),[sx,sy]=hzScr(x,y);g.drawImage(T.lpedW,sx,sy)}}
+    for(let i=0;i<8;i++){const x=(i*47+t*4)%SW,y=(i*31+t*6)%SW;if(Math.sin(t*2+i)>0.3)px(g,'#fff6d0',x|0,y|0,1,1)}}
+  if(P.map==='kazoe'){
+    for(const k of q.ac||[]){const[x,y]=k.split(',').map(Number),[sx,sy]=hzScr(x,y);g.drawImage(T.grass,sx,sy)}
+    npc9('tanuki',11,7,t);npc9('saru',4,9,t);npc9('harinezumi',18,9,t);npc9('kaeru',12,12,t,14);
+    const nd=q.pup?7:q.dogs?6:S.q9?S.q9.dogs:0;for(let i=0;i<nd;i++){const[sx,sy]=hzScr(1+(i%4)*1,11+(i>>2));g.drawImage(WKP9.down[Math.floor(t*2+i)%2],sx+((i%4)*-4)+6,sy-2+(i>>2)*-6)}
+    if(q.dogs&&!q.pup){const[sx,sy]=hzScr(3,2);g.drawImage(WKP9.down[Math.floor(t*3)%2],sx,sy-2+Math.round(Math.sin(t*8)));g.fillStyle='rgba(255,255,255,.55)';for(let i=0;i<5;i++)g.fillRect(sx-4+((i*7+t*10)%22),sy+2+i*3,8,2)}
+    for(let i=0;i<4;i++){const[sx,sy]=hzScr(18+i,2);if(sx<-16||sx>SW)continue;if((q.tb||0)>>i&1||q.torch&&[1,0,1,1][i]){const f=Math.floor(t*8+i)%2;px(g,'#ff5a3a',sx+5,sy-1+f,6,6);px(g,'#ff9a3a',sx+6,sy+f,4,4);px(g,'#ffe86a',sx+7,sy+1+f,2,3);g.fillStyle='rgba(220,220,220,.5)';for(let k=0;k<3;k++)g.fillRect(sx+6+Math.round(Math.sin(t*2+k)*2),sy-6-k*6-((t*10)%6),3,3)}
+      for(let d=0;d<TV9[i];d++)px(g,'#fff6d0',sx+2+(d%4)*3,sy+11+(d>>2)*2,2,1)}
+    if(!q.clear){const[sx,sy]=hzScr(13,2);const im=EI.moyan;if(im&&im.width){const sc=(q.torch?30:16)/im.width;g.globalAlpha=q.torch?0.95:0.45;g.drawImage(im,sx+8-im.width*sc/2,sy+14-im.height*sc+Math.sin(t*2)*2,im.width*sc,im.height*sc);g.globalAlpha=1}
+      g.fillStyle='rgba(255,255,255,.16)';for(let i=0;i<9;i++)g.fillRect(((i*53+t*(5+i%3))%(SW+60))-60,(i*23)%SW,56,4)}
+    if(S.q9){const Q=S.q9;g.fillStyle='rgba(10,12,30,.82)';g.fillRect(8,6,160,46);g.fillStyle='#ffd23f';g.fillRect(8,6,160,1);g.fillRect(8,51,160,1);
+      px(g,'#7a5230',20,24,34,22);px(g,'#9c6a40',22,22,30,4);px(g,'#3a2414',24,26,26,18);for(let i=0;i<Q.st;i++)px(g,'#b0acbc',26+(i%4)*6,38-(i>>2)*6,4,4);
+      for(let i=0;i<Q.out;i++){px(g,'#8a8696',70+i*9,38,6,6);px(g,'#c8c4d4',71+i*9,39,2,2)}
+      for(let i=0;i<Q.dogs;i++)g.drawImage(WKP9.down[0],64+i*16,10);
+      if(Q.run){const k=Math.min(1,(tnow()-Q.run)/0.65);g.drawImage(WKP9.left[Math.floor(t*8)%2],Math.round(170-(170-(64+Q.dogs*16))*k),10)}}}
+  if(q.koha&&S.mode==='field'){const[cx,cy]=camPos(),[sx,sy]=hzScr(cx,cy);const im=WKK9[P.dir][Math.floor(t*2)%2];g.drawImage(im,Math.round(sx)+4,Math.round(sy)-9+Math.round(Math.sin(t*3)),9,9)}}
+const _dW9=drawWorld7;drawWorld7=function(t){_dW9(t);if(LIB9.has(P.map))drawWorld9(t)};
+const F11={libEnter,owlTalk,bookEvent,elderTalk,frogTalk,dogsGame,pupEvent,acornGet,tradeEvent,torchEvent,signEvent,moyanEvent,clear9,notes9,noteRead,scale9,C9,KOHA,NOTE};
+/* ===== v11 ここまで ===== */
 
 
-window.__G={FX,P,S,IN,EN,SK,RUSH,SET,readCode,myCode,tileAt,run,F:{battle,uzuEnter,uzuAppear,juraTalk,juraShop,slipSeq,meteorSeq,juraClearSeq,machiEnding,machiShop,machiTalk,bossRush,shrineEvent,voyage,trueEnding,awakenScene,oyaAwakenScene,npcTalk,turtleEvent,giveStar},warpTo:(m,x,y,d)=>{P.map=m;P.x=x;P.y=y;P.dir=d||'down';S.trail=[{x,y:y+1,px:x,py:y+1,dir:'up'}];bgm(musFor())},press,setPad:d=>setPad(d),battle:k=>run(()=>battle(k)),save,get timeOrigin(){return performance.timeOrigin}};
+
+window.__G={F11,FX,P,S,IN,EN,SK,RUSH,SET,readCode,myCode,tileAt,run,F:{battle,uzuEnter,uzuAppear,juraTalk,juraShop,slipSeq,meteorSeq,juraClearSeq,machiEnding,machiShop,machiTalk,bossRush,shrineEvent,voyage,trueEnding,awakenScene,oyaAwakenScene,npcTalk,turtleEvent,giveStar},warpTo:(m,x,y,d)=>{P.map=m;P.x=x;P.y=y;P.dir=d||'down';S.trail=[{x,y:y+1,px:x,py:y+1,dir:'up'}];bgm(musFor())},press,setPad:d=>setPad(d),battle:k=>run(()=>battle(k)),save,get timeOrigin(){return performance.timeOrigin}};
 Object.assign(window.__G.F,{hazamaEnter,clockEvent,banninMeet,sunaGet,kuroMeet,ending8,shop8,uzuTravel8});
 const start=()=>titleScreen();
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start);else start();
