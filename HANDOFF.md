@@ -1,7 +1,7 @@
 # 引き継ぎ書：おぴょの ぼうけん（ゲーム専用チャットへ）
 
 ## いまの状態（2026-11-10）
-- **確認版が preview/ に ある（下の「確認版（preview）と v9 えんしゅつ」を 先に 読む）。本番は 11-09 の まま**
+- **v9 えんしゅつを 本番へ 反映ずみ（2026-11-10 夜。テストして もらって OK）。index.html と preview/index.html は おなじ 中身**
 - 公開URL：https://poromi-oyabun.github.io/opyo-bouken/ （GitHub：Poromi-Oyabun/opyo-bouken、main に push すると Pages に反映）
 - 第1〜8章まで公開ずみ。index.html 1ファイル（約90万字）＋ bgm/*.mp3。
 - 第7章「きょうりゅうの じだい」：まちクリア後 → じくうの うず → ジュラき → ボス6たい → ちょうきょだい いんせき → しんの エクスカリバー → 「つづく」
@@ -23,7 +23,7 @@
 - つぎに やるなら：クリアごの おまけ（はざまの つよい てき・ずかん うめ）など
 
 ## 確認版（preview）と v9 えんしゅつ（2026-11-10・Fable が 作成。つづきは Opus でも できる）
-- いまの 状態：**本番の index.html は さわっていない**。なおした 版は preview/index.html に ある
+- いまの 状態：**2026-11-10 夜に 本番へ 反映ずみ**（index.html ＝ preview/index.html）。つぎの 直しも「preview に 置く → 高原さんが スマホで OK → 本番へ コピー」の 順で
   - 確認用URL：https://poromi-oyabun.github.io/opyo-bouken/preview/ （高原さんが スマホで あそんで OK を 出したら 本番へ）
   - 本番へ 反映する とき：`cp preview/index.html index.html` だけ。ファイルの 中で `/preview/` かどうかを 見分けて いるので（PV）、書きかえは いらない
   - PV の ときだけ：セーブの キーに `pv` を つける（opyo3pv・opyo3setpv・opyo3muspv。はじめて ひらいた ときに 本番の きろくを コピー。本番の きろくは 読むだけで 書かない）、曲は `../bgm/` から 読む、下の バーに「（かくにんばん）」
@@ -50,7 +50,7 @@
   - 通し：`window.__FAST=1` で EN の 117たい ぜんぶと たたかう（__G.F.battle(k)）、__G.F の イベント 12こ、つづきから／はじめから／ながおし／せってい → コンソールエラー 0（2026-11-10）
   - 見た目：`window.__HOUR=5.6` などで タイトルの 時間帯を きりかえ。`__G.FX.t`（hurt・levelUp・cutIn・placeCard・encFx・hitE）で 演出だけ 出せる
   - 公開の まえ：`python3 tools/textcheck.py preview/index.html`、`python3 tools/moji_check.py preview/index.html`（moji_check は ファイルを 指定できるように した）
-- 気づいたが さわって いない こと（高原さんに 聞いてから）：og:description が「ドット絵RPG」の まま（きまりでは「ゲーム」と よぶ）
+- og:description の「ドット絵RPG」は 本番反映の ときに「ドット絵ゲーム」へ なおした（きまりどおり）
 - つぎに やるなら：フィールドの 演出（天気・足あと・マップ切りかえ）は まだ 手つかず。高原さんの「良／直し／ボツ」を 聞いてから
 
 ## きろく（セーブ）
