@@ -118,7 +118,7 @@
 - イベント：dar11Talk／fin11(i)／kame11(0|1)／hiro11Talk（なかまわけ → たべる たべられるの ならべ → よそう → S.q11 の 棒グラフ）／wagi11Event（たすけを よぶ 3回 → 当たった 数 n で ボスの HP を 1割ずつ へらす → たたかい）／clear11／kin9c（きんだんの 本：4×4×4＝64）／haru11（はるちゃんの ヒント）
 - 進み具合 P.c11（in・met・fin[3]・cls・ask・ka・kb・dar・chain・clear）。ワトムの 記録 P.koha に f11（とりの まちがい）・q11・d11（カメの こたえ）・c11・p11（よそう）・h11（たすけの 当たり）・g11・k11
 - てき：batta11・toka11（lv9）、ボス wagirin（`cyc:[0,1,0,2]`＝こうげき・すいとる・こうげき・ためる）。レベル3・40・160 で「たたかう」だけでも かてる ことを 確認
-- **絵は 仮**（今ある 絵の 色ちがい：fin_a・fin_b・fin_c＝hato、kame_a・kame_b＝turtle、batta11＝kamemushi、toka11＝konpuso、wagirin＝mist。ダーウィンは HUM9.darwin）。高原さんへ ChatGPT用の プロンプトを わたして ある。絵が とどいたら：なかまと おなじく tools/sprite_cut3.py で darwin・darwin_L を つくり、ほかは EI に おなじ なまえで 入れる（ph11 は hd=3 の 絵を 上がきしない）
+- **絵（2026-11-11 夜 とどいて 反映ずみ）**：ダーウィン・とり 3種・カメ 2種・トカゲ・ワギリンは 高原さんの ChatGPTの 絵。`hd/<なまえ>.webp`（darwin・darwin_L・fin_a・fin_b・fin_c・kame_a・kame_b・toka11・wagirin）を v13 の さいごの 読みこみで `EI[なまえ]`（i.hd=3）に まるごと 入れかえる。読みこめない ときは 色ちがいの 仮の 絵（ph11）と HUM9.darwin の まま。batta11 だけは kamemushi の 色ちがい。会話の 大きい 絵（port9）は いちばん 上に かく ため post13 の さいごで よぶ
 - ノート：n11〜n15・k3。事実は STORY.md の 7-3 に 一覧
 - テスト：第11章の 通し（わざと まちがえる 選び方も ふくむ）・全126たい・第9〜10章の 通し・古い セーブ、エラー 0
 - つぎに やるなら：第1幕（9〜11章）の まとめイベント → 第12章「めいれいの ほん」（はるちゃんが 主役。プログラミング）

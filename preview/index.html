@@ -3560,7 +3560,7 @@ const _kt=kayoTalk;kayoTalk=async function(){S.pt9='kayobe';try{return await _kt
 const _ft=fujiTalk;fujiTalk=async function(){S.pt9='fuji';try{return await _ft()}finally{S.pt9=null}};
 const _tt=tadaTalk;tadaTalk=async function(){S.pt9='tadataka';try{return await _tt()}finally{S.pt9=null}};
 const _ys=yuuShadow;yuuShadow=async function(...a){S.pt9='yuu';try{return await _ys(...a)}finally{S.pt9=null}};
-const _dW12=drawWorld9;drawWorld9=function(t){_dW12(t);if(!S.q10)try{port9()}catch(e){}};
+/* 会話の 大きい 絵（port9）は、いちばん 上に かく ため v13 の post13 の さいごで よぶ */
 Object.assign(F11,{notes9,bookEvent,haruTalk,hiroTalk,yuuTalk,kayoTalk,fujiTalk,kin9a,kin9b,tadaTalk,yuuShadow,nobiEvent,clear10,segDone,step10,C10});
 
 
@@ -3734,7 +3734,7 @@ const HDM13={"nekodai":[-0.019,-0.028,0.032,-0.025],"inoshishi":[-0.009,-0.024,0
 const _tint13=tint;tint=function(src,col,a){const c=_tint13(src,col,a);c._t=[src,col,a];return c};
 function hi13(im,d){if(im.hi)return im.hi;const t=im._t;if(!t||d>3)return null;const sh=t[0]&&hi13(t[0],(d||0)+1);if(!sh)return null;const c=_tint13(sh,t[1],t[2]);c.m=sh.m;return im.hi=c}
 const _di13=g.drawImage.bind(g),Z13=[0,0,0,0];
-g.drawImage=function(im,a,b,c,d){const n=arguments.length;if(im&&n<=5&&(im.hi||im._t)){const hi=hi13(im,0);if(hi){const w=n===5?c:im.width,h=n===5?d:im.height,m=hi.m||Z13;g.imageSmoothingEnabled=true;_di13(hi,a-m[0]*w,b-m[1]*h,w*(1+m[0]+m[2]),h*(1+m[1]+m[3]));g.imageSmoothingEnabled=false;return}}return _di13.apply(null,arguments)};
+g.drawImage=function(im,a,b,c,d){const n=arguments.length;if(im&&im.hd>1&&n<=5){g.imageSmoothingEnabled=true;_di13.apply(null,arguments);g.imageSmoothingEnabled=false;return}if(im&&n<=5&&(im.hi||im._t)){const hi=hi13(im,0);if(hi){const w=n===5?c:im.width,h=n===5?d:im.height,m=hi.m||Z13;g.imageSmoothingEnabled=true;_di13(hi,a-m[0]*w,b-m[1]*h,w*(1+m[0]+m[2]),h*(1+m[1]+m[3]));g.imageSmoothingEnabled=false;return}}return _di13.apply(null,arguments)};
 ;(()=>{const ks=Object.keys(HDM13);let i=0;function nx(){if(i>=ks.length)return;const k=ks[i++],im=new Image();im.onload=()=>{try{const e=EI[k];if(e){im.m=HDM13[k];e.hi=im}}catch(x){}nx()};im.onerror=nx;im.src=HDDIR13+k+'.webp'}setTimeout(()=>{nx();nx();nx()},900)})();
 function sh13(cx,by,w,a){g.save();g.globalAlpha=0.3*a;g.fillStyle='#05030c';g.beginPath();g.ellipse(cx,by-0.5,Math.max(6,w*0.4),2.6,0,0,6.2832);g.fill();g.restore()}
 const BGL13=(()=>{const c=mk(BW*3,BH*3),x=c.getContext('2d');const a=x.createRadialGradient(BW*1.5,BH*2.6,6,BW*1.5,BH*2.6,BW*1.25);a.addColorStop(0,'rgba(255,244,210,.26)');a.addColorStop(1,'rgba(255,244,210,0)');x.fillStyle=a;x.fillRect(0,0,c.width,c.height);
@@ -3746,8 +3746,11 @@ function post13(t){try{
     if(!RM)for(let i=0;i<16;i++){const u=(i*53.7+t*(3+i%4))%SW,v=(i*97.3+Math.sin(t*0.5+i)*9+t*2.2)%SW,a=0.25+0.25*Math.sin(t*1.7+i*2.1);g.fillStyle='rgba(255,236,190,'+a.toFixed(2)+')';g.fillRect(u,v,0.67,0.67)}g.restore()}
   if(P.map==='hakari'&&!RM){const M=GM.hakari(),[ox,oy]=hzScr(0,0),x0=Math.max(0,Math.floor(-ox/TS)),y0=Math.max(0,Math.floor(-oy/TS));g.fillStyle='#ffffff';
     for(let ty=y0;ty<y0+12&&ty<M.length;ty++)for(let tx=x0;tx<x0+12&&tx<M[ty].length;tx++){if(M[ty][tx]!=='~')continue;for(let j=0;j<2;j++){const h=(tx*37+ty*91+j*53)%97,a=Math.sin(t*(1.6+h%5*0.3)+h);if(a<0.55)continue;g.globalAlpha=(a-0.55)*1.7;g.fillRect(ox+tx*TS+(h*7)%13,oy+ty*TS+(h*3)%14,1.6+(h%3)*0.6,0.34)}}g.globalAlpha=1}
-  g.drawImage(VG13,0,0,SW,SW)}catch(e){}}
+  g.drawImage(VG13,0,0,SW,SW)}catch(e){}
+  try{if(!S.q10&&!S.q11)port9()}catch(e){}}
 const _dw13=drawWorld;drawWorld=function(t){_dw13(t);post13(t)};
+/* まるごと 入れかえる こまかい 絵（第11章から。元の 小さい 絵が ない もの）：hd/<なまえ>.webp を 読めたら EI[なまえ] を i.hd=3 の 絵に する（tools/sprite_cut3.py で つくる） */
+;(()=>{const ks=['darwin','darwin_L','fin_a','fin_b','fin_c','kame_a','kame_b','toka11','wagirin'];for(const k of ks){const i=new Image();i.hd=3;i.onload=()=>{EI[k]=i;try{for(const c in FX.cache)if(c.indexOf(k+'|')===0)delete FX.cache[c]}catch(e){}};i.src=HDDIR13+k+'.webp'}})();
 /* ===== v13 ここまで ===== */
 
 
