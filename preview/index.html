@@ -3169,7 +3169,7 @@ async function bookEvent(x,y){const b=BOOKS9.find(o=>o.at===x+','+y);if(!b)retur
   await say(`『かぞえる ほん』\nほんの なかへ とびこみますか？`,{wait:false});const k=await choose(['とびこむ','やめる'],{pos:[120,80,52]});hideMsg();if(k!==0)return;
   SFX.stairs();S.flash=0.8;await warp('kazoe',11,12,'up',BGM7.kazoe);
   if(!q.in){q.in=1;await card9('かぞえる ほん','かずの はじまり');
-    await say('ひろい そら、かやぶきの いえ。\nずっと むかしの むらだ');await say('でも しろい もやが ただよって\nむらの ひとは ぼんやり している…');await say('ワトム「みんな、なにかを\nわすれちゃった みたい」');await say('（あしもとの ほんに のると\nとしょかんへ もどれるよ）');hideMsg();save()}}
+    await say('ひろい そら、かやぶきの いえ。\nずっと むかしの むらだ');await say('でも しろい もやが ただよって\nむらの みんなは ぼんやり している…');await say('ワトム「みんな、なにかを\nわすれちゃった みたい」');await say('（あしもとの ほんに のると\nとしょかんへ もどれるよ）');hideMsg();save()}}
 /* --- かぞえの むら：はなし --- */
 const TV9=[8,4,2,1],TSUM9=()=>TV9.reduce((s,v,i)=>s+((C9().tb||0)>>i&1?v:0),0);
 async function elderTalk(){const q=C9();SFX.ok();
@@ -3294,25 +3294,37 @@ function drawWorld9(t){try{ph9()}catch(e){}const q=C9();
 const _dW9=drawWorld7;drawWorld7=function(t){_dW9(t);if(LIB9.has(P.map))drawWorld9(t)};
 const F11={libEnter,owlTalk,bookEvent,elderTalk,frogTalk,dogsGame,pupEvent,acornGet,tradeEvent,torchEvent,signEvent,moyanEvent,clear9,notes9,noteRead,scale9,C9,KOHA,NOTE};
 /* --- なかまの 5にん と 第10章「はかる ほん」（2026-11-11 追加） ---
-   ・なかま：はるちゃん（かしこい おんなのこ）・ひろくん（むしに くわしい）・ゆうくん（さかなと やまが すき）・かよべ（なぞの ちから）・ふじばあちゃん（きんだんの とびらを あける）
-   ・ひとの 絵は 高原さんが 用意する 予定。それまでは コードで かいた 仮の ドット絵（HUM9）。絵が きたら EI.haru・EI.hiro・EI.yuu・EI.kayobe・EI.fuji・EI.tadataka に 入れると そちらを つかう */
-function hum9(o){const c=mk(16,18),x=c.getContext('2d'),K='#1a1210';
-  if(o.long){px(x,o.hair,3,2,2,10);px(x,o.hair,11,2,2,10)}
-  px(x,o.hair,4,1,8,4);px(x,o.skin,5,3,6,5);px(x,o.hair,4,3,1,2);px(x,o.hair,11,3,1,2);px(x,K,6,5,1,1);px(x,K,9,5,1,1);px(x,'#e06a6a',7,7,2,1);
-  px(x,o.top,4,8,8,6);px(x,o.top,3,8,1,3);px(x,o.top,12,8,1,3);px(x,o.skin,3,11,1,2);px(x,o.skin,12,11,1,2);
-  if(o.robe){px(x,o.top,3,13,10,4);px(x,o.bot,3,16,10,1)}else{if(o.skirt)px(x,o.bot,3,13,10,3);px(x,o.skirt?o.skin:o.bot,5,o.skirt?16:14,2,o.skirt?1:3);px(x,o.skirt?o.skin:o.bot,9,o.skirt?16:14,2,o.skirt?1:3)}
-  px(x,'#3a2414',5,17,2,1);px(x,'#3a2414',9,17,2,1);
-  if(o.hat){px(x,o.hat,2,1,12,2);px(x,o.hat,5,0,6,1)}if(o.cap){px(x,o.cap,4,0,8,3);px(x,o.cap,10,2,4,1)}if(o.bun){px(x,o.hair,7,0,3,1);px(x,o.hair,6,-0,5,1)}
-  if(o.ribbon){px(x,o.ribbon,4,0,2,2);px(x,o.ribbon,10,0,2,2)}if(o.star){px(x,'#ffd23f',7,9,2,2);px(x,'#fff6c0',7,9,1,1)}
-  if(o.glass){px(x,'#3a4a6a',5,5,3,1);px(x,'#3a4a6a',8,5,3,1)}if(o.pack){px(x,o.pack,2,8,1,5);px(x,o.pack,13,8,1,5)}
-  if(o.net){px(x,'#c8c8d0',14,2,1,14);px(x,'#ffffff',12,0,4,3);px(x,'#c8c8d0',13,1,2,1)}if(o.rod){px(x,'#8a5a2a',14,0,1,16);px(x,'#c8c8d0',15,0,1,6)}if(o.staff){px(x,'#8a5a2a',14,3,1,14)}if(o.book){px(x,'#2a6ad8',1,10,3,4);px(x,'#fff6d0',2,11,1,2)}
+   ・なかま：はるちゃん（かしこい うさぎ）・ひろくん（むしに くわしい こぐま）・ゆうくん（さかなと やまが すきな カワウソ）・かよべ（なぞの ちからの しろぎつね）・ふじばあちゃん（イノシシ）。いのう ただたかは ヤギ。**キャラは 人間以外（どうぶつ）で かく きまり**。ふじばあちゃん（きんだんの とびらを あける）
+   ・なかまの 絵は 高原さんが 用意する 予定。それまでは コードで かいた 仮の ドット絵（HUM9）。絵が きたら EI.haru・EI.hiro・EI.yuu・EI.kayobe・EI.fuji・EI.tadataka に 入れると そちらを つかう */
+function hum9(o){const c=mk(16,18),x=c.getContext('2d'),K='#1a1210',F=o.fur,G=o.fur2,e=o.ear;
+  if(e==='fox'){px(x,F,13,12,2,4);px(x,G,14,12,1,2)}if(e==='otter')px(x,F,13,13,2,3);
+  px(x,F,4,3,8,6);px(x,F,3,4,10,4);px(x,G,6,6,4,3);
+  if(o.cap){px(x,o.cap,4,2,8,2);px(x,o.cap,10,3,4,1)}
+  if(e==='rabbit'){px(x,F,5,0,2,4);px(x,F,9,0,2,4);px(x,'#ffb0c0',5,1,1,2);px(x,'#ffb0c0',10,1,1,2)}
+  if(e==='bear'){px(x,F,3,1,3,3);px(x,F,10,1,3,3);px(x,G,4,2,1,1);px(x,G,11,2,1,1)}
+  if(e==='otter'){px(x,F,3,2,2,2);px(x,F,11,2,2,2)}
+  if(e==='fox'){px(x,F,4,1,2,3);px(x,F,4,0,1,1);px(x,F,10,1,2,3);px(x,F,11,0,1,1);px(x,'#ffb0c0',5,2,1,1);px(x,'#ffb0c0',10,2,1,1)}
+  if(e==='boar'){px(x,F,3,2,2,2);px(x,F,11,2,2,2);px(x,'#e8a090',6,6,4,2);px(x,'#ffffff',5,7,1,1);px(x,'#ffffff',10,7,1,1)}
+  if(e==='goat'){px(x,F,1,5,2,1);px(x,F,13,5,2,1)}
+  px(x,K,6,5,1,1);px(x,K,9,5,1,1);if(e==='boar'){px(x,'#7a3a34',7,7,1,1);px(x,'#7a3a34',8,7,1,1)}else px(x,'#3a2414',7,7,2,1);
+  if(o.glass){px(x,'#3a4a6a',5,5,1,1);px(x,'#3a4a6a',7,5,2,1);px(x,'#3a4a6a',10,5,1,1);px(x,'#3a4a6a',5,4,3,1);px(x,'#3a4a6a',8,4,3,1)}
+  px(x,o.top,4,9,8,5);px(x,o.top,3,9,1,3);px(x,o.top,12,9,1,3);px(x,F,3,12,1,1);px(x,F,12,12,1,1);
+  if(o.robe){px(x,o.top,3,13,10,3);px(x,o.bot,3,16,10,1);px(x,F,5,17,2,1);px(x,F,9,17,2,1)}
+  else if(o.skirt){px(x,o.bot,3,13,10,2);px(x,F,5,15,2,3);px(x,F,9,15,2,3)}
+  else{px(x,o.bot,5,14,2,3);px(x,o.bot,9,14,2,3);px(x,F,5,17,2,1);px(x,F,9,17,2,1)}
+  if(e==='goat'){px(x,'#ffffff',7,9,2,2)}
+  if(o.hat){px(x,o.hat,2,3,12,1);px(x,o.hat,4,2,8,1);px(x,o.hat,6,1,4,1)}
+  if(o.bun){px(x,'#e8e8f0',7,1,2,2);px(x,'#e8e8f0',6,2,4,1)}
+  if(o.ribbon){px(x,o.ribbon,8,3,4,1);px(x,o.ribbon,9,2,2,3)}if(o.star){px(x,'#ffd23f',7,10,2,2);px(x,'#fff6c0',7,10,1,1)}
+  if(o.pack){px(x,o.pack,2,9,1,5);px(x,o.pack,13,9,1,5)}
+  if(o.net){px(x,'#c8c8d0',14,3,1,13);px(x,'#ffffff',12,0,4,3);px(x,'#c8c8d0',13,1,2,1)}if(o.rod){px(x,'#8a5a2a',14,1,1,15);px(x,'#c8c8d0',15,1,1,6)}if(o.staff){px(x,'#8a5a2a',14,4,1,13)}if(o.book){px(x,'#2a6ad8',1,11,3,4);px(x,'#fff6d0',2,12,1,2)}
   return c}
-const HUM9={haru:hum9({hair:'#5a3a20',skin:'#ffd9b8',top:'#ff8aa8',bot:'#c84a6a',skirt:1,long:1,ribbon:'#ffd23f',book:1,glass:1}),
-  hiro:hum9({hair:'#2a2a2a',skin:'#ffd0a8',top:'#5aac5a',bot:'#3a5a8a',cap:'#e8c040',net:1}),
-  yuu:hum9({hair:'#6a4a2a',skin:'#f0c090',top:'#3a8ac8',bot:'#6a5a3a',hat:'#d8c890',pack:'#c84a4a',rod:1}),
-  kayobe:hum9({hair:'#3a2a5a',skin:'#ffe0c8',top:'#6a4ac0',bot:'#ffd23f',robe:1,long:1,star:1}),
-  fuji:hum9({hair:'#c8c8d0',skin:'#f0c8a0',top:'#c84a4a',bot:'#4a4a8a',bun:1}),
-  tadataka:hum9({hair:'#8a8a96',skin:'#f0c8a0',top:'#4a5a6a',bot:'#8a8a96',robe:1,hat:'#d8b048',staff:1})};
+const HUM9={haru:hum9({ear:'rabbit',fur:'#fff0e4',fur2:'#ffffff',top:'#ff8aa8',bot:'#c84a6a',skirt:1,ribbon:'#ffd23f',book:1,glass:1}),
+  hiro:hum9({ear:'bear',fur:'#9a6238',fur2:'#e8c8a0',top:'#5aac5a',bot:'#3a5a8a',cap:'#e8c040',net:1}),
+  yuu:hum9({ear:'otter',fur:'#7a5234',fur2:'#f0d8b8',top:'#3a8ac8',bot:'#6a5a3a',hat:'#d8c890',pack:'#c84a4a',rod:1}),
+  kayobe:hum9({ear:'fox',fur:'#f0ecff',fur2:'#ffffff',top:'#6a4ac0',bot:'#ffd23f',robe:1,star:1}),
+  fuji:hum9({ear:'boar',fur:'#8a6a52',fur2:'#b89878',top:'#c84a4a',bot:'#4a4a8a',bun:1}),
+  tadataka:hum9({ear:'goat',fur:'#f0ece0',fur2:'#ffffff',top:'#4a5a6a',bot:'#8a8a96',robe:1,hat:'#d8b048',staff:1})};
 function hum9draw(k,tx,ty,t){const im=(EI[k]&&EI[k].width)?EI[k]:HUM9[k];const[sx,sy]=hzScr(tx,ty);if(sx<-20||sx>SW||sy<-24||sy>SW)return;
   if(im===HUM9[k])g.drawImage(im,sx,sy-3+Math.round(Math.sin(t*2.5+tx)*0.6));else{const sc=Math.min(20/im.width,22/im.height),w=Math.round(im.width*sc),h=Math.round(im.height*sc);g.drawImage(im,sx+8-(w>>1),sy+15-h,w,h)}}
 ;(()=>{const tc=tileCanvas;
@@ -3327,31 +3339,31 @@ function hum9draw(k,tx,ty,t){const im=(EI[k]&&EI[k].width)?EI[k]:HUM9[k];const[s
 })();
 /* --- としょかんの なかま --- */
 async function haruTalk(){const q=C9(),q2=C10();SFX.ok();
-  if(!q.haru){q.haru=1;await say('めがねの おんなのこ「こんにちは！\nわたしは はるちゃん。\nここの ほんを ぜんぶ よむのが ゆめなの」');await say('はるちゃん「こまったら こえを かけてね。\nこたえは いわないけど、\nヒントなら あげられるよ」');hideMsg();save();return}
+  if(!q.haru){q.haru=1;await say('めがねの うさぎ「こんにちは！\nわたしは はるちゃん。\nここの ほんを ぜんぶ よむのが ゆめなの」');await say('はるちゃん「こまったら こえを かけてね。\nこたえは いわないけど、\nヒントなら あげられるよ」');hideMsg();save();return}
   await say('はるちゃん「どうしたの？」',{wait:false});const k=await choose(['ヒントを きく','ノートの よみかた','やめる'],{pos:[90,60,82]});
   if(k===1){await say('はるちゃん「ノートは ★から よむと いいよ。\n★★と ★★★は むずかしいけど、\nいつか『あっ これか』って なるの」')}
   else if(k===0){let h;
     if(!q.koha)h='フクロウの はかせに はなしかけて みて';
-    else if(!q.clear)h=!q.dogs?'かぞえの むらの にしに\nいぬの ことで こまってる ひとが いるよ':!q.pup?'いしが あまったなら、\nまだ もどらない こが いるって こと。\nにしの もりを さがして みて':!q.trade?'どんぐりの やまは 3つ。\nあつめたら ひがしの あきんどへ':!q.torch?'のろしは 8・4・2・1。\n11は 8より おおきいから 8は つかうよね。\nのこりは いくつ？':'きたの いしの わ。\nカズナシの うごきには きまりが あるよ';
-    else if(!q2.clear)h=!q2.in?'つぎは みどりの ほん『はかる ほん』よ':!q2.met?'うみべの かさを かぶった\nおじいさんに はなしかけて みて':(q2.seg||[]).length<3?'あかい はたから はたへ、\nみちの うえを まっすぐ あるくの':!q2.map?'はかりおわったら\nただたかさんの ところへ':!q2.tall?'ゆうくんが おおきな まつの ことで\nなやんでたよ。かげを あるいて みて':'みさきの さきに\nもやが あつまってるみたい';
+    else if(!q.clear)h=!q.dogs?'かぞえの むらの にしに\nいぬの ことで こまってる\nかりうどが いるよ':!q.pup?'いしが あまったなら、\nまだ もどらない こが いるって こと。\nにしの もりを さがして みて':!q.trade?'どんぐりの やまは 3つ。\nあつめたら ひがしの あきんどへ':!q.torch?'のろしは 8・4・2・1。\n11は 8より おおきいから 8は つかうよね。\nのこりは いくつ？':'きたの いしの わ。\nカズナシの うごきには きまりが あるよ';
+    else if(!q2.clear)h=!q2.in?'つぎは みどりの ほん『はかる ほん』よ':!q2.met?'うみべの かさを かぶった\nヤギの おじいさんに\nはなしかけて みて':(q2.seg||[]).length<3?'あかい はたから はたへ、\nみちの うえを まっすぐ あるくの':!q2.map?'はかりおわったら\nただたかさんの ところへ':!q2.tall?'ゆうくんが おおきな まつの ことで\nなやんでたよ。かげを あるいて みて':'みさきの さきに\nもやが あつまってるみたい';
     else h='いまある ほんは ぜんぶ なおったよ。\nつぎの ほんを まっててね';
     await say('はるちゃん「'+h+'」')}
   hideMsg()}
 async function hiroTalk(){const q=C9();SFX.ok();
-  if(!q.hiro){q.hiro=1;await say('あみを もった おとこのこ「やあ！\nぼくは ひろくん。むしが だいすきなんだ」');await say('ひろくん「としょかんの すみっこにも\nちいさな いきものが いるんだよ。\nよく みると おもしろいよ」');hideMsg();save();return}
+  if(!q.hiro){q.hiro=1;await say('あみを もった こぐま「やあ！\nぼくは ひろくん。むしが だいすきなんだ」');await say('ひろくん「としょかんの すみっこにも\nちいさな いきものが いるんだよ。\nよく みると おもしろいよ」');hideMsg();save();return}
   const L=['アリは においの みちを つけて、\nなかまに えさの ばしょを おしえるんだ','トンボは 4まいの はねを\nべつべつに うごかせるんだよ。\nだから くうちゅうで とまれる','セミの ようちゅうは\nつちの なかで なんねんも すごすんだ','チョウは あしの さきで\nあじが わかるんだって'];
   q.hiroN=((q.hiroN||0)+1)%L.length;await say('ひろくん「'+L[q.hiroN]+'」');await say('ひろくん「『いきものの ほん』が ひらいたら\nぼくも いっしょに いくからね！」');hideMsg()}
 async function yuuTalk(){const q=C9(),q2=C10();SFX.ok();
   if(P.map==='hakari')return yuuShadow();
-  if(!q.yuu){q.yuu=1;await say('リュックの おにいさん「おっ、しばいぬだ。\nおれは ゆうくん。\nやまのぼりと つりが すきなんだ」');await say('ゆうくん「やまでは ちずが いのちづな。\nうみでは さかなの きもちを かんがえる。\nそとは ぜんぶ きょうしつだよ」');hideMsg();save();return}
+  if(!q.yuu){q.yuu=1;await say('リュックの カワウソ「おっ、しばいぬだ。\nおれは ゆうくん。\nやまのぼりと つりが すきなんだ」');await say('ゆうくん「やまでは ちずが いのちづな。\nうみでは さかなの きもちを かんがえる。\nそとは ぜんぶ きょうしつだよ」');hideMsg();save();return}
   await say(q2.clear?'ゆうくん「あの まつ、たかかったなあ。\nのぼらずに たかさが わかるなんてね」':q.clear?'ゆうくん「『はかる ほん』の うみべに\nでっかい まつが あるんだ。\nさきに いって まってるよ」':'ゆうくん「サケは うまれた かわに\nもどって くるんだ。\nどうやって みちを おぼえてるんだろうね」');hideMsg()}
 async function kayoTalk(){const q=C9(),q2=C10();SFX.ok();
-  if(!q.kayo){q.kayo=1;await say('ほしの かざりを つけた ひとが\nまっしろな ほんを みつめている…');await say('？？？「…あら。みえるのね、わたしが」');await say('かよべ「わたしは かよべ。\nちぎれた ページを つなぐのが やくめ。\nそれいじょうは まだ ひみつ」');hideMsg();save();return}
+  if(!q.kayo){q.kayo=1;await say('ほしの かざりの しろぎつねが\nまっしろな ほんを みつめている…');await say('？？？「…あら。みえるのね、わたしが」');await say('かよべ「わたしは かよべ。\nちぎれた ページを つなぐのが やくめ。\nそれいじょうは まだ ひみつ」');hideMsg();save();return}
   await say(q2.clear?'かよべ「2まいの ページが つながった。\nワスレンマンは あせって いるわ」':q.clear?'かよべ「ページが 1まい つながった。\n…ワスレンマンは『しらなければ\nまよわない』と おもっているの」':'かよべ「ページを とりもどしたら\nわたしが つなぐわ。まっている」');
   await say('かよべ「さいごの ほんだけは\nわたしにも つなげない。\nあれは… あなたの ほんだから」');hideMsg()}
 /* --- きんだんの しょこ（ふじばあちゃん）：やらなくても すすめる、もっと ふかい ちょうせん --- */
 async function fujiTalk(){const q=C9(),q2=C10();SFX.ok();
-  if(!q.fuji){q.fuji=1;await say('うでまくりを した おばあちゃんが\nあかい とびらの まえに たっている');await say('おばあちゃん「わしは ふじばあちゃん。\nこの さきは『きんだんの しょこ』じゃ」');await say('ふじばあちゃん「むずかしすぎて\nふういんされた ほんが ねむっとる。\nとびらは おもいが… わしなら あけられる！」');hideMsg();save();return}
+  if(!q.fuji){q.fuji=1;await say('うでまくりを した\nイノシシの おばあちゃんが\nあかい とびらの まえに たっている');await say('おばあちゃん「わしは ふじばあちゃん。\nこの さきは『きんだんの しょこ』じゃ」');await say('ふじばあちゃん「むずかしすぎて\nふういんされた ほんが ねむっとる。\nとびらは おもいが… わしなら あけられる！」');hideMsg();save();return}
   if(!q.clear){await say('ふじばあちゃん「まだ はやい！\nほんを 1さつ なおして から おいで。\nそしたら あけちゃる」');hideMsg();return}
   await say('ふじばあちゃん「よっしゃ、どれに いく？\nやらんでも ぼうけんは すすめるけぇ、\nきが むいたら で ええよ」',{wait:false});
   const L=['かたてで かぞえる わざ'];if(q2.clear)L.push('ちきゅうを はかった ひと');L.push('やめる');const k=await choose(L,{pos:[40,56,130],title:'きんだんの しょこ'});
@@ -3426,7 +3438,7 @@ let M10=null;      // はかっている とちゅう：{seg,n} または {sh:'s
 function hud10(txt){let el=fxL.querySelector('.hn.m10');if(!txt){if(el)el.remove();return}if(!el){el=fxEl(fxL,'hn m10','');el.style.top=U(8);el.style.fontSize=U(10)}el.textContent=txt}
 async function tadaTalk(){const q=C10();SFX.ok();
   if(q.clear){await say('ただたか「ながさが もどった。\nこれで うみべを ぜんぶ はかれる」');await say('ただたか「わしは 50を すぎてから\nほしと はかりかたを まなんだ。\nはじめるのに おそすぎる ことは ないぞ」');hideMsg();return}
-  if(!q.met){q.met=1;await say('かさの おじいさん「わしは いのう ただたか。\nこの くにの かたちを しりたくて\nうみべを あるいて はかって おる」');await say('ただたか「ところが もやが でてから、\n『けん』も『しゃく』も…\nながさの はかりかたを わすれて しもうた」');
+  if(!q.met){q.met=1;await say('かさの ヤギ「わしは いのう ただたか。\nこの くにの かたちを しりたくて\nうみべを あるいて はかって おる」');await say('ただたか「ところが もやが でてから、\n『けん』も『しゃく』も…\nながさの はかりかたを わすれて しもうた」');
     await say('ワトム「ものさしが ないなら…\nおぴょの 1ぽを ものさしに したら？」');await say('ただたか「ほう！ いつも おなじ はばで あるけば\nそれが ものさしに なるな。\nあかい はたから はたへ あるいて おくれ」');
     await say('（いちばん ちかい はたに のると\nはかりはじめるよ。みちの うえを\nまっすぐ あるこう）');hideMsg();save();return}
   const n=(q.seg||[]).length;
@@ -3508,7 +3520,7 @@ bookEvent=(f=>async function(x,y){const b=BOOKS9.find(o=>o.at===x+','+y);if(!b||
   if(!C9().clear){await say(`『${b.n}』\nひらいて みたが…\nページが まっしろだ`);await say('（さきに『かぞえる ほん』を なおそう）',{add:true});hideMsg();return}
   await say('『はかる ほん』\nほんの なかへ とびこみますか？',{wait:false});const k=await choose(['とびこむ','やめる'],{pos:[120,80,52]});hideMsg();if(k!==0)return;
   SFX.stairs();S.flash=0.8;M10=null;await warp('hakari',2,10,'right',BGM7.hakari);
-  if(!q.in){q.in=1;await card9('はかる ほん','あるいて せかいを しる');await say('しおの におい、ひろい うみ。\nちょんまげの ひとが いた じだいの うみべだ');await say('でも もやの せいで\nみちが どこまで つづくか わからない…');await say('ワトム「かさを かぶった おじいさんが\nこまった かおを してるよ」');hideMsg();save()}})(bookEvent);
+  if(!q.in){q.in=1;await card9('はかる ほん','あるいて せかいを しる');await say('しおの におい、ひろい うみ。\nえどじだいの うみべだ');await say('でも もやの せいで\nみちが どこまで つづくか わからない…');await say('ワトム「かさを かぶった おじいさんが\nこまった かおを してるよ」');hideMsg();save()}})(bookEvent);
 const _dW10=drawWorld9;drawWorld9=function(t){_dW10(t);try{ph10()}catch(e){}
   if(P.map!=='hakari'&&M10){M10=null}if(P.map!=='hakari'||!M10)hud10(null);
   if(P.map==='tosho'){hum9draw('haru',2,5,t);hum9draw('hiro',2,6,t);hum9draw('yuu',9,4,t);hum9draw('kayobe',9,6,t);hum9draw('fuji',11,4,t);
@@ -3525,6 +3537,7 @@ const _dW10=drawWorld9;drawWorld9=function(t){_dW10(t);try{ph10()}catch(e){}
       let rem=tot*k;g.fillStyle='#2a4a8a';for(let i=1;i<pts.length&&rem>0;i++){const d=Math.min(L[i-1],rem),f=L[i-1]?d/L[i-1]:0;const x0=ox+pts[i-1][0]*cs,y0=oy+pts[i-1][1]*cs,x1=x0+(pts[i][0]-pts[i-1][0])*cs*f,y1=y0+(pts[i][1]-pts[i-1][1])*cs*f;g.fillRect(Math.min(x0,x1)-1,Math.min(y0,y1)-1,Math.abs(x1-x0)+2,Math.abs(y1-y0)+2);rem-=d}
       g.fillStyle='#e84a4a';for(const i of[0,1,3,5]){if(k*5>=i)g.fillRect(ox+pts[i][0]*cs-2,oy+pts[i][1]*cs-2,4,4)}}}};
 Object.assign(F11,{notes9,bookEvent,haruTalk,hiroTalk,yuuTalk,kayoTalk,fujiTalk,kin9a,kin9b,tadaTalk,yuuShadow,nobiEvent,clear10,segDone,step10,C10});
+
 /* ===== v11 ここまで ===== */
 
 
