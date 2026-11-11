@@ -3773,7 +3773,7 @@ async function prog12(lv){const L=LV12[lv],K=KOHA();let cs=[];S.q12={lv,x:L.s[0]
   finally{S.q12=null;hideMsg()}}
 async function koto12(){const q=C12(),K=KOHA();SFX.ok();try{
   if(q.clear){S.pt9='haru';await say('はるちゃん「コトコト、すっかり げんきね。\nめいれいを かんがえるの、\nわたし だいすきに なっちゃった」');return}
-  if(!q.met){q.met=1;await say('ちいさな からくりが\nひろばの まんなかで とまっている');S.pt9='haru';await say('はるちゃん「ぜんまいは まいて あるのに\nうごかないわ。…わかった。\nめいれいが からっぽなのよ」');await say('はるちゃん「この こは コトコト。\nカードを ならべた とおりに うごくの。\nはたまで つれて いって あげよう」');S.pt9=null;save()}
+  if(!q.met){q.met=1;S.pt9='koto';await say('ちいさな からくりが\nひろばの まんなかで とまっている');S.pt9='haru';await say('はるちゃん「ぜんまいは まいて あるのに\nうごかないわ。…わかった。\nめいれいが からっぽなのよ」');await say('はるちゃん「この こは コトコト。\nカードを ならべた とおりに うごくの。\nはたまで つれて いって あげよう」');S.pt9=null;save()}
   if(!q.l1){await say('コトコトを きいろい はたまで うごかそう。\nカードは 上から じゅんばんに\n1まいずつ つかわれる');if(!await prog12(1))return;q.l1=1;
     S.pt9='haru';await say('はるちゃん「できた！ きかいは\nかいた じゅんばんの とおりに、\n1つずつ うごくのね」');S.pt9=null;await noteGet('n16');save();await say('（もういちど はなしかけると\nつぎの ちょうせんが できるよ）');return}
   if(!q.l2){S.pt9='haru';await say('はるちゃん「こんどは かいだんよ。\nでも カードは 4まいしか ないの」');await say('はるちゃん「そのかわり、ならべた カードを\nなんかいも くりかえせるわ」');S.pt9=null;if(!await prog12(2))return;q.l2=1;
@@ -3931,7 +3931,7 @@ function post13(t){try{
   try{if(!S.q10&&!S.q11)port9()}catch(e){}}
 const _dw13=drawWorld;drawWorld=function(t){_dw13(t);post13(t)};
 /* まるごと 入れかえる こまかい 絵（第11章から。元の 小さい 絵が ない もの）：hd/<なまえ>.webp を 読めたら EI[なまえ] を i.hd=3 の 絵に する（tools/sprite_cut3.py で つくる） */
-;(()=>{const ks=['darwin','darwin_L','fin_a','fin_b','fin_c','kame_a','kame_b','toka11','wagirin'];for(const k of ks){const i=new Image();i.hd=3;i.onload=()=>{EI[k]=i;try{for(const c in FX.cache)if(c.indexOf(k+'|')===0)delete FX.cache[c]}catch(e){}};i.src=HDDIR13+k+'.webp'}})();
+;(()=>{const ks=['darwin','darwin_L','fin_a','fin_b','fin_c','kame_a','kame_b','toka11','wagirin','ada','ada_L','koto','koto_L','bagurun','kara12'];for(const k of ks){const i=new Image();i.hd=3;i.onload=()=>{EI[k]=i;try{for(const c in FX.cache)if(c.indexOf(k+'|')===0)delete FX.cache[c]}catch(e){}};i.src=HDDIR13+k+'.webp'}})();
 /* ===== v13 ここまで ===== */
 
 
