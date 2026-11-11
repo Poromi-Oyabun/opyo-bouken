@@ -3363,30 +3363,30 @@ async function haruTalk(){const q=C9(),q2=C10();SFX.ok();
     if(!q.koha)h='フクロウの はかせに はなしかけて みて';
     else if(!q.clear)h=!q.dogs?'かぞえの むらの にしに\nいぬの ことで こまってる\nかりうどが いるよ':!q.pup?'いしが あまったなら、\nまだ もどらない こが いるって こと。\nにしの もりを さがして みて':!q.trade?'どんぐりの やまは 3つ。\nあつめたら ひがしの あきんどへ':!q.torch?'のろしは 8・4・2・1。\n11は 8より おおきいから 8は つかうよね。\nのこりは いくつ？':'きたの いしの わ。\nカズナシの うごきには きまりが あるよ';
     else if(!q2.clear)h=!q2.in?'つぎは みどりの ほん『はかる ほん』よ':!q2.met?'うみべの かさを かぶった\nヤギの おじいさんに\nはなしかけて みて':(q2.seg||[]).length<3?'あかい はたから はたへ、\nみちの うえを まっすぐ あるくの':!q2.map?'はかりおわったら\nただたかさんの ところへ':!q2.tall?'ゆうくんが おおきな まつの ことで\nなやんでたよ。かげを あるいて みて':'みさきの さきに\nもやが あつまってるみたい';
-    else h='いまある ほんは ぜんぶ なおったよ。\nつぎの ほんを まっててね';
+    else h=haru11();
     await say('はるちゃん「'+h+'」')}
   hideMsg()}
 async function hiroTalk(){const q=C9();SFX.ok();
   if(!q.hiro){q.hiro=1;await say('あみを もった こぐま「やあ！\nぼくは ひろくん。むしが だいすきなんだ」');await say('ひろくん「としょかんの すみっこにも\nちいさな いきものが いるんだよ。\nよく みると おもしろいよ」');hideMsg();save();return}
   const L=['アリは においの みちを つけて、\nなかまに えさの ばしょを おしえるんだ','トンボは 4まいの はねを\nべつべつに うごかせるんだよ。\nだから くうちゅうで とまれる','セミの ようちゅうは\nつちの なかで なんねんも すごすんだ','チョウは あしの さきで\nあじが わかるんだって'];
-  q.hiroN=((q.hiroN||0)+1)%L.length;await say('ひろくん「'+L[q.hiroN]+'」');await say('ひろくん「『いきものの ほん』が ひらいたら\nぼくも いっしょに いくからね！」');hideMsg()}
+  q.hiroN=((q.hiroN||0)+1)%L.length;await say('ひろくん「'+L[q.hiroN]+'」');await say((P.c11||{}).clear?'ひろくん「しまの いきもの、すごかったね！\nまた いっしょに しらべよう」':C10().clear?'ひろくん「『いきものの ほん』が ひらいたよ！\nぼくも いっしょに いくからね」':'ひろくん「『いきものの ほん』が ひらいたら\nぼくも いっしょに いくからね！」');hideMsg()}
 async function yuuTalk(){const q=C9(),q2=C10();SFX.ok();
   if(P.map==='hakari')return yuuShadow();
   if(!q.yuu){q.yuu=1;await say('リュックの カワウソ「おっ、しばいぬだ。\nおれは ゆうくん。\nやまのぼりと つりが すきなんだ」');await say('ゆうくん「やまでは ちずが いのちづな。\nうみでは さかなの きもちを かんがえる。\nそとは ぜんぶ きょうしつだよ」');hideMsg();save();return}
   await say(q2.clear?'ゆうくん「あの まつ、たかかったなあ。\nのぼらずに たかさが わかるなんてね」':q.clear?'ゆうくん「『はかる ほん』の うみべに\nでっかい まつが あるんだ。\nさきに いって まってるよ」':'ゆうくん「サケは うまれた かわに\nもどって くるんだ。\nどうやって みちを おぼえてるんだろうね」');hideMsg()}
 async function kayoTalk(){const q=C9(),q2=C10();SFX.ok();
   if(!q.kayo){q.kayo=1;await say('ほしの かざりの しろぎつねが\nまっしろな ほんを みつめている…');await say('？？？「…あら。みえるのね、わたしが」');await say('かよべ「わたしは かよべ。\nちぎれた ページを つなぐのが やくめ。\nそれいじょうは まだ ひみつ」');hideMsg();save();return}
-  await say(q2.clear?'かよべ「2まいの ページが つながった。\nワスレンマンは あせって いるわ」':q.clear?'かよべ「ページが 1まい つながった。\n…ワスレンマンは『しらなければ\nまよわない』と おもっているの」':'かよべ「ページを とりもどしたら\nわたしが つなぐわ。まっている」');
+  await say((P.c11||{}).clear?'かよべ「3まいの ページが つながった。\nいのちの わも、ページの わも\nつながると つよいのね」':q2.clear?'かよべ「2まいの ページが つながった。\nワスレンマンは あせって いるわ」':q.clear?'かよべ「ページが 1まい つながった。\n…ワスレンマンは『しらなければ\nまよわない』と おもっているの」':'かよべ「ページを とりもどしたら\nわたしが つなぐわ。まっている」');
   await say('かよべ「さいごの ほんだけは\nわたしにも つなげない。\nあれは… あなたの ほんだから」');hideMsg()}
 /* --- きんだんの しょこ（ふじばあちゃん）：やらなくても すすめる、もっと ふかい ちょうせん --- */
 async function fujiTalk(){const q=C9(),q2=C10();SFX.ok();
   if(!q.fuji){q.fuji=1;await say('うでまくりを した\nイノシシの おばあちゃんが\nあかい とびらの まえに たっている');await say('おばあちゃん「わしは ふじばあちゃん。\nこの さきは『きんだんの しょこ』じゃ」');await say('ふじばあちゃん「むずかしすぎて\nふういんされた ほんが ねむっとる。\nとびらは おもいが… わしなら あけられる！」');hideMsg();save();return}
   if(!q.clear){await say('ふじばあちゃん「まだ はやい！\nほんを 1さつ なおして から おいで。\nそしたら あけちゃる」');hideMsg();return}
   await say('ふじばあちゃん「よっしゃ、どれに いく？\nやらんでも ぼうけんは すすめるけぇ、\nきが むいたら で ええよ」',{wait:false});
-  const L=['かたてで かぞえる わざ'];if(q2.clear)L.push('ちきゅうを はかった ひと');L.push('やめる');const k=await choose(L,{pos:[40,56,130],title:'きんだんの しょこ'});
+  const L=['かたてで かぞえる わざ'];if(q2.clear)L.push('ちきゅうを はかった ひと');if((P.c11||{}).clear)L.push('いのちの 4つの もじ');L.push('やめる');const k=await choose(L,{pos:[40,56,130],title:'きんだんの しょこ'});
   if(k<0||k===L.length-1){hideMsg();return}
   SFX.boom();S.shakeT=1;S.flash=0.5;await say('ふじばあちゃん「どりゃあああ！！」\nおもい とびらが ギギギ… と ひらいた！');
-  if(k===0)await kin9a();else await kin9b();hideMsg();save()}
+  if(k===0)await kin9a();else if(k===1)await kin9b();else await kin9c();hideMsg();save()}
 async function kin9a(){const V=[16,8,4,2,1];let b=0,n=0;const sum=()=>V.reduce((s,v,i)=>s+(b>>i&1?v:0),0);
   await say('くらい へやに ひかる いしが 5つ。\n16・8・4・2・1 と ほってある');await say('かべに もじが ある。\n「ひかる いしで 21を つくれ」');
   while(sum()!==21){hideMsg();const k=await choose(V.map((v,i)=>`${b>>i&1?'●':'○'} ${v}の いし`).concat(['あきらめる']),{pos:[60,30,100],title:`いま ${sum()}`});if(k<0||k===5){await say('ふじばあちゃん「また いつでも きんさい」');return}b^=1<<k;n++;SFX.blip()}
@@ -3562,6 +3562,165 @@ const _tt=tadaTalk;tadaTalk=async function(){S.pt9='tadataka';try{return await _
 const _ys=yuuShadow;yuuShadow=async function(...a){S.pt9='yuu';try{return await _ys(...a)}finally{S.pt9=null}};
 const _dW12=drawWorld9;drawWorld9=function(t){_dW12(t);if(!S.q10)try{port9()}catch(e){}};
 Object.assign(F11,{notes9,bookEvent,haruTalk,hiroTalk,yuuTalk,kayoTalk,fujiTalk,kin9a,kin9b,tadaTalk,yuuShadow,nobiEvent,clear10,segDone,step10,C10});
+
+
+/* ===== 第11章「いきものの ほん」：くちばしの しま（かたちには わけが ある・ばしょと かたち・たべる たべられるの わ）2026-11-11 =====
+   ・なかまの ひろくん（こぐま）が いっしょに くる。実在の 人物は ダーウィン（ビーグルの すがた。のった ふねが「ビーグルごう」）
+   ・絵は 仮（今ある 絵の 色ちがい＋HUM9.darwin）。高原さんの 絵が とどいたら EI.darwin・darwin_L・fin_a・fin_b・fin_c・kame_a・kame_b・toka11・wagirin に 入れる
+   ・進み具合は P.c11（met・fin[3]・cls・ask・ka・kb・dar・chain・clear）。ワトムの 記録は P.koha の f11・q11・d11・c11・p11・h11・g11・k11 */
+const C11=()=>P.c11||(P.c11={});
+MAPS9.shima=["ミミミミミミミミミミミミミミミミミミミミミミミミミミ","ミ,,,サ,,,,,,,,,,,,,,,ムムム,,ミ","ミ,,ギ,,,,,,,,,,,,,,,,ムムム,,ミ","ミ,,,,,,,,,,,,,,,,,,,,,,ズ,ミ","ミ,,,,,,,,,ぴ,,,,,,,,,,,,,,ミ","ミ,,,,,,,,,,,,,,,,,ぺミ,,,,,ミ","ミ,,,,,,,,,,,,,,サ,,,,,,,,,ミ","ミ,,,,,,,,,,,,,ぷ,,,,,,,,,,ミ","ミ,,ダ,,,,,,,,,,,,ムムくくくム,,,ミ","ミ,,,,ひ,グ,,,,,,,,ムくくくくム,,,ミ","ミカ......................,ミ","ミ,,,,,,,,,,,,,,,ムムくくくム,,,ミ","ミ,,,,,ガ,,,,,,,,,,,,,,,,,,ミ","ミssssssssssssssssssssssssミ","~~~~~~~~~~~~~~~~~~~~~~~~~~","~~~~~~~~~~~~~~~~~~~~~~~~~~"];
+GM.shima=()=>MAPS9.shima;JURA_MAPS.add('shima');LIB9.add('shima');BGM7.shima='mori';Object.assign(REG9,{shima:'k11'});
+['ダ','ぴ','ぷ','ぺ','ガ','ギ','ひ','グ','ズ'].forEach(c=>SOLID.add(c));
+HUM9.darwin=hum9({ear:'goat',fur:'#c08a4a',fur2:'#fff6e0',top:'#4a3424',bot:'#2a2018',robe:1,hat:'#3a2a1a',book:1});
+T.scactus=tileCanvas(x=>{x.drawImage(T.grass,0,0);px(x,'#2a7a34',6,2,4,13);px(x,'#3a9a44',7,2,1,13);px(x,'#2a7a34',2,6,3,2);px(x,'#2a7a34',2,4,2,3);px(x,'#2a7a34',11,8,3,2);px(x,'#2a7a34',12,5,2,4);px(x,'#ff8ab0',7,1,2,2);px(x,'#fff6c0',6,5,1,1);px(x,'#fff6c0',9,9,1,1)});
+T.stall=tileCanvas(x=>{x.drawImage(T.grass,0,0);for(const[a,b,h]of[[1,9,6],[3,5,7],[5,10,5],[7,4,8],[9,9,6],[11,5,7],[13,10,5],[14,4,6]]){px(x,'#2a7a34',a,b,1,h);px(x,'#4aa84a',a+1,b+1,1,h-1)}});
+function ph11(){if(ph11.done)return;const ok=im=>im&&im.width>0;let all=true;
+  const L={fin_a:['hato','#8a6a3a',.45],fin_b:['hato','#3a3a44',.5],fin_c:['hato','#c8a050',.4],kame_a:['turtle','#6a7a4a',.5],kame_b:['turtle','#8a6a4a',.5],batta11:['kamemushi','#ffffff',.5],toka11:['konpuso','#ffffff',.5],wagirin:['mist','#ff8a5a',.5]};
+  for(const k in L){const[s,c,a]=L[k];if(EI[k]&&(EI[k].c9||EI[k].hd===3))continue;if(ok(EI[s])){const t=tint(EI[s],c,a);t.hd=EI[s].hd;t.c9=1;EI[k]=t}else{all=false;if(!EI[k])EI[k]=EI[s]||mk(1,1)}}ph11.done=all}
+try{ph11()}catch(e){}
+Object.assign(EN,{
+  batta11:E9('ワスレバッタ','batta11',[['ぴょーんと とびかかった！',1],['なにを たべるか わすれている',0]]),
+  toka11:E9('ワスレトカゲ','toka11',[['しっぽで ぴしゃり！',1],['ひなたぼっこを している',0]]),
+  wagirin:E9('わを きる もや ワギリン','wagirin',[['もやの はさみで きりつけた！',1],['げんきを すいとった！',-13],['ちからを ためている…！',-10]],{boss:'wagirin',big:1,cyc:[0,1,0,2]})});
+Object.assign(BTITLE,{wagirin:'つながりを きる もや'});Object.assign(B7MUS,{wagirin:'mboss'});
+const FIN11=[{n:'ふとい くちばしの とり',k:'fin_a',ok:'ふとい くちばしが\nかたい たねを パキッと わった！'},{n:'ながい くちばしの とり',k:'fin_b',ok:'ながい くちばしが\nはなの おくの みつに とどいた！'},{n:'ほそい くちばしの とり',k:'fin_c',ok:'ほそい くちばしが\nあなの むしを ひょいと つまんだ！'}];
+const FOOD11=['かたい たね','サボテンの はなの みつ','きの あなの むし'];
+const NG11=[[null,'ふとい くちばしは\nはなの おくまで とどかない…','ふとい くちばしは\nほそい あなに はいらない…'],['ながい くちばしでは\nかたい たねが われない…',null,'ながい くちばしは あなの なかで\nうまく つまめない…'],['ほそい くちばしでは\nかたい たねが われない…','ほそい くちばしは みじかくて\nはなの おくに とどかない…',null]];
+const finN11=()=>(C11().fin||[]).filter(v=>v).length;
+async function fin11(i){const q=C11(),K=KOHA(),F=FIN11[i];q.fin=q.fin||[];SFX.ok();
+  if(q.fin[i]){await say(`${F.n}は\nげんきに さえずっている`);hideMsg();return}
+  await say(`${F.n}が\nおなかを すかせて ふるえている`);
+  while(true){await say('なにを あげる？',{wait:false});const k=await choose(FOOD11.concat(['やめる']),{pos:[30,56,140]});if(k<0||k===3){hideMsg();return}
+    if(k===i)break;SFX.no();K.f11=(K.f11||0)+1;await say(NG11[i][k]);S.pt9='hiro';await say('ひろくん「くちばしの かたちを\nもういちど みて みよう」');S.pt9=null}
+  SFX.rare();S.flash=0.4;await say(F.ok);q.fin[i]=1;if(finN11()===1)await noteGet('n11');
+  if(finN11()>=3)await say('とりたちが げんきに さえずった！\nダーウィンに しらせよう');hideMsg();save()}
+async function kame11(b){const q=C11();SFX.ok();
+  await say(b?'こうらの まえが そりあがった カメ。\nくびを ぐーんと のばして\nたかい サボテンを たべている':'まるい こうらの おおきな カメ。\nあしもとの ひくい くさを\nのんびり たべている');if(b)q.kb=1;else q.ka=1;
+  if(q.ask&&q.ka&&q.kb&&!q.dar)await say('ふたつの カメを みくらべた。\nダーウィンに しらせよう');hideMsg();save()}
+async function dar11Talk(){const q=C11(),K=KOHA();SFX.ok();S.pt9='darwin';try{
+  if(q.clear){await say('ダーウィン「しまの つながりが もどった。\nよく みて、くらべて、かんがえる。\nそれだけで せかいは おもしろいよ」');return}
+  if(!q.met){q.met=1;await say('ぼうしの ビーグル「やあ。\nわたしは ダーウィン。この しまの\nいきものを しらべて いるんだ」');await say('ダーウィン「ところが もやが でてから、\nとりたちが なにを たべるか\nわすれて しまってね」');
+    S.pt9='hiro';await say('ひろくん「くちばしを よく みれば\nわかるかも！ とりは 3わ いるよ」');S.pt9='darwin';await say('（しまの とりに はなしかけて みよう）');save();return}
+  if(finN11()<3){await say(`ダーウィン「とりは 3わ。\nくちばしの かたちを よく みて ごらん。\nいま ${finN11()}わ たすけたね」`);return}
+  if(!q.dar){
+    if(!(q.ka&&q.kb)){q.ask=1;await say('ダーウィン「ありがとう！ もうひとつ\nふしぎな ことが あるんだ」');await say('ダーウィン「きたの カメと みなみの カメを\nみくらべて きて くれないか」');save();return}
+    await say('ダーウィン「きたの カメは\nくびを のばせる こうら。\nみなみの カメは まるい こうら」');await say('ダーウィン「どうして ちがうと おもう？」',{wait:false});
+    const k=await choose(['たべものの たかさが ちがうから','たまたま','わからない'],{pos:[20,60,150],cancel:false});K.d11=k;
+    await say(k===0?'ダーウィン「いい ところに きづいたね！」':k===1?'ダーウィン「たまたま、か。\nじつは それも だいじな てがかりなんだ」':'ダーウィン「わたしも ながい あいだ\nわからなかったよ」');
+    await say('ダーウィン「きたは サボテンが たかい。\nくびを のばせる カメが\nたべものに とどいて、こを のこした」');await say('ダーウィン「みなみは くさが ひくい。\nのばさなくて いいから\nまるい こうらの ままで よかった」');
+    await say('ダーウィン「ながい ながい ねんげつで、\nその ばしょに あう かたちの なかまが\nおおく のこる。そう かんがえたんだ」');S.pt9=null;await say('ワトム「カメが がんばって\nのばしたんじゃ なくて、\nのびる カメが のこったんだ！」');q.dar=1;await noteGet('n13');
+    S.pt9='darwin';await say('ダーウィン「ところで ひがしの くさはらが\nくいあらされて いる。\nひろくんが しらべて いたよ」');save();return}
+  await say(q.chain?'ダーウィン「ひがしの はしの もやが\nつながりを きって いるようだ。\nきを つけて」':'ダーウィン「ひがしの くさはらが\nくいあらされて いる。\nひろくんが しらべて いたよ」')}finally{S.pt9=null;hideMsg()}}
+async function hiro11Talk(){const q=C11(),K=KOHA();SFX.ok();S.pt9='hiro';try{
+  if(q.clear){await say('ひろくん「くさが もどって、\nバッタも トカゲも タカも\nちょうど いい かずに なったよ！」');return}
+  if(!q.cls){await say('ひろくん「みて、この はっぱの うら！\nあしが 6ぽんの むしと\n8ほんの むしが いるよ」');await say('あしが 8ほんの ほうは\nなんの なかま？',{wait:false});
+    const k=await choose(['こんちゅう','クモの なかま','わからない'],{pos:[60,60,110],cancel:false});K.q11=k;
+    await say(k===1?'ひろくん「せいかい！\n6ぽんは こんちゅう、\n8ほんは クモの なかまだよ」':'ひろくん「8ほんは クモの なかま。\n6ぽんが こんちゅうだよ。\nぼくも さいしょは まちがえた！」');
+    await say('ひろくん「にている ところで わけると、\nはじめて みる いきものも\nどの なかまか わかるんだ」');q.cls=1;await noteGet('n12');save();return}
+  if(finN11()<3){await say('ひろくん「とりの くちばし、\nぼくも みて くるね。\nふとい・ながい・ほそい… ちがうなあ」');return}
+  if(!q.dar){await say('ひろくん「カメの こうらが\nきたと みなみで ちがうんだって。\nみくらべて みよう！」');return}
+  if(q.chain){await say('ひろくん「もやは ひがしの はしだ。\nしまの みんなも てつだって くれるよ！」');return}
+  await say('ひろくん「たいへんだ！ ひがしの くさが\nぜんぶ くいあらされてる。\nバッタが ふえすぎたんだ」');await say('ひろくん「だれが だれを たべるか、\nじゅんばんに ならべて みよう」');
+  const O=['くさ','バッタ','トカゲ','タカ'],Q=['じぶんで えいようを つくるのは？','くさを たべるのは？','バッタを たべるのは？','トカゲを たべるのは？'];
+  for(let i=0;i<4;i++){while(true){await say(Q[i],{wait:false});const k=await choose(O,{pos:[100,56,70],cancel:false});if(k===i){SFX.blip();break}SFX.no();K.c11=(K.c11||0)+1;await say(`ひろくん「うーん、${O[k]}は\nちがうみたい。もういちど！」`)}}
+  SFX.ok();await say('くさ → バッタ → トカゲ → タカ。\nたべる・たべられるの わが できた！');
+  await say('ひろくん「じゃあ もし トカゲが\nいなく なったら どうなると おもう？」',{wait:false});const p=await choose(['バッタが ふえる','なにも かわらない','くさが ふえる'],{pos:[70,60,100],cancel:false});K.p11=p;
+  S.pt9=null;S.q11={t0:tnow()};SFX.card();await say('トカゲが いなく なると…\nバッタを たべる ものが いない');await say('バッタが ふえて、くさを たべつくす。\nくさが なくなると…\nバッタも たべものが なくなる');S.q11=null;
+  await say('ワトム「ひとつ いなくなると\nみんなに ひびくんだ」');S.pt9='hiro';await say(p===0?'ひろくん「おぴょの よそう、あたり！\nいま この しまで おきてるのが これだ」':'ひろくん「よそうと ちがったね。\nでも ためして わかった。\nいま この しまで おきてるのが これだ」');
+  await say('ひろくん「トカゲが きえたのは\nもやの せいだ。ひがしの はしに\nもやが あつまってる！」');q.chain=1;await noteGet('n14');save()}finally{S.pt9=null;hideMsg()}}
+async function wagi11Event(){const q=C11(),K=KOHA();
+  if(!(finN11()>=3&&q.dar&&q.chain)){await say('もやが うずを まいている。\nまだ しまの ことを よく しらない…\nもう すこし しらべて みよう');hideMsg();return}
+  await say('もやの なかから こえが する');await say('ワギリン「たべる、たべられる…\nそんな つながり、めんどうだろう？\nぜんぶ ばらばらに して やる…」');
+  const O=['トカゲ','ふとい くちばしの とり','くびの ながい カメ','ほそい くちばしの とり'];
+  const R=[['ワギリンが バッタの たいぐんを\nけしかけて きた！',[0,3],'バッタを ぱくぱく おいはらった！'],['かたい たねの あられが\nふって きた！',[1],'たねを パキパキ わって くれた！'],['トゲだらけの サボテンの かべが\nみちを ふさいだ！',[2],'くびを のばして サボテンを\nむしゃむしゃ たべて くれた！']];let n=0;
+  for(const[t,ok,fin]of R){await say(t);await say('だれに たすけて もらう？',{wait:false});const k=await choose(O,{pos:[30,56,140],cancel:false});
+    if(ok.includes(k)){n++;SFX.ok();await say(`${O[k]}が かけつけた！\n${fin}`)}else{SFX.no();await say(`${O[k]}は こまって いる…\nでも ${O[ok[0]]}が\nかわりに かけつけて くれた！`)}}
+  K.h11=n;await say(n>=3?'ワトム「みんなの とくいな ことを\nぜんぶ おぼえてたね！\nワギリンが ひるんでる」':'ワトム「みんなが たすけて くれた！\nこんどの うごきも\n4つで ひとまわり みたい」',{wait:false});
+  const k=await choose(['たたかう','やめる'],{pos:[120,80,52]});hideMsg();if(k!==0)return;
+  const r=await battle('wagirin',{ex:{hp:Math.max(8,Math.round(scale9(EN.wagirin).hp*(1-0.1*n)))}});if(!r||r.r!=='win')return;await clear11()}
+async function clear11(){const q=C11(),K=KOHA();q.clear=1;bgm(null);S.flash=1;await sleep(SFX.rare()*600);
+  await say('ワギリンは ほどけて\nちいさな もやに なって きえた…');bgm('true_end');await say('もやの なかから トカゲたちが\nぞろぞろ でて きた！');await say('バッタが へって、くさが めを だす。\nしまの つながりが もどって いく');await noteGet('n15');
+  await say('そらから ほしの ひかりが おりて きた。\n…かよべだ');await say('かよべ「ページを うけとったわ。\nいま つなぐ」');SFX.star();S.flash=0.6;await card9('いきものの ほん','ページが もどった！');
+  await say('ワトム「ぼく、きょうも おぼえたよ」');
+  await say((K.f11||0)===0?'ワトム「とりの ごはんは\nくちばしを みて、ぜんぶ 1かいで\nあてたね。よく みてた！」':'ワトム「とりの ごはんは\nためして、ちがったら また かんがえた。\nそれで ちゃんと みつかったね」');
+  await say(K.d11===0?'ワトム「カメの こうらは\nたべものの たかさに きづいたね」':K.d11===1?'ワトム「カメの こうらは『たまたま』って\nこたえたね。たまたまの ちがいが\nのこるか どうか、が だいじなんだって」':'ワトム「カメの こうらは\n『わからない』から はじめたね。\nそれが しらべる はじまりだ」');
+  await say(K.p11===0?'ワトム「トカゲが いなく なったら\nバッタが ふえるって、\nさきに よそう できたね」':'ワトム「よそうは はずれたけど、\nためして たしかめた。\nつぎは あたるかも しれないね」');
+  await say((K.g11||0)>0?'ワトム「ワギリンが ためた あと、\nちゃんと まもってた。\nうごきを よんだんだね」':'ワトム「ワギリンも 4つで ひとまわり。\nつぎは かぞえて まもって みよう」');
+  P.shiori=(P.shiori||0)+1;P.gold+=P.lv*100;SFX.item();await say(`「ちえの しおり」を てにいれた！\nコインを ${P.lv*100}まい もらった！`);hideMsg();save();
+  await warp('tosho',6,4,'up',BGM7.tosho);await say('ホーキド はかせ「ホー！ 3まいめの ページじゃ。\nつぎは『めいれいの ほん』。\nはるちゃんが よみたがって おったぞ」');await say('（ふじばあちゃんの とびらに\nあたらしい ちょうせんが ふえたよ）');hideMsg()}
+function haru11(){const q=C11();return !q.in?'つぎは『いきものの ほん』。\nひろくんが まってるよ':!q.met?'ぼうしの ビーグルに\nはなしかけて みて':finN11()<3?'とりの くちばしの かたちを\nよく みて。なにが たべやすそう？':!q.dar?'きたと みなみの カメを みくらべて、\nダーウィンさんに しらせるの':!q.chain?'ひろくんが ひがしの くさはらを\nしらべて いたよ':!q.clear?'ひがしの はしに もやが いるわ。\nしまの みんなが たすけて くれるはず':'いまある ほんは ぜんぶ なおったよ。\nつぎの ほんを まっててね'}
+async function kin9c(){const K=KOHA();await say('ガラスの びんに、ねじれた はしごの\nもけいが はいって いる');await say('はしごの だんは 4しゅるいの いろ。\nかべに もじが ある');
+  await say('「4しゅるいの もじを 3つ ならべると\nなんとおり？」',{wait:false});const k=await choose(['12とおり','64とおり','81とおり'],{pos:[90,60,80],cancel:false});K.k11=k;
+  if(k===1){SFX.rare();S.flash=0.7;await say('4×4×4＝64とおり！\nびんが ぱあっと ひかった！')}else await say('こたえは 4×4×4＝64とおり。\n1つめが 4とおり、2つめも 4とおり、\n3つめも 4とおり だから');
+  await say('ワトム「のろしは 2しゅるいで\nかずを つくった。いのちは 4しゅるいで\nからだを つくるんだ！」');
+  if(!NOTE().k3){await noteGet('k3');P.gold+=P.lv*50;await say(`おくの たからばこから\nコインを ${P.lv*50}まい みつけた！`)}
+  await say('ふじばあちゃん「わしも あんたも おぴょも、\nおなじ 4つの もじで できとる。\nふしぎじゃのう！」')}
+Object.assign(NOTES9,{
+ n11:{t:'かたちには わけが ある',p:[
+  'ふとい くちばしは かたい たねを わる。\nほそい くちばしは むしを つまむ。\nながい くちばしは はなの おくへ。\nいきものの かたちには\nくらしに あった わけが ある。',
+  'ガラパゴス諸島の フィンチは、\n島や食べ物によって\nくちばしの形が ちがう。\n共通の祖先から分かれて、\nそれぞれの くらしに合う形に\nなったと考えられている。',
+  'グラント夫妻は ガラパゴスで\n40年以上 フィンチを調べた。\n干ばつで 小さな種が減った年、\nくちばしの大きい鳥が 多く生き残り、\n次の世代の平均が 大きくなった。\n進化は 観察できる速さでも起こる。',
+  'じゅうい、どうぶつえんの しいくいん、\nとりを しらべる けんきゅうしゃ。\nかたちを よく みると、\nその いきものの くらしが わかる。']},
+ n12:{t:'あしの かずで なかまわけ',p:[
+  'あしが 6ぽんなら こんちゅう。\n8ほんなら クモの なかま。\nにている ところで わけると、\nはじめて みる いきものも\nどの なかまか わかる。',
+  '生物は 特徴で グループに分ける。\n背骨のある動物は セキツイ動物で、\n魚類・両生類・ハチュウ類・\n鳥類・ホニュウ類の 5つ。\n昆虫やクモは 節足動物の なかま。',
+  '現在の分類は、見た目だけでなく\nDNAの情報も使って、\n共通の祖先からの 分かれ方を調べる。\n見た目が似ていても 遠い親せき、\nという例も 見つかっている。',
+  'はくぶつかんの がくげいいん、\nしんしゅを さがす けんきゅうしゃ、\nがいちゅうを しらべる ひと。\nなまえを つけて わける ことが\nしらべる ことの はじまり。']},
+ n13:{t:'ばしょが ちがうと かたちが ちがう',p:[
+  'くさが ひくい しまの カメは\nまるい こうら。\nサボテンが たかい しまの カメは\nくびを のばせる こうら。\nすむ ばしょに あった かたちの\nなかまが おおく のこって きた。',
+  '同じ種でも 一つ一つに\n少しずつ ちがいがある（変異）。\nその場所で 生きやすい特徴を\nもつものが 子を多く残し、\n長い年月で 集団の特徴が変わる。\nこれが 自然選択。',
+  '自然選択が はたらく条件は 3つ。\n①個体に 変異がある\n②その変異が 子に伝わる（遺伝）\n③変異で 残せる子の数がちがう\n目的があって 変わるのではなく、\n結果として 合うものが残る。',
+  'さくもつや かちくの ひんしゅを\nつくる ひと、\nしぜんを まもる レンジャー、\nいでんを しらべる けんきゅうしゃ。']},
+ n14:{t:'たべる・たべられるの わ',p:[
+  'くさを バッタが たべ、\nバッタを トカゲが たべ、\nトカゲを タカが たべる。\nひとつ いなくなると、\nほかの みんなに ひびく。\nいきものは つながって いる。',
+  '植物は 光合成で 養分をつくる\n「生産者」。それを食べる動物は\n「消費者」。死がいや ふんを\n分解する 菌類や細菌は「分解者」。\n食べる・食べられるの つながりが\n食物連鎖。',
+  '食物連鎖を 1段のぼるごとに、\n使えるエネルギーは およそ1割に減る。\nだから 上位の動物ほど 数が少ない\n（生態ピラミッド）。\n実際の関係は 網の目のように\n入り組んだ「食物網」。',
+  'のうか、りょうし、\nしんりんを かんりする ひと、\nかんきょうを しらべる ひと。\nとりすぎない、ふやしすぎない。\nつりあいを みるのが しごと。']},
+ n15:{t:'チャールズ・ダーウィン',p:[
+  'ダーウィンは わかい ころ、\n「ビーグルごう」と いう ふねで\nせかいを まわり、ガラパゴスの\nいきものを しらべた。\nよく みて、くらべて、\nかんがえた ひと。',
+  'チャールズ・ダーウィン\n（1809〜1882）は イギリスの博物学者。\n1831年から 約5年の航海に出て、\n1835年に ガラパゴス諸島を訪れた。\n1859年に『種の起源』を出版した。',
+  'ダーウィンは 航海から 20年以上\n証拠を集め、考えを確かめ続けた。\n同じころ ウォレスも\n同じ考えに たどりつき、1858年に\n二人の説が 同時に発表された。\n科学は 証拠の つみかさねで進む。',
+  'せいぶつがくしゃ、\nしぜんの ばんぐみを つくる ひと、\nずかんを つくる ひと。\n「なぜ？」を メモして くらべるのは\nだれでも きょうから できる。']},
+ k3:{t:'いのちの 4つの もじ',p:[
+  'いきものの からだの せっけいずは\n4しゅるいの「もじ」で かかれている。\nのろしは 2しゅるい（つける・けす）。\nいのちは 4しゅるい。\nならべかたで ちがいが うまれる。',
+  'DNAは A・T・G・C の\n4種類の塩基が ならんだもの。\n3つ1組で 1つのアミノ酸を指定する。\n4×4×4＝64通りの 組み合わせで、\n20種類のアミノ酸を 表している。',
+  'ヒトのDNAは 約30億の塩基対。\n1つの塩基は 4通り＝2ビットなので、\n情報量は 約60億ビット。\nおよそ 750メガバイトに あたる。\n生命も「符号」で 情報を伝えている。',
+  'いでんしを しらべる けんきゅうしゃ、\nくすりを つくる ひと、\nさくもつの ひんしゅを つくる ひと。']}});
+NOTEBOOK9.splice(2,0,['いきものの ほん',['n11','n12','n13','n14','n15']]);NOTEBOOK9[NOTEBOOK9.length-1][1].push('k3');
+/* --- つなぐ --- */
+lib9Tile=(f=>function(map,c){if(map==='shima'){if(c==='く'&&C11().clear)return',';if(c==='ズ'&&C11().clear)return',';return c}return f(map,c)})(lib9Tile);
+lib9Img=(f=>function(m,c,x,y){if(m==='shima')return{',':T.grass,'.':T.path,'s':T.sand,'ミ':T.jtree,'サ':T.scactus,'ム':T.stall,'く':T.kdirt,'カ':T.kbook,'グ':T.ksign}[c]||T.grass;return f(m,c,x,y)})(lib9Img);
+juraEnemy=(f=>function(){if(P.map==='shima')return rnd()<0.6?'batta11':'toka11';return f()})(juraEnemy);
+juraRate=(f=>function(c){if(P.map==='shima')return C11().clear?0:c==='ム'?1/7:0;return f(c)})(juraRate);
+bg7=(f=>function(){return P.map==='shima'?'isle':f()})(bg7);
+battle=(f=>function(key,opt){if(EN[key]&&EN[key].lv9){try{ph11()}catch(e){}}return f(key,opt)})(battle);
+red=(f=>function(d,guard,oyaGuard){if(S.battle&&S.battle.st&&S.battle.st.n===EN.wagirin.n&&FX.eaK==='big'){const k=KOHA();if(guard||oyaGuard)k.g11=(k.g11||0)+1}return f(d,guard,oyaGuard)})(red);
+juraBump=(f=>function(c,x,y){
+  if(P.map==='shima'){if(c==='ダ'){run(dar11Talk);return true}if(c==='ひ'||c==='グ'){run(hiro11Talk);return true}const i='ぴぷぺ'.indexOf(c);if(i>=0){run(()=>fin11(i));return true}
+    if(c==='ガ'){run(()=>kame11(0));return true}if(c==='ギ'){run(()=>kame11(1));return true}if(c==='ズ'){run(wagi11Event);return true}
+    if(c==='サ'){run(async()=>{await say('せの たかい サボテン。\nてっぺんに ピンクの はなが さいている');hideMsg()});return true}
+    return false}
+  return f(c,x,y)})(juraBump);
+juraArrive=(f=>function(c){
+  if(P.map==='shima'){if(c==='カ'){S.path=[];run(async()=>{await say('としょかんへ もどりますか？',{wait:false});const k=await choose(['もどる','やめる'],{pos:[120,80,52]});hideMsg();if(k===0){SFX.stairs();await warp('tosho',4,2,'down',BGM7.tosho)}else{P.x+=1;P.dir='right'}});return true}return false}
+  return f(c)})(juraArrive);
+bookEvent=(f=>async function(x,y){const b=BOOKS9.find(o=>o.at===x+','+y);if(!b||b.ch!==11)return f(x,y);const q=C11();
+  if(!C10().clear){await say(`『${b.n}』\nひらいて みたが…\nページが まっしろだ`);await say('（さきに『はかる ほん』を なおそう）',{add:true});hideMsg();return}
+  await say('『いきものの ほん』\nほんの なかへ とびこみますか？',{wait:false});const k=await choose(['とびこむ','やめる'],{pos:[120,80,52]});hideMsg();if(k!==0)return;
+  SFX.stairs();S.flash=0.8;await warp('shima',2,10,'right',BGM7.shima);
+  if(!q.in){q.in=1;await card9('いきものの ほん','いのちは つながっている');await say('あおい うみ、くろい いわ、サボテン。\nとおい みなみの しまだ');S.pt9='hiro';await say('ひろくん「うわあ、みたこと ない\nいきものが いっぱい！\nぼくも いっしょに しらべるよ」');S.pt9=null;await say('ワトム「ぼうしの ビーグルが\nとりを みて こまってるよ」');hideMsg();save()}})(bookEvent);
+drawWorld9=(f=>function(t){f(t);try{ph11()}catch(e){}
+  if(P.map==='tosho'&&C10().clear&&!C11().clear){const[gx,gy]=hzScr(4,1),a=0.4+0.4*Math.sin(t*3);g.fillStyle=`rgba(255,200,120,${a*0.5})`;g.fillRect(gx+2,gy,12,9)}
+  if(P.map!=='shima')return;const q=C11();hum9draw('darwin',3,8,t);hum9draw('hiro',5,9,t);npc9('fin_a',10,4,t,15);npc9('fin_b',14,7,t,15);npc9('fin_c',18,5,t,15);npc9('kame_a',6,12,t,20);npc9('kame_b',3,2,t,20);
+  if(q.clear){npc9('toka11',18,9,t,14);npc9('toka11',18,11,t,14)}
+  else{const[sx,sy]=hzScr(23,3),im=EI.wagirin,rdy=finN11()>=3&&q.dar&&q.chain;if(im&&im.width){const sc=(rdy?30:16)/im.width;g.globalAlpha=rdy?0.95:0.45;g.drawImage(im,sx+8-im.width*sc/2,sy+14-im.height*sc+Math.sin(t*2)*2,im.width*sc,im.height*sc);g.globalAlpha=1}}
+  if(S.q11){const k=Math.min(1,(tnow()-S.q11.t0)/5),cl=(v,a,b)=>Math.max(0,Math.min(1,(v-a)/(b-a)));g.fillStyle='#f4ead0';g.fillRect(10,6,156,100);g.fillStyle='#8a6a34';g.fillRect(10,6,156,2);g.fillRect(10,104,156,2);
+    const tok=1-cl(k,0.05,0.25),bat=0.35+0.65*cl(k,0.2,0.55)-0.85*cl(k,0.7,1),gr=0.8-0.75*cl(k,0.35,0.7);const B=[[44,gr,'#4aa84a',T.stall],[88,bat,'#d8b030',EI.batta11],[132,tok,'#d87a3a',EI.toka11]];
+    for(const[x,v,c,im]of B){g.fillStyle='rgba(138,106,52,.2)';g.fillRect(x-11,36,22,60);g.fillStyle=c;const h=Math.round(60*Math.max(0,v));g.fillRect(x-11,96-h,22,h);if(im&&im.width){const sc=Math.min(20/im.width,20/im.height);g.drawImage(im,x-im.width*sc/2,32-im.height*sc,im.width*sc,im.height*sc)}
+      if(v<=0.02){g.strokeStyle='#c83a3a';g.lineWidth=2;g.beginPath();g.moveTo(x-8,14);g.lineTo(x+8,30);g.moveTo(x+8,14);g.lineTo(x-8,30);g.stroke()}}
+    g.fillStyle='#8a6a34';g.fillRect(24,96,128,1)}})(drawWorld9);
+Object.assign(F11,{bookEvent,notes9,C11,fin11,kame11,dar11Talk,hiro11Talk,wagi11Event,clear11,kin9c,haru11});
 
 /* ===== v11 ここまで ===== */
 /* ===== v13 がしつ担当：画面を 3ばいの こまかさで かく・ひかりと かげ（2026-11-11。高原さんの 依頼「映像や 画像を もう少し よく」）=====
