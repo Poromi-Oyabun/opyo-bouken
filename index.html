@@ -3383,10 +3383,10 @@ async function fujiTalk(){const q=C9(),q2=C10();SFX.ok();
   if(!q.fuji){q.fuji=1;await say('うでまくりを した\nイノシシの おばあちゃんが\nあかい とびらの まえに たっている');await say('おばあちゃん「わしは ふじばあちゃん。\nこの さきは『きんだんの しょこ』じゃ」');await say('ふじばあちゃん「むずかしすぎて\nふういんされた ほんが ねむっとる。');await say('とびらは おもいが… わしなら\nあけられる！」');hideMsg();save();return}
   if(!q.clear){await say('ふじばあちゃん「まだ はやい！\nほんを 1さつ なおして から おいで。\nそしたら あけちゃる」');hideMsg();return}
   await say('ふじばあちゃん「よっしゃ、どれじゃ？\nやらんでも ぼうけんは すすめるけぇ、\nきが むいたら で ええよ」',{wait:false});
-  const L=['かたてで かぞえる わざ'];if(q2.clear)L.push('ちきゅうを はかった ひと');if((P.c11||{}).clear)L.push('いのちの 4つの もじ');if((P.c12||{}).clear)L.push('はんぶんずつ さがす');if((P.c13||{}).clear)L.push('なにも ないを かく');if((P.c14||{}).clear)L.push('じょうまえの ひみつ');L.push('やめる');const k=await choose(L,{pos:[40,56,130],title:'きんだんの しょこ'});
+  const L=['かたてで かぞえる わざ'];if(q2.clear)L.push('ちきゅうを はかった ひと');if((P.c11||{}).clear)L.push('いのちの 4つの もじ');if((P.c12||{}).clear)L.push('はんぶんずつ さがす');if((P.c13||{}).clear)L.push('なにも ないを かく');if((P.c14||{}).clear)L.push('じょうまえの ひみつ');if((P.c15||{}).clear)L.push('コインは おぼえて いない');L.push('やめる');const k=await choose(L,{pos:[40,56,130],title:'きんだんの しょこ'});
   if(k<0||k===L.length-1){hideMsg();return}
   SFX.boom();S.shakeT=1;S.flash=0.5;await say('ふじばあちゃん「どりゃあああ！！」\nおもい とびらが ギギギ… と ひらいた！');
-  const t=L[k];if(k===0)await kin9a();else if(t.indexOf('ちきゅう')===0)await kin9b();else if(t.indexOf('いのち')===0)await kin9c();else if(t.indexOf('はんぶん')===0)await kin9d();else if(t.indexOf('なにも')===0)await kin9e();else await kin9f();hideMsg();save()}
+  const t=L[k];if(k===0)await kin9a();else if(t.indexOf('ちきゅう')===0)await kin9b();else if(t.indexOf('いのち')===0)await kin9c();else if(t.indexOf('はんぶん')===0)await kin9d();else if(t.indexOf('なにも')===0)await kin9e();else if(t.indexOf('じょうまえ')===0)await kin9f();else await kin9g();hideMsg();save()}
 async function kin9a(){const V=[16,8,4,2,1];let b=0,n=0;const sum=()=>V.reduce((s,v,i)=>s+(b>>i&1?v:0),0);
   await say('くらい へやに ひかる いしが 5つ。\n16・8・4・2・1 と ほってある');await say('かべに もじが ある。\n「ひかる いしで 21を つくれ」');
   while(sum()!==21){hideMsg();const k=await choose(V.map((v,i)=>`${b>>i&1?'●':'○'} ${v}の いし`).concat(['あきらめる']),{pos:[60,30,100],title:`いま ${sum()}`});if(k<0||k===5){await say('ふじばあちゃん「また いつでも\nきんさい」');return}b^=1<<k;n++;SFX.blip()}
@@ -4158,7 +4158,7 @@ async function clear14(){const q=C14(),K=KOHA();q.clear=1;bgm(null);S.flash=1;aw
   await say((K.g14||0)>0?'ワトム「ザザーンの おおきいのを\nちゃんと まもったね」':'ワトム「ザザーンは すいとってから\nためる。 ためたら つぎは\nまもって みよう」');
   P.shiori=(P.shiori||0)+1;P.gold+=P.lv*100;SFX.item();await say(`「ちえの しおり」を てにいれた！\nコインを ${P.lv*100}まい もらった！`);hideMsg();save();
   await warp('tosho',2,4,'up',BGM7.tosho);await say('ホーキド はかせ「ホー！ 6まいめの\nページじゃ。 のこりは 4さつ。\nつぎは『たしかめる ほん』じゃ」');await say('（ふじばあちゃんの とびらに\nあたらしい ちょうせんが ふえたよ）');hideMsg()}
-function haru14(){const q=C14();return !q.in?'つぎは『つたえる ほん』。\nわたしと ゆうくんが いっしょに\nいくわ':!q.n?'おかの うえで サルの みはりが\nあわてて いるわ':!q.z1?'イタチの ひきゃくさんに\nはなしかけて みて':!q.m?'せいふくの ハト、まえじまさんに\nはなしかけて':!q.z2?'しゅくばまちで わたしに\nはなしかけてね。\nあんごうを いっしょに つくるの':!q.d?'アライグマの ぎしさんの\nきかいを みせて もらって':!q.z3?'ひかりの とうを しらべて みて':!q.clear?'みちの さきの もやへ。\nげんきを すいとられたら\nむりせず かいふくしてね':'いまある ほんは ぜんぶ なおったよ。\nつぎの ほんを まっててね'}
+function haru14(){const q=C14();return !q.in?'つぎは『つたえる ほん』。\nわたしと ゆうくんが いっしょに\nいくわ':!q.n?'おかの うえで サルの みはりが\nあわてて いるわ':!q.z1?'イタチの ひきゃくさんに\nはなしかけて みて':!q.m?'せいふくの ハト、まえじまさんに\nはなしかけて':!q.z2?'しゅくばまちで わたしに\nはなしかけてね。\nあんごうを いっしょに つくるの':!q.d?'アライグマの ぎしさんの\nきかいを みせて もらって':!q.z3?'ひかりの とうを しらべて みて':!q.clear?'みちの さきの もやへ。\nげんきを すいとられたら\nむりせず かいふくしてね':haru15()}
 async function kin9f(){const K=KOHA();await say('いしの はこと、あいたままの\nじょうまえが おいて ある');await say('とおくの ともだちに ひみつの\nてがみを はこで おくりたい。\nでも かぎは わたせない…');
   await say('かぎを おくらずに、はこを\nしめて とどけて もらうには？',{wait:false});const k=await choose(['あいてに じょうまえだけ もらう','かぎも いっしょに いれる','しめないで おくる'],{pos:[14,62,158],cancel:false});K.k14=k;
   if(k===0){SFX.rare();S.flash=0.7;await say('あいてが くれた じょうまえで\nパチンと しめる。あけられるのは\nかぎを もつ あいてだけ！')}else await say('こたえは「あいてに じょうまえを\nもらう」。しめるのは だれでも\nできて、あけるのは あいてだけ');
@@ -4230,6 +4230,166 @@ drawWorld9=(f=>function(t){f(t);try{ph14()}catch(e){}
   if(S.q14){g.fillStyle='#2a2438';g.fillRect(34,8,108,40);g.fillStyle='#8a6a34';g.fillRect(34,8,108,2);g.fillRect(34,46,108,2);
     S.q14.forEach((v,i)=>{const cx=58+i*30,cy=28;g.fillStyle='#1a1210';g.beginPath();g.arc(cx,cy,11,0,6.2832);g.fill();g.fillStyle=v?'#ffd23f':'#4a4654';g.beginPath();g.arc(cx,cy,9,0,6.2832);g.fill();if(v){g.fillStyle='#fff6c0';g.beginPath();g.arc(cx-3,cy-3,3,0,6.2832);g.fill();g.fillStyle=`rgba(255,220,80,${0.18+0.1*Math.sin(t*6+i)})`;g.beginPath();g.arc(cx,cy,14,0,6.2832);g.fill()}})}})(drawWorld9);
 Object.assign(F11,{map14:()=>MAPS9.tsutae,lib9TileT:(m,c)=>lib9Tile(m,c),bookEvent,C14,yuu14,noro14,hiky14,mae14,ango14,den14,hikari14,zaza14Event,clear14,kin9f,haru14});
+
+/* ===== 第15章「たしかめる ほん」：うわさの はま → しろい テント → いちばの おか（2026-11-12）=====
+   ・なかまは ひろくん（こぐま）。実在の 人物は ナイチンゲール（ヒツジの すがた。人間の 絵・せりふは つくらない）
+   ・マップ tashika は 左から はま（ゆか ,＝すな）→ テント（ゆか ど＝くさ）→ いちば（ゆか _＝つち）。きり ⑤⑥。ひろくんは ①②③ の いまの ばしょにだけ 立つ
+   ・絵は 仮（HUM9.naichi と 色ちがい）。とどいたら hd/ に naichi・naichi_L・kimetsu・uwa15・dema15 を 入れて v13 の さいごの リストに 足す
+   ・S.q15={b:[[かず,いろ]…],max} の あいだ、画面に ぼうグラフを かく（文字は かかない）
+   ・進み具合は P.c15（in・u・z1・z2・k・z3・clear）。ワトムの 記録は P.koha の u15・a15・g15・m15・s15・h15・gd15・k15 */
+const C15=()=>P.c15||(P.c15={});
+const ZN15=()=>{const q=C15();return !q.z1?0:!q.z2?1:2};
+MAPS9.tashika=["ミミミミミミミミミミミミミミミミミミミミミミミミミミミミミミミミ","ミ,,,,,,,,,スどどどどどどどどどス__________ミ","ミ,,,,,,,,,スどどどどどどどどどス__________ミ","ミ,,,,た,,,,スどポどポどどどどどス___わ__ら___ミ","ミ,,,さ,,,つ,スどどこどどどどどどス__あ____ぬ__ミ","ミ,,,,,,,,,スどどどどどどどどどス__________ミ","ミカ........⑤.........⑥.........ボミ","ミ,,①,,,,,,スどどどど②どどどどス_③________ミ","ミ,,,,ヰヰ,,,スどどどどどどどどどス___ヰヰ_____ミ","ミ,イイ,,,ヰ,,スどヰどどヰヰどどどス___ヰ___ヰヰ_ミ","ミ,,,,ヰヰ,ヰ,スどどどどヰどどヰどス____イ__ヰ__ミ","ミ,,,,,,,,,スどどどどどどどどどス__________ミ","ミミミミミミミミミミミミミミミミミミミミミミミミミミミミミミミミ"];
+GM.tashika=()=>MAPS9.tashika;JURA_MAPS.add('tashika');LIB9.add('tashika');BGM7.tashika=BGM7.kazoe;Object.assign(REG9,{tashika:'k15'});
+['た','さ','つ','こ','ポ','わ','あ','ら','ぬ','①','②','③','⑤','⑥'].forEach(c=>SOLID.add(c));
+HUM9.naichi=(()=>{const c=hum9({ear:'goat',fur:'#fff8f0',fur2:'#ffffff',top:'#e8e8f0',bot:'#5a6a9a',robe:1,bun:1}),x=c.getContext('2d');px(x,'#8a6a34',14,9,1,4);px(x,'#ffd23f',13,7,3,3);px(x,'#fff6c0',14,8,1,1);return c})();
+T.aberry=tileCanvas(x=>{x.drawImage(T.sand,0,0);px(x,'#2f7a34',2,5,12,9);px(x,'#3a9a44',3,4,10,8);px(x,'#5a3a20',7,13,2,3);for(const[a,b]of[[4,6],[8,5],[11,7],[6,9],[10,10],[3,10]]){px(x,'#e83a3a',a,b,2,2);px(x,'#ff9a8a',a,b,1,1)}});
+T.atent=tileCanvas(x=>{x.drawImage(T.grass,0,0);px(x,'#c8c8d0',1,14,14,2);px(x,'#f4f4f8',2,6,12,8);px(x,'#ffffff',4,3,8,3);px(x,'#ffffff',6,1,4,2);px(x,'#d8d8e0',2,6,1,8);px(x,'#4a4654',6,9,4,5);px(x,'#ffd23f',7,10,2,2);px(x,'#8a6a34',8,0,1,2)});
+T.asign=tileCanvas(x=>{x.drawImage(T.kdirt,0,0);px(x,'#5a3a20',3,11,2,5);px(x,'#5a3a20',11,11,2,5);px(x,'#8a6a34',1,1,14,11);px(x,'#fff6d0',2,2,12,9);px(x,'#e8943a',4,3,3,8);px(x,'#8a8a96',9,9,3,2);px(x,'#1a1210',3,10,10,1)});
+T.aice=tileCanvas(x=>{x.drawImage(T.kdirt,0,0);px(x,'#5a3a20',2,9,12,2);px(x,'#8a6a34',2,11,2,5);px(x,'#8a6a34',12,11,2,5);px(x,'#5ac8f0',1,2,14,3);px(x,'#ffffff',1,3,14,1);px(x,'#8a6a34',2,5,1,4);px(x,'#8a6a34',13,5,1,4);px(x,'#ffb0c0',5,6,3,3);px(x,'#fff6d0',9,6,3,3);px(x,'#c8a050',6,8,1,2);px(x,'#c8a050',10,8,1,2)});
+function ph15(){if(ph15.done)return;const ok=im=>im&&im.width>0;let all=true;
+  const L={uwa15:['gull','#c89a5a',.45],dema15:['crab','#8a5ac8',.45],kimetsu:['mist','#c85a8a',.5]};
+  for(const k in L){const[s,c,a]=L[k];if(EI[k]&&(EI[k].c9||EI[k].hd===3))continue;if(ok(EI[s])){const t=tint(EI[s],c,a);t.hd=EI[s].hd;t.c9=1;EI[k]=t}else{all=false;if(!EI[k])EI[k]=EI[s]||mk(1,1)}}ph15.done=all}
+try{ph15()}catch(e){}
+Object.assign(EN,{
+  uwa15:E9('うわさ スズメ','uwa15',[['つついて きた！',1],['ひそひそ はなして いる',0]]),
+  dema15:E9('でまかせ ヤドカリ','dema15',[['はさみで はさんで きた！',1],['からに かくれて いる',0]]),
+  kimetsu:E9('きめつけの もや キメツケル','kimetsu',[['きめつけて なぐって きた！',1],['「そうに きまって いる！」と さけんだ',0],['ちからを ためている…！',-10]],{boss:'kimetsu',big:1,cyc:[0,0,2,0,1]})});
+scale9=(f=>function(D){const r=f(D);if(D===EN.kimetsu)r.hp=Math.max(8,Math.round(r.hp*0.72));return r})(scale9);
+Object.assign(BTITLE,{kimetsu:'きめつけの もや'});Object.assign(B7MUS,{kimetsu:'mboss'});
+async function hiro15(){const q=C15();SFX.ok();S.pt9='hiro';try{const z=ZN15();
+  await say(q.clear?'ひろくん「よそうして、ためして、\nくらべる。 これからも\nじぶんで たしかめるよ！」':z===0?(q.u?'ひろくん「ネコの つりびとも\nなにか いって いるよ。\nきいて みよう」':'ひろくん「アライグマが うわさを\nひろめて いるみたい。\nはなしを きいて みよう」'):z===1?'ひろくん「ランプを もった ヒツジが\nテントの まえに いるよ」':!q.k?'ひろくん「タヌキの かんばん、\nなんだか あやしいぞ」':!q.z3?'ひろくん「クマの アイスやさんが\nこまって いるみたい」':'ひろくん「みちの さきで もやが\nさけんで いる。 ここまでの\nたしかめかたを おもいだそう！」')}finally{S.pt9=null;hideMsg()}}
+async function uwasa15(){const q=C15(),K=KOHA();SFX.ok();try{
+  if(q.u){await say('アライグマ「うわさを きいたら、\nまず かぞえる。\nもう あわてないよ」');return}
+  await say('アライグマ「たいへんだ！ あかい みを\nたべると おなかが いたく なるって\nうわさだよ！」');S.pt9='hiro';await say('ひろくん「ほんとうかな？\nうわさは うわさ。\nどう やって たしかめよう？」');S.pt9=null;
+  while(true){await say('どう する？',{wait:false});const k=await choose(['みんなに きいて かぞえる','うわさを そのまま しんじる','みんなに ひろめる'],{pos:[20,62,150],cancel:false});if(k===0)break;SFX.no();K.u15=(K.u15||0)+1;await say(k===1?'しんじて あかい みを ぜんぶ\nすてそうに なった。\n…ほんとうに それで いい？':'うわさは あっというまに ひろがり、\nしまじゅうが おおさわぎに…')}
+  SFX.ok();await say('しまの 10ぴきに きいて まわった');await say('あかい みを たべた 5ひき：\nおなかが いたく なったのは 1ぴき');await say('たべて いない 5ひき：\nおなかが いたく なったのは 1ぴき');S.q15={b:[[1,'#e83a3a'],[1,'#8a8a96']],max:5};
+  while(true){await say('あかい みの せいと いえる？',{wait:false});const k=await choose(['いえない。どちらも おなじ かず','いえる。1ぴき いたく なった','わからないから すてる'],{pos:[14,62,158],cancel:false});if(k===0)break;SFX.no();K.u15=(K.u15||0)+1;await say('たべて いない ほうも 1ぴき。\nくらべると ちがいが ない…')}
+  S.q15=null;SFX.rare();S.flash=0.4;await say('たべた ほうと たべて いない ほう。\nくらべて ちがいが ないなら、\nあかい みの せいとは いえない');S.pt9='hiro';
+  await say('ひろくん「よそうして、ためして、\nくらべる。 むしの かんさつと\nおなじ やりかただ！」');S.pt9=null;q.u=1;await noteGet('n31');save();await say('アライグマ「なあんだ。みずの\nのみすぎ だったのかも。\nあかい みは おいしいよ」')}finally{S.q15=null;S.pt9=null;hideMsg()}}
+async function heikin15(){const q=C15(),K=KOHA();SFX.ok();try{
+  if(q.z1){await say('ネコの つりびと「きょうは 3びき。\nならせば やっぱり\n4ひきくらいだね」');return}
+  if(!q.u){await say('ネコの つりびと「しまじゅうが\nうわさで ざわざわ している。\nアライグマに きいて ごらん」');return}
+  await say('ネコの つりびと「きのうは 6ぴきも\nつれた！ この はまは まいにち\n6ぴき つれる はまだ！」');S.pt9='hiro';await say('ひろくん「1にちだけじゃ わからないよ。\nそのまえの ひは どうだった？」');S.pt9=null;
+  await say('3かかんの きろく：\n2ひき・4ひき・6ぴき');S.q15={b:[[2,'#5a9ac8'],[4,'#5a9ac8'],[6,'#5a9ac8']],max:7};
+  while(true){await say('ならすと 1にち なんびき？\n（ぜんぶ たして 3で わる）',{wait:false});const k=await choose(['4ひき','6ぴき','2ひき'],{pos:[110,66,60],cancel:false});if(k===0)break;SFX.no();K.a15=(K.a15||0)+1;await say('2と 4と 6を たすと 12。\nそれを 3つに わけると…')}
+  S.q15={b:[[4,'#e8c040'],[4,'#e8c040'],[4,'#e8c040']],max:7};SFX.rare();S.flash=0.4;await say('12を 3で わって 4ひき！\nおおい ひも すくない ひも ならした\nかずを「へいきん」と いう');S.q15=null;
+  await say('つりびと「いちばん いい ひだけを\nはなして いたよ。\nこれも うわさの もとだなあ」');q.z1=1;await noteGet('n32');save();await say('きりが はれて、\nひがしへの みちが ひらいた')}finally{S.q15=null;S.pt9=null;hideMsg()}}
+async function naichi15(){const q=C15(),K=KOHA();SFX.ok();S.pt9='naichi';try{
+  if(q.z2){await say('ナイチンゲール「かぞえて、くらべて、\nつたえる。 それで すくえる\nいのちが あるのよ」');return}
+  await say('ランプを もった ヒツジ「わたしは\nナイチンゲール。 この テントで\nけがにんの せわを して いるの」');await say('ナイチンゲール「でも、なかなか\nげんきに ならない こが おおい。\nなぜなのか しりたいの」');S.pt9='hiro';
+  await say('ひろくん「まいにち かぞえて\nきろく したら どうかな。\nむしの かんさつ みたいに！」');S.pt9=null;
+  await say('ねこんで いる わけを しらべて、\nいろで わけて ぼうに した。\nあおが けが、むらさきが よごれ');S.q15={b:[[3,'#5a9ac8'],[9,'#9a5ac8']],max:10};
+  while(true){await say('ぼうを くらべよう。\nおおいのは どっち？',{wait:false});const k=await choose(['よごれから くる びょうき','けが','おなじ'],{pos:[30,66,140],cancel:false});if(k===0)break;SFX.no();K.g15=(K.g15||0)+1;await say('ぼうの たかさを もういちど\nみて みよう')}
+  SFX.ok();await say('けがより、きたない へやで うつる\nびょうきの ほうが ずっと おおい！');S.q15=null;S.pt9='naichi';
+  await say('ナイチンゲール「では そうじを して、\nまどを あけて、みずを きれいに\nしましょう」');S.pt9=null;S.q15={b:[[9,'#9a5ac8'],[2,'#c8a0e8']],max:10};
+  await say('ひだりが そうじの まえ、\nみぎが そうじの あと。\nびょうきは ぐんと へった！');
+  while(true){await say('えらい ひとに わかって もらうには？',{wait:false});const k=await choose(['グラフに して みせる','すうじを ながながと よむ','おおごえで おこる'],{pos:[30,66,140],cancel:false});if(k===0)break;SFX.no();K.g15=(K.g15||0)+1;await say(k===1?'すうじを よみあげた。\n…えらい ひとは とちゅうで\nねむって しまった':'おこっても、\nなにが たいへんかは つたわらない…')}
+  SFX.rare();S.flash=0.4;await say('ひとめで わかる グラフに した！\nえらい ひとは おどろいて、\nしまじゅうの テントを そうじ させた');S.q15=null;S.pt9='naichi';
+  await say('ナイチンゲール「かぞえた かずは、\nグラフに すると ちからに なる。\nおぼえて おいてね」');S.pt9=null;q.z2=1;await noteGet('n33');save();await say('きりが はれて、\nひがしへの みちが ひらいた')}finally{S.q15=null;S.pt9=null;hideMsg()}}
+async function mikata15(){const q=C15(),K=KOHA();SFX.ok();try{
+  if(q.k){await say('タヌキの あきんど「めもりは 0から。\nしょうじきな かんばんに\nかきなおしたよ」');return}
+  await say('タヌキの あきんど「みて おくれ！\nうちの りんごは となりの みせの\n5ばいも うれて いるよ！」');S.q15={b:[[10,'#e8943a'],[2,'#8a8a96']],max:11};
+  await say('かんばんの グラフでは、タヌキの ぼうが\nとなりの 5ばいの たかさだ');S.pt9='hiro';await say('ひろくん「あれ？ ぼうの したの\nめもりが 0じゃ ないよ。\n98から はじまって いる！」');S.pt9=null;
+  S.q15={b:[[102,'#e8943a'],[100,'#8a8a96']],max:110};await say('ほんとうの かずは、\nタヌキ 102こ、となり 100こ');
+  while(true){await say('ほんとうの ちがいは？',{wait:false});const k=await choose(['2こだけ。ほとんど おなじ','5ばい','100こ'],{pos:[30,66,140],cancel:false});if(k===0)break;SFX.no();K.m15=(K.m15||0)+1;await say('102と 100。\nひきざんを して みよう')}
+  SFX.rare();S.flash=0.4;await say('ちがいは 2こだけ！ めもりを とちゅう\nから はじめると、ちいさな ちがいが\nおおきく みえる');S.q15=null;
+  await say('あきんど「うそは ついて いないよ…\nでも みせかたが ずるかったね。\nごめんよ」');S.pt9='hiro';await say('ひろくん「おなじ かずでも、みせかたで\nちがって みえる。\nめもりを みる くせを つけよう」');S.pt9=null;q.k=1;await noteGet('n34');save()}finally{S.q15=null;S.pt9=null;hideMsg()}}
+async function souka15(){const q=C15(),K=KOHA();SFX.ok();try{
+  if(q.z3){await say('クマの アイスや「あつい ひは\nアイスも うみも だいにんき。\nきを つけて およいでね」');return}
+  if(!q.k){await say('クマの アイスや「となりの タヌキの\nかんばん、なんだか へんだよ。\nみて きて くれないか」');return}
+  await say('クマの アイスや「こまった…。アイスが\nよく うれる ひは、うみで おぼれ\nかける こが おおいんだ」');await say('「アイスは きけんだ」という うわさが\nひろまって、おみせが つぶれそう');
+  while(true){await say('アイスの せいで おぼれるの？',{wait:false});const k=await choose(['あつい ひは どちらも ふえるだけ','そう。アイスの せい','うみが アイスを うって いる'],{pos:[14,62,158],cancel:false});if(k===0)break;SFX.no();K.s15=(K.s15||0)+1;S.pt9='hiro';await say('ひろくん「アイスを たべない こも\nおぼれかけて いるよ。\nべつの わけが ありそうだ」');S.pt9=null}
+  SFX.rare();S.flash=0.4;await say('あつい ひは アイスが うれる。\nあつい ひは およぐ こも ふえる。\nげんいんは「あつさ」だった！');
+  await say('ワトム「いっしょに ふえて いても、\nかたほうが もう かたほうの\nげんいんとは かぎらないんだね」');q.z3=1;save();await say('ワトム「みちの さきで、だれかが\nおおきな こえで きめつけて いるよ」')}finally{S.pt9=null;hideMsg()}}
+async function kime15Event(){const q=C15(),K=KOHA();
+  if(!q.z3){await say('もやが おおごえで なにか\nさけんで いる。');await say('まだ たしかめる やりかたを\nよく しらない…\nもう すこし みて まわろう');hideMsg();return}
+  await say('もやが むねを はって\nさけんで いる');await say('キメツケル「かぞえなくて いい！\nくらべなくて いい！');await say('みんなが いって いるから\nそうに きまって いる！」');S.pt9='hiro';await say('ひろくん「きまって ないよ！\nぼくらは じぶんで かぞえて\nたしかめるんだ！」');S.pt9=null;
+  const R=[['うわさを きいたら\nまず どう する？',['じぶんで かぞえて くらべる','そのまま しんじる','すぐ ひろめる'],0],['グラフを みる ときに\nきを つけるのは？',['ぼうの いろ','めもりが どこから はじまるか','かみの おおきさ'],1],['いっしょに ふえる 2つ。\nかならず げんいんと いえる？',['いえない。べつの わけも ある','いえる','いつでも いえる'],0]];let n=0;
+  for(const[t,o,a]of R){await say(t,{wait:false});const k=await choose(o,{pos:[20,60,152],cancel:false});if(k===a){n++;SFX.ok();await say(`「${o[a]}」！\nキメツケルが ぐらりと ゆれた`)}else{SFX.no();await say(`こたえは\n「${o[a]}」。\nキメツケルは ふんぞりかえった`)}}
+  K.h15=n;await say('ワトム「キメツケルは 2かい つづけて\nこうげきして、そのあと ちからを\nためる みたい。きを つけて！」',{wait:false});const k=await choose(['たたかう','やめる'],{pos:[120,80,52]});hideMsg();if(k!==0)return;
+  const r=await battle('kimetsu',{ex:{hp:Math.max(8,Math.round(scale9(EN.kimetsu).hp*0.9*(1-0.08*n)))}});if(!r||r.r!=='win')return;await clear15()}
+async function clear15(){const q=C15(),K=KOHA();q.clear=1;bgm(null);S.flash=1;await sleep(SFX.rare()*600);
+  await say('キメツケルの こえが ちいさく なり、\nもやは ほどけて きえた…');bgm('true_end');await say('はまの なみ、テントの ランプ、\nいちばの こえ。 しまに\nおちついた おとが もどって きた');await noteGet('n35');
+  await say('そらから ほしの ひかりが おりて きた。\n…かよべだ');await say('かよべ「ページを うけとったわ。\nいま つなぐ」');SFX.star();S.flash=0.6;await card9('たしかめる ほん','ページが もどった！');
+  await say('ワトム「ぼく、きょうも おぼえたよ」');
+  await say((K.u15||0)===0?'ワトム「はまでは うわさを きいて\nすぐ かぞえに いったね」':'ワトム「はまでは うわさを しんじかけた\nけど、かぞえて くらべたら\nちがうと わかったね」');
+  await say(((K.g15||0)+(K.m15||0))===0?'ワトム「グラフは ひとめで よんで、\nめもりの しかけも みぬいたね」':'ワトム「グラフは たかさだけじゃ なく、\nめもりも みる。\nぼくも きを つけるよ」');
+  await say((K.s15||0)===0?'ワトム「アイスの うわさは、\nほんとうの げんいんを\nすぐ みつけたね」':'ワトム「アイスの うわさは\nむずかしかったね。いっしょに ふえても\nげんいんとは かぎらないんだ」');
+  await say((K.gd15||0)>0?'ワトム「キメツケルの おおきいのを\nちゃんと まもったね」':'ワトム「キメツケルは 2かい なぐって\nから ためる。 ためたら つぎは\nまもって みよう」');
+  P.shiori=(P.shiori||0)+1;P.gold+=P.lv*100;SFX.item();await say(`「ちえの しおり」を てにいれた！\nコインを ${P.lv*100}まい もらった！`);hideMsg();save();
+  await warp('tosho',4,4,'up',BGM7.tosho);await say('ホーキド はかせ「ホー！ 7まいめの\nページじゃ。 のこりは 3さつ。\nつぎは『まなぶ きかいの ほん』じゃ」');await say('（ふじばあちゃんの とびらに\nあたらしい ちょうせんが ふえたよ）');hideMsg()}
+function haru15(){const q=C15();return !q.in?'つぎは『たしかめる ほん』。\nひろくんが かんさつノートを\nもって まって いるわ':!q.u?'はまの アライグマの うわさを\nきいて あげて。\nしんじる まえに かぞえるのよ':!q.z1?'ネコの つりびとさんに\nはなしかけて みて':!q.z2?'ランプを もった ヒツジ、\nナイチンゲールさんに はなしかけて':!q.k?'タヌキの かんばんを よく みて。\nめもりは どこから？':!q.z3?'クマの アイスやさんが\nこまって いるわ':!q.clear?'みちの さきの もやへ。\nためたら まもる、を\nおもいだしてね':'いまある ほんは ぜんぶ なおったよ。\nつぎの ほんを まっててね'}
+async function kin9g(){const K=KOHA();await say('いしの だいに コインが 1まい。\nかべに きろくが ほって ある');await say('きろく：おもて・おもて・おもて・\nおもて・おもて。5かい つづけて\nおもてが でた');
+  await say('つぎに なげると どう なる？',{wait:false});const k=await choose(['おもても うらも おなじ でやすさ','そろそろ うらが でる','つぎも おもてが でる'],{pos:[14,62,158],cancel:false});K.k15=k;
+  if(k===0){SFX.rare();S.flash=0.7;await say('そのとおり！ コインは まえの\nけっかを おぼえて いない。\nまいかい はんぶん はんぶん')}else await say('こたえは「おなじ でやすさ」。\nコインは まえの けっかを\nおぼえて いないから');
+  await say('ワトム「つづくと『そろそろ』って\nおもっちゃう。でも コインには\nきおくが ないんだね」');
+  if(!NOTE().k7){await noteGet('k7');P.gold+=P.lv*50;await say(`おくの たからばこから\nコインを ${P.lv*50}まい みつけた！`)}
+  await say('ふじばあちゃん「くじも てんきも、\nおもいこみで きめつけちゃ いかん。\nたいした もんじゃ！」')}
+Object.assign(NOTES9,{
+ n31:{t:'うわさを たしかめる',p:[
+  'うわさを きいたら、まず かぞえる。\nたべた ほうと たべて いない ほうを\nくらべる。\nちがいが なければ、\nその せいとは いえない。',
+  '「たぶん こうだ」と よそうを 立て、\nためして、くらべる。\nくらべる ときは、しらべたい こと\nいがいの 条件を そろえる。\nこれを 対照実験と いう。',
+  '薬の ききめを 調べる ときは、\n本物の薬と にせの薬を 用意し、\nだれが どちらを 飲んだか\n本人にも 医者にも 知らせない。\n思いこみの 力を のぞくためだ\n（二重盲検法）。',
+  'いしゃ、かがくしゃ、\nくすりを つくる ひと。\n「ほんとうに きくのか」を\nたしかめる しごと。']},
+ n32:{t:'ならす（へいきん）',p:[
+  'ぜんぶ たして、かずで わる。\n2と 4と 6なら、たして 12。\n3で わって 4。\nこれが「へいきん」。\n1かいだけでは わからない。',
+  '平均は、でこぼこを ならした 数。\nただし、とびぬけて 大きい数が\nまじると、平均は 引っぱられる。\nまん中の 順位の 数（中央値）も\nいっしょに 見ると よい。',
+  'さいころを 少しだけ ふると、\n出る目は かたよる。\nたくさん ふるほど、どの目も\n6分の1に 近づいていく\n（大数の法則）。\n少ない 回数で 決めつけない。',
+  'きしょうよほうし、\nスポーツの データを しらべる ひと、\nほけんの しごと。\nたくさんの きろくから よそうする。']},
+ n33:{t:'グラフに する',p:[
+  'かぞえた かずを ぼうに すると、\nどっちが おおいか ひとめで わかる。\nグラフは、かずを\nみんなに つたえる どうぐ。',
+  '棒グラフは 大きさを くらべる。\n折れ線グラフは 変化を 見る。\n円グラフは 全体の中の わりあいを\n見る。\n目的に 合わせて 使い分ける。',
+  'ナイチンゲールは、兵士が 亡くなった\n原因を 月ごとに 色分けした\n円形の グラフを 作った。\n「鶏のとさか」とも よばれ、\n数字が 苦手な 人にも\n問題が ひとめで 伝わった。',
+  'きしゃ、デザイナー、\nデータを しらべる ひと。\nかずを わかりやすく つたえる しごと。']},
+ n34:{t:'みかたで かわる',p:[
+  'グラフの めもりが\n0から はじまって いないと、\nちいさな ちがいが おおきく みえる。\nめもりを みる くせを つけよう。',
+  'アイスが 売れる日は、\n水の事故も 多い。\nでも アイスが 原因では ない。\nどちらも「暑さ」で ふえる。\nいっしょに ふえても、\n原因とは かぎらない。',
+  'いっしょに 変わる 関係を 相関、\n原因と 結果の 関係を 因果と いう。\nまた、聞く相手が かたよると、\n結果も かたよる（標本の偏り）。\n「だれに 聞いたか」も\nたしかめる。',
+  'きしゃ、けんきゅうしゃ、\nニュースを たしかめる ひと。\n「ほんとうかな？」と\nといなおす しごと。']},
+ n35:{t:'ナイチンゲール',p:[
+  'ナイチンゲールは 200年ほど まえに\nうまれた イギリスの かんごし。\nびょういんを きれいに して、\nたくさんの ひとを たすけた。\nかぞえて グラフに する めいじん。',
+  'フローレンス・ナイチンゲール\n（1820〜1910）。\nクリミア戦争の 病院で 看護にあたり、\nそうじや かんきを 進めると、\n亡くなる 人が 大きく へった。',
+  '集めた 記録を 統計に まとめ、\nグラフで 政府に うったえて、\n病院の しくみを 変えさせた。\n1860年には 看護学校を 開いた。\n誕生日の 5月12日は\n「国際看護師の日」。',
+  'かんごし、いしゃ、\nびょういんを よくする ひと。\nやさしさと かずの りょうほうで\nひとを たすける しごと。']},
+ k7:{t:'コインは おぼえて いない',p:[
+  'コインの おもてと うらは、\nまいかい はんぶん はんぶん。\nおもてが つづいても、\nつぎに うらが でやすく なる\nわけでは ない。',
+  '起こりやすさを 数で 表した ものが\n確率。コインの 表は 2分の1。\nさいころの 1の目は 6分の1。\n前の 結果が 次に えいきょうしない\nとき、「独立」と いう。',
+  '「そろそろ 出るはず」と 思いこむ\nまちがいを、ギャンブラーの誤りと\nいう。確率の 研究は、17世紀に\nパスカルと フェルマーが かわした\n手紙から 大きく 進んだ。',
+  'すうがくしゃ、\nてんきや じしんを よそうする ひと、\nゲームを つくる ひと。\n「どのくらい おこりやすいか」を\nかんがえる。']}});
+NOTEBOOK9.splice(6,0,['たしかめる ほん',['n31','n32','n33','n34','n35']]);NOTEBOOK9[NOTEBOOK9.length-1][1].push('k7');
+/* --- つなぐ --- */
+lib9Tile=(f=>function(map,c){if(map==='tashika'){const q=C15(),z=q.clear?2:ZN15();if(c==='①')return z===0?c:',';if(c==='②')return z===1?c:'ど';if(c==='③')return z===2?c:'_';if(c==='⑤')return q.z1?'.':c;if(c==='⑥')return q.z2?'.':c;if(c==='ボ'&&q.clear)return'.';return c}return f(map,c)})(lib9Tile);
+lib9Img=(f=>function(m,c,x,y){if(m==='tashika'){const r={',':T.sand,'.':T.path,'ど':T.grass,'_':T.kdirt,'ミ':T.tree,'ス':T.jtree,'イ':T.khouse,'た':T.aberry,'ポ':T.atent,'わ':T.asign,'ら':T.aice,'ヰ':T.stall,'カ':T.kbook,'⑤':T.sgate,'⑥':T.sgate,'ボ':T.path,'①':T.sand,'さ':T.sand,'つ':T.sand,'こ':T.grass,'②':T.grass,'あ':T.kdirt,'ぬ':T.kdirt,'③':T.kdirt}[c];return r||T.kdirt}return f(m,c,x,y)})(lib9Img);
+juraEnemy=(f=>function(){if(P.map==='tashika')return P.x<10?'dema15':rnd()<0.5?'uwa15':'dema15';return f()})(juraEnemy);
+juraRate=(f=>function(c){if(P.map==='tashika')return C15().clear?0:c==='ヰ'?1/7:0;return f(c)})(juraRate);
+bg7=(f=>function(){return P.map==='tashika'?(P.x<20?'mori':'machi'):f()})(bg7);
+battle=(f=>function(key,opt){if(EN[key]&&EN[key].lv9){try{ph15()}catch(e){}}return f(key,opt)})(battle);
+red=(f=>function(d,guard,oyaGuard){if(S.battle&&S.battle.st&&S.battle.st.n===EN.kimetsu.n&&FX.eaK==='big'){const k=KOHA();if(guard||oyaGuard)k.gd15=(k.gd15||0)+1}return f(d,guard,oyaGuard)})(red);
+juraBump=(f=>function(c,x,y){
+  if(P.map==='tashika'){if('①②③'.indexOf(c)>=0){run(hiro15);return true}if(c==='さ'||c==='た'){run(uwasa15);return true}if(c==='つ'){run(heikin15);return true}
+    if(c==='こ'||c==='ポ'){run(naichi15);return true}if(c==='あ'||c==='わ'){run(mikata15);return true}if(c==='ぬ'||c==='ら'){run(souka15);return true}if(c==='ボ'){run(kime15Event);return true}
+    if('⑤⑥'.indexOf(c)>=0){run(async()=>{await say('しろい きりが みちを ふさいでいる。\nこの あたりの うわさを\nたしかめれば はれそうだ');hideMsg()});return true}
+    return false}
+  return f(c,x,y)})(juraBump);
+juraArrive=(f=>function(c){
+  if(P.map==='tashika'){if(c==='カ'){S.path=[];run(async()=>{await say('としょかんへ もどりますか？',{wait:false});const k=await choose(['もどる','やめる'],{pos:[120,80,52]});hideMsg();if(k===0){SFX.stairs();await warp('tosho',4,2,'down',BGM7.tosho)}else{P.x+=1;P.dir='right'}});return true}return false}
+  return f(c)})(juraArrive);
+bookEvent=(f=>async function(x,y){const b=BOOKS9.find(o=>o.at===x+','+y);if(!b||b.ch!==15)return f(x,y);const q=C15();
+  if(!C14().clear){await say(`『${b.n}』\nひらいて みたが…\nページが まっしろだ`);await say('（さきに『つたえる ほん』を\nなおそう）',{add:true});hideMsg();return}
+  await say('『たしかめる ほん』\nほんの なかへ とびこみますか？',{wait:false});const k=await choose(['とびこむ','やめる'],{pos:[120,80,52]});hideMsg();if(k!==0)return;
+  SFX.stairs();S.flash=0.8;await warp('tashika',2,6,'right',BGM7.tashika);
+  if(!q.in){q.in=1;await card9('たしかめる ほん','ほんとうかな？');await say('ちいさな しまの はまべ。\nどうぶつたちが あちこちで\nひそひそ はなして いる');S.pt9='hiro';await say('ひろくん「うわさだらけの しまだって。\nぼくの かんさつノートの\nでばんだね！」');S.pt9=null;hideMsg();save()}})(bookEvent);
+kayoTalk=(f=>async function(){if((P.c15||{}).clear&&C9().kayo){SFX.ok();S.pt9='kayobe';try{await say('かよべ「7まいの ページ。\nしんじる まえに たしかめる。\nそれは やさしさでも あるのよ」')}finally{S.pt9=null;hideMsg()}return}return f()})(kayoTalk);
+drawWorld9=(f=>function(t){f(t);try{ph15()}catch(e){}
+  if(P.map==='tosho'&&C14().clear&&!C15().clear){const[gx,gy]=hzScr(4,3),a=0.4+0.4*Math.sin(t*3);g.fillStyle=`rgba(160,220,160,${a*0.5})`;g.fillRect(gx+2,gy,12,9)}
+  if(P.map!=='tashika')return;const q=C15();npc9('araiguma',4,4,t,17);npc9('noraneko',8,4,t,17);npc9('tanuki',23,4,t,17);npc9('kuma',28,4,t,19);npc9('nezumi',16,3,t,13);npc9('harinezumi',17,4,t+1,14);
+  hum9draw('naichi',13,4,t);hum9draw('hiro',[3,15,22][q.clear?2:ZN15()],7,t);
+  if(!q.clear){const[sx,sy]=hzScr(30,6),im=EI.kimetsu,rdy=q.z3;if(im&&im.width){const w=im.width/(im.hd||1),h=im.height/(im.hd||1),sc=(rdy?30:18)/w;g.globalAlpha=rdy?0.95:0.5;g.drawImage(im,sx+8-w*sc/2,sy+14-h*sc+Math.sin(t*2)*2,w*sc,h*sc);g.globalAlpha=1}}
+  if(S.q15){const B=S.q15.b,mx=S.q15.max,n=B.length,bw=n>2?20:26,gap=n>2?12:22,tw=n*bw+(n-1)*gap,x0=88-tw/2;g.fillStyle='#fff6d0';g.fillRect(30,6,116,58);g.fillStyle='#8a6a34';g.fillRect(30,6,116,2);g.fillRect(30,62,116,2);g.fillStyle='#1a1210';g.fillRect(38,56,100,1);
+    for(let i=1;i<5;i++){g.fillStyle='rgba(138,106,52,.25)';g.fillRect(38,56-i*11,100,1)}
+    B.forEach(([v,c],i)=>{const k=Math.min(1,(tnow()-(S.q15.t0||(S.q15.t0=tnow())))/0.6),h=Math.max(1,Math.round(44*v/mx*k)),x=Math.round(x0+i*(bw+gap));g.fillStyle='#1a1210';g.fillRect(x-1,56-h-1,bw+2,h+1);g.fillStyle=c;g.fillRect(x,56-h,bw,h);g.fillStyle='rgba(255,255,255,.35)';g.fillRect(x+2,56-h,3,h)})}})(drawWorld9);
+Object.assign(F11,{map15:()=>MAPS9.tashika,bookEvent,C15,hiro15,uwasa15,heikin15,naichi15,mikata15,souka15,kime15Event,clear15,kin9g,haru15});
 
 /* ===== v11 ここまで ===== */
 /* ===== v13 がしつ担当：画面を 3ばいの こまかさで かく・ひかりと かげ（2026-11-11。高原さんの 依頼「映像や 画像を もう少し よく」）=====
